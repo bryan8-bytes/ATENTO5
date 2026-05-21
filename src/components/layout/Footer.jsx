@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import logoA5 from '../../logo_a5.png'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -8,11 +7,11 @@ export default function Footer() {
     <footer className="bg-dark-900 py-12 border-t border-dark-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <img src={logoA5} alt="ATENTO5" className="h-10 sm:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-            </div>
+           {/* Company Info */}
+           <div className="col-span-1 md:col-span-2">
+             <div className="flex items-center gap-2 mb-4">
+               <span className="text-faguade-light-blue text-xl font-bold">ATENTO5</span>
+             </div>
             <p className="text-gray-400 mb-4">
               Servicios Generales E.I.R.L. - Soluciones integrales con excelencia 
               y compromiso para tu empresa.

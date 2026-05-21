@@ -10,7 +10,7 @@ const ATENTO5 = {
   ruc: '20612345678',
   direccion: 'Asoc. Villa el Rosario, MZ D, Lote 1, Calle 3, Chaclacayo, Lima, Perú',
   telefono: '+51 955 295 390',
-  correo: 'contacto@atento5.com',
+  correo: 'Juan.ampuero@atento5.com',
   web: 'www.atento5.com'
 };
 
@@ -73,8 +73,9 @@ const QuotationGenerator = () => {
       margin: 0,
       filename: 'Cotizacion_' + (cotizacion.numero || '000') + '.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css'] }
     }).from(element).save();
   };
 
@@ -211,140 +212,211 @@ const EditorPanel = ({empresa, setEmpresa, banco, setBanco, cliente, setCliente,
 };
 
 const PreviewPanel = ({previewRef, empresa, banco, cliente, cotizacion, items, subtotal, igv, total, formatCurrency}) => {
+  const [scale, setScale] = useState(0.65);
+
+  useEffect(() => {
+    const updateScale = () => {
+      const availableHeight = window.innerHeight - 130;
+      const sheetHeight = 1122.5; // 297mm in pixels at 96dpi
+      let newScale = availableHeight / sheetHeight;
+      
+      const availableWidth = window.innerWidth * 0.6 - 40; // 60% width minus padding
+      const sheetWidth = 793.7; // 210mm in pixels at 96dpi
+      const widthScale = availableWidth / sheetWidth;
+      
+      newScale = Math.min(newScale, widthScale, 1.0);
+      setScale(newScale);
+    };
+    
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
   return (
-    <div style={{width: '60%', height: '100vh', overflowY: 'auto', backgroundColor: '#0a0e17', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-      <div style={{textAlign: 'center', marginBottom: '16px'}}>
-        <h2 style={{fontSize: '18px', fontWeight: 'bold', color: 'white'}}>VISTA PREVIA</h2>
-        <p style={{fontSize: '12px', color: '#9ca3af'}}>Así se verá tu cotización PDF</p>
+    <div style={{width: '60%', height: '100vh', overflow: 'hidden', backgroundColor: '#0a0e17', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+      <div style={{textAlign: 'center', marginBottom: '12px', flexShrink: 0}}>
+        <h2 style={{fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0}}>VISTA PREVIA</h2>
+        <p style={{fontSize: '12px', color: '#9ca3af', margin: '4px 0 0 0'}}>Así se verá tu cotización PDF</p>
       </div>
-      <div style={{background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', minHeight: '297mm'}}>
-        <div ref={previewRef} style={{background: 'white', color: 'black', width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box'}}>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px'}}>
-            <div style={{display: 'flex', alignItems: 'center', gap: '16px'}}>
-              <img src={logo} alt="Logo" style={{height: '60px', width: 'auto', objectFit: 'contain'}} />
-              <div>
-                <h1 style={{fontSize: '16px', fontWeight: 'bold', color: '#111', lineHeight: 1.3}}>{ATENTO5.nombre}</h1>
-                <p style={{fontSize: '10px', color: '#6b7280', fontWeight: '500'}}>RUC: {ATENTO5.ruc}</p>
+      <div style={{
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        height: 'calc(100vh - 100px)',
+        overflow: 'hidden',
+        flexShrink: 0
+      }}>
+        <div style={{
+          transform: `scale(${scale})`,
+          transformOrigin: 'top center',
+          width: '210mm',
+          height: '297mm',
+          flexShrink: 0,
+          marginBottom: `-${1122.5 * (1 - scale)}px`
+        }}>
+          <div style={{background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', height: '297mm'}}>
+            <div ref={previewRef} style={{background: 'white', color: 'black', width: '210mm', height: '295mm', padding: '8mm 12mm 8mm 12mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column'}}>
+              
+              {/* Header */}
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
+                <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
+                  <img src={logo} alt="Logo" style={{height: '52px', width: 'auto', objectFit: 'contain'}} />
+                  <div>
+                    <h1 style={{fontSize: '16px', fontWeight: '800', color: '#111', lineHeight: 1.1, margin: 0}}>{ATENTO5.nombre}</h1>
+                    <p style={{fontSize: '9.5px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '2px 0 0 0'}}>SOLUCIONES INTEGRALES</p>
+                  </div>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                  <h2 style={{fontSize: '18px', fontWeight: '800', color: '#D21414', letterSpacing: '0.05em', margin: 0}}>COTIZACION N° {cotizacion.numero || '000'}</h2>
+                </div>
               </div>
+
+          <div style={{height: '1px', background: '#cbd5e1', marginBottom: '8px'}} />
+
+          {/* Top Info Grid */}
+          <div style={{display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', marginBottom: '8px'}}>
+            <div>
+              <h3 style={{fontSize: '11.5px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0'}}>CLIENTE:</h3>
+              <p style={{fontSize: '14px', fontWeight: 'bold', color: '#111', margin: 0}}>{cliente.nombre || (cliente.tipo === 'empresa' ? 'Nombre de Empresa' : 'Nombre del Cliente')}</p>
+              {cliente.tipo === 'empresa' && cliente.ruc && <p style={{fontSize: '11px', color: '#4b5563', margin: '1px 0 0 0'}}><span style={{fontWeight: '600'}}>RUC:</span> {cliente.ruc}</p>}
             </div>
-            <div style={{textAlign: 'right'}}>
-              <h2 style={{fontSize: '24px', fontWeight: '800', color: '#3CB4FF', letterSpacing: '0.05em'}}>COTIZACIÓN</h2>
-              <p style={{fontSize: '12px', color: '#6b7280', fontWeight: '500'}}>{cotizacion.numero || '000'}</p>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11.5px', color: '#111', justifyContent: 'center'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between'}}><span style={{fontWeight: 'bold', color: '#4b5563'}}>Fecha:</span> <span>{cotizacion.fecha}</span></div>
+              <div style={{display: 'flex', justifyContent: 'space-between'}}><span style={{fontWeight: 'bold', color: '#4b5563'}}>Vencimiento:</span> <span>{cotizacion.vencimiento}</span></div>
             </div>
           </div>
 
-          <div style={{height: '4px', background: 'linear-gradient(to right, #3CB4FF, #D21414)', borderRadius: '9999px', marginBottom: '20px'}} />
-
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '20px'}}>
-            <div style={{background: '#f8fafc', padding: '16px', borderRadius: '8px', borderLeft: '4px solid #3CB4FF'}}>
-              <h3 style={{fontSize: '10px', fontWeight: 'bold', color: '#3CB4FF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px'}}>{cliente.tipo === 'empresa' ? 'Datos de la Empresa' : 'Datos del Cliente'}</h3>
-              <p style={{fontSize: '14px', fontWeight: 'bold', color: '#111'}}>{cliente.nombre || (cliente.tipo === 'empresa' ? 'Nombre de Empresa' : 'Nombre del Cliente')}</p>
-              {cliente.tipo === 'empresa' && cliente.ruc && <p style={{fontSize: '11px', color: '#4b5560'}}>RUC: {cliente.ruc}</p>}
-              <p style={{fontSize: '11px', color: '#4b5560'}}>Atención: {cliente.contacto || '-'}</p>
-              <p style={{fontSize: '11px', color: '#4b5560'}}>Telf: {cliente.telefono || '-'}</p>
-              <p style={{fontSize: '11px', color: '#4b5560'}}>Email: {cliente.correo || '-'}</p>
-              <p style={{fontSize: '11px', color: '#4b5560'}}>Dirección: {cliente.direccion || '-'}</p>
-            </div>
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px'}}>
-              <div style={{background: '#eff6ff', padding: '8px', borderRadius: '8px'}}>
-                <p style={{fontSize: '9px', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold'}}>Fecha</p>
-                <p style={{fontSize: '11px', fontWeight: '600', color: '#111'}}>{cotizacion.fecha}</p>
-              </div>
-              <div style={{background: '#fff7ed', padding: '8px', borderRadius: '8px'}}>
-                <p style={{fontSize: '9px', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold'}}>Vence</p>
-                <p style={{fontSize: '11px', fontWeight: '600', color: '#111'}}>{cotizacion.vencimiento}</p>
-              </div>
-              <div style={{background: '#f0fdf4', padding: '8px', borderRadius: '8px'}}>
-                <p style={{fontSize: '9px', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold'}}>Moneda</p>
-                <p style={{fontSize: '11px', fontWeight: '600', color: '#111'}}>Soles</p>
-              </div>
-              <div style={{background: '#faf5ff', padding: '8px', borderRadius: '8px'}}>
-                <p style={{fontSize: '9px', color: '#6b7280', textTransform: 'uppercase', fontWeight: 'bold'}}>Validez</p>
-                <p style={{fontSize: '11px', fontWeight: '600', color: '#111'}}>{cotizacion.validez}</p>
+          {/* Contact and Payment Grid */}
+          <div style={{display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', marginBottom: '8px', background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0'}}>
+            <div>
+              <h3 style={{fontSize: '11px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0'}}>PERSONA DE CONTACTO:</h3>
+              <div style={{fontSize: '11px', color: '#374151', display: 'flex', flexDirection: 'column', gap: '2px'}}>
+                <div><span style={{fontWeight: '600'}}>Atención:</span> {cliente.contacto || '-'}</div>
+                <div><span style={{fontWeight: '600'}}>Telf:</span> {cliente.telefono || '-'}</div>
+                <div><span style={{fontWeight: '600'}}>Correo:</span> {cliente.correo || '-'}</div>
+                {cliente.direccion && <div style={{whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}><span style={{fontWeight: '600'}}>Dirección:</span> {cliente.direccion}</div>}
               </div>
             </div>
-          </div>
-
-          <table style={{width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '20px'}}>
-            <thead>
-              <tr style={{background: 'linear-gradient(to right, #1e293b, #334155)', color: 'white'}}>
-                <th style={{padding: '12px', textAlign: 'left', width: '32px', borderTopLeftRadius: '8px'}}>#</th>
-                <th style={{padding: '12px', textAlign: 'left'}}>Descripción del Servicio</th>
-                <th style={{padding: '12px', textAlign: 'center', width: '56px'}}>Und</th>
-                <th style={{padding: '12px', textAlign: 'center', width: '48px'}}>Cant</th>
-                <th style={{padding: '12px', textAlign: 'right', width: '80px'}}>P. Unit</th>
-                <th style={{padding: '12px', textAlign: 'right', width: '96px', borderTopRightRadius: '8px'}}>Importe</th>
-              </tr>
-            </thead>
-            <tbody style={{color: '#374151'}}>
-              {items.map((item, index) => {
-                const lines = (item.descripcion || '').split('\n');
-                const first = lines[0];
-                const rest = lines.slice(1);
-                return (
-                  <tr key={item.id} style={{borderBottom: '1px solid #e2e8f0'}}>
-                    <td style={{padding: '12px', fontWeight: 'bold'}}>{index + 1}</td>
-                    <td style={{padding: '12px'}}>
-                      <p style={{fontWeight: 'bold', color: '#111'}}>{first || 'Descripción'}</p>
-                      {rest.length > 0 && (
-                        <ul style={{fontSize: '10px', marginTop: '4px', color: '#6b7280'}}>
-                          {rest.map((l, i) => <li key={i}>• {l}</li>)}
-                        </ul>
-                      )}
-                    </td>
-                    <td style={{padding: '12px', textAlign: 'center', fontWeight: '500'}}>{item.unidad || '-'}</td>
-                    <td style={{padding: '12px', textAlign: 'center', fontWeight: '500'}}>{item.cantidad || '0'}</td>
-                    <td style={{padding: '12px', textAlign: 'right'}}>{formatCurrency(item.precio)}</td>
-                    <td style={{padding: '12px', textAlign: 'right', fontWeight: 'bold'}}>{formatCurrency((item.precio || 0) * (item.cantidad || 0))}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          <div style={{display: 'flex', justifyContent: 'flex-end', marginBottom: '20px'}}>
-            <div style={{width: '200px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: '12px', borderBottom: '1px solid #e2e8f0'}}>
-                <span style={{color: '#4b5560'}}>Subtotal</span>
-                <span style={{fontWeight: '600'}}>{formatCurrency(subtotal)}</span>
-              </div>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', fontSize: '12px', borderBottom: '1px solid #e2e8f0'}}>
-                <span style={{color: '#4b5560'}}>IGV (18%)</span>
-                <span style={{fontWeight: '600'}}>{formatCurrency(igv)}</span>
-              </div>
-              <div style={{display: 'flex', justifyContent: 'space-between', padding: '12px 16px', fontSize: '14px', background: 'linear-gradient(to right, #3CB4FF, #D21414)', color: 'white', borderRadius: '8px', fontWeight: 'bold', marginTop: '4px'}}>
-                <span>Total</span>
-                <span>{formatCurrency(total)}</span>
+            <div>
+              <h3 style={{fontSize: '11px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0'}}>DATOS DE PAGO / {banco.nombre || 'BANCO'}:</h3>
+              <div style={{fontSize: '10.5px', color: '#374151', display: 'flex', flexDirection: 'column', gap: '2px'}}>
+                {banco.cuentaSoles && <div><span style={{fontWeight: '600'}}>Soles:</span> {banco.cuentaSoles}</div>}
+                {banco.cciSoles && <div><span style={{fontWeight: '600'}}>CCI:</span> {banco.cciSoles}</div>}
+                {banco.cuentaDolares && <div><span style={{fontWeight: '600'}}>Dólares:</span> {banco.cuentaDolares}</div>}
+                {banco.cciDolares && <div><span style={{fontWeight: '600'}}>CCI:</span> {banco.cciDolares}</div>}
+                {!banco.cuentaSoles && !banco.cuentaDolares && <div>No especificados</div>}
               </div>
             </div>
           </div>
 
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px'}}>
-            <div style={{background: '#f8fafc', padding: '12px', borderRadius: '8px'}}>
-              <h3 style={{fontSize: '10px', fontWeight: 'bold', color: '#374151', textTransform: 'uppercase', marginBottom: '8px'}}>Condiciones Comerciales</h3>
-              <p style={{fontSize: '11px'}}><span style={{fontWeight: '600'}}>Forma de Pago:</span> {cotizacion.formaPago || '-'}</p>
-              <p style={{fontSize: '11px'}}><span style={{fontWeight: '600'}}>Garantía:</span> {cotizacion.garantia || '-'}</p>
+          {/* Table */}
+          <div style={{flex: 1, minHeight: '160px', marginBottom: '8px'}}>
+            <table style={{width: '100%', fontSize: '11.5px', borderCollapse: 'collapse'}}>
+              <thead>
+                <tr style={{background: '#111', color: 'white'}}>
+                  <th style={{padding: '5px 8px', textAlign: 'left', width: '25px'}}>N°</th>
+                  <th style={{padding: '5px 8px', textAlign: 'left'}}>DESCRIPCION</th>
+                  <th style={{padding: '5px 8px', textAlign: 'center', width: '40px'}}>CANT</th>
+                  <th style={{padding: '5px 8px', textAlign: 'center', width: '40px'}}>UND</th>
+                  <th style={{padding: '5px 8px', textAlign: 'right', width: '80px'}}>P. / UND</th>
+                  <th style={{padding: '5px 8px', textAlign: 'right', width: '90px'}}>TOTAL</th>
+                </tr>
+              </thead>
+              <tbody style={{color: '#374151'}}>
+                {items.map((item, index) => {
+                  const lines = (item.descripcion || '').split('\n');
+                  const first = lines[0];
+                  const rest = lines.slice(1);
+                  return (
+                    <tr key={item.id} style={{borderBottom: '1px solid #e2e8f0'}}>
+                      <td style={{padding: '5px 8px', fontWeight: 'bold', verticalAlign: 'top'}}>{index + 1}</td>
+                      <td style={{padding: '5px 8px', verticalAlign: 'top'}}>
+                        <p style={{fontWeight: 'bold', color: '#D21414', fontSize: '11.5px', margin: 0}}>{first || 'Descripción'}</p>
+                        {rest.length > 0 && (
+                          <ul style={{fontSize: '10px', marginTop: '2px', color: '#4b5563', listStyle: 'none', paddingLeft: 0, margin: 0}}>
+                            {rest.map((l, i) => <li key={i} style={{marginBottom: '1px'}}>• {l}</li>)}
+                          </ul>
+                        )}
+                      </td>
+                      <td style={{padding: '5px 8px', textAlign: 'center', fontWeight: '500', verticalAlign: 'top'}}>{item.cantidad || '0'}</td>
+                      <td style={{padding: '5px 8px', textAlign: 'center', fontWeight: '500', verticalAlign: 'top'}}>{item.unidad || 'UND'}</td>
+                      <td style={{padding: '5px 8px', textAlign: 'right', verticalAlign: 'top'}}>{formatCurrency(parseFloat(item.precio))}</td>
+                      <td style={{padding: '5px 8px', textAlign: 'right', fontWeight: 'bold', verticalAlign: 'top'}}>{formatCurrency((parseFloat(item.precio) || 0) * (parseFloat(item.cantidad) || 0))}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totals & Commercial Conditions Row */}
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', marginBottom: '8px'}}>
+            
+            {/* Commercial Conditions */}
+            <div style={{flex: 1.2}}>
+              <h3 style={{fontSize: '11px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0'}}>CONDICIONES COMERCIALES:</h3>
+              <div style={{fontSize: '10.5px', color: '#374151', display: 'flex', flexDirection: 'column', gap: '2px'}}>
+                <div><span style={{fontWeight: '600'}}>Forma de Pago:</span> {cotizacion.formaPago || '-'}</div>
+                <div><span style={{fontWeight: '600'}}>Garantía:</span> {cotizacion.garantia || '-'}</div>
+                <div><span style={{fontWeight: '600'}}>Moneda:</span> Soles</div>
+                <div><span style={{fontWeight: '600'}}>Validez:</span> {cotizacion.validez || '-'}</div>
+              </div>
+
+              {/* Other Details / Stamp Area */}
+              <div style={{marginTop: '6px'}}>
+                <h3 style={{fontSize: '10.5px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0'}}>OTROS DETALLES:</h3>
+                <div style={{fontSize: '9.5px', color: '#4b5563', display: 'flex', flexDirection: 'column', gap: '1px'}}>
+                  <div>• Personal con SCTR</div>
+                  <div>• Precios incluyen IGV (18%)</div>
+                </div>
+              </div>
             </div>
-            <div style={{background: '#f8fafc', padding: '12px', borderRadius: '8px'}}>
-              <h3 style={{fontSize: '10px', fontWeight: 'bold', color: '#374151', textTransform: 'uppercase', marginBottom: '8px'}}>Datos de Pago</h3>
-              <p style={{fontSize: '11px', fontWeight: '500'}}>{banco.nombre || 'Banco'}</p>
-              <p style={{fontSize: '11px'}}>Soles: {banco.cuentaSoles || '-'}</p>
-              <p style={{fontSize: '11px'}}>CCI: {banco.cciSoles || '-'}</p>
+
+            {/* Totals Box & Stamp/Signature Placeholder */}
+            <div style={{flex: 0.8, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px'}}>
+              <div style={{width: '100%', maxWidth: '200px'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '11.5px', borderBottom: '1px solid #e2e8f0'}}>
+                  <span style={{color: '#4b5563', fontWeight: '600'}}>SUB-TOTAL</span>
+                  <span style={{fontWeight: '700'}}>{formatCurrency(subtotal)}</span>
+                </div>
+                <div style={{display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '11.5px', borderBottom: '1px solid #e2e8f0'}}>
+                  <span style={{color: '#4b5563', fontWeight: '600'}}>IGV (18%)</span>
+                  <span style={{fontWeight: '700'}}>{formatCurrency(igv)}</span>
+                </div>
+                <div style={{display: 'flex', justifyContent: 'space-between', padding: '5px 8px', fontSize: '13px', background: '#111', color: 'white', fontWeight: 'bold', marginTop: '2px'}}>
+                  <span>TOTAL</span>
+                  <span>{formatCurrency(total)}</span>
+                </div>
+              </div>
+
+              {/* Stamp / Digital Signature */}
+              <div style={{marginTop: '4px', textAlign: 'center', alignSelf: 'center', border: '1px dashed #cbd5e1', padding: '4px 8px', borderRadius: '4px', background: '#fafafa', width: '100%'}}>
+                <p style={{fontSize: '8.5px', color: '#6b7280', margin: 0, fontStyle: 'italic'}}>Firmado digitalmente por:</p>
+                <p style={{fontSize: '9px', fontWeight: 'bold', color: '#D21414', margin: '2px 0 0 0'}}>ATENTO5 S.G. E.I.R.L.</p>
+                <p style={{fontSize: '7.5px', color: '#9ca3af', margin: 0}}>RUC: 20612345678</p>
+              </div>
             </div>
           </div>
 
-          <div style={{paddingTop: '12px', borderTop: '2px solid #cbd5e1'}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '10px', color: '#6b7280'}}>
-              <div>
-                <p>{ATENTO5.direccion}</p>
-                <p>Telf: {ATENTO5.telefono} | Email: {ATENTO5.correo}</p>
-              </div>
-              <div style={{fontWeight: 'bold', color: '#3CB4FF', fontSize: '14px'}}>{ATENTO5.web}</div>
+          {/* Footer Details */}
+          <div style={{marginTop: 'auto', display: 'flex', flexDirection: 'column'}}>
+            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: '10px', color: '#4b5563', borderTop: '1px solid #e2e8f0'}}>
+              <span>{ATENTO5.direccion}</span>
+              <span style={{fontWeight: 'bold'}}>{ATENTO5.correo} | {ATENTO5.telefono}</span>
+            </div>
+            
+            {/* Red bottom bar */}
+            <div style={{background: '#D21414', margin: '0 -12mm -8mm -12mm', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <a href={`https://${ATENTO5.web}`} target="_blank" rel="noopener noreferrer" style={{color: 'white', textDecoration: 'none', fontSize: '11.5px', fontWeight: 'bold', letterSpacing: '1px'}}>{ATENTO5.web}</a>
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   );
 };
 

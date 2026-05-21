@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Youtube, ArrowUp } from 'lucide-react';
+import logo from '../assets/Logo Atento5.png';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -55,10 +56,17 @@ const Footer = () => {
             transition={{ duration: 0.5 }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <img 
-                src="/src/assets/Logo Atento5.png" 
+              <motion.img 
+                src={logo}
                 alt="ATENTO5" 
-                style={{ height: '42px' }}
+                style={{ 
+                  height: '160px',
+                  width: 'auto',
+                  objectFit: 'contain',
+                  filter: 'drop-shadow(0 0 20px rgba(60, 180, 255, 0.6))',
+                }}
+                animate={{ y: [-3, 3, -3] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               />
             </div>
             <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.05em' }}>
@@ -178,7 +186,7 @@ const Footer = () => {
               </p>
               <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <Mail size={14} style={{ color: '#3CB4FF' }} />
-                contacto@atento5.com
+                Juan.ampuero@atento5.com
               </p>
               <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <MapPin size={14} style={{ color: '#3CB4FF' }} />

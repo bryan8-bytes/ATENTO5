@@ -67,7 +67,7 @@ const Hero = () => {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Mail size={18} />
-            <span>contacto@atento5.com</span>
+            <span>Juan.ampuero@atento5.com</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Globe size={18} />
@@ -151,10 +151,10 @@ const Hero = () => {
               src={logo} 
               alt="ATENTO5" 
               style={{
-                width: '180px',
-                height: '180px',
+                width: '400px',
+                height: '400px',
                 objectFit: 'contain',
-                filter: 'drop-shadow(0 0 15px rgba(60, 180, 255,0.5))',
+                filter: 'drop-shadow(0 0 30px rgba(60, 180, 255,0.7))',
                 position: 'relative',
                 zIndex: 1
               }}

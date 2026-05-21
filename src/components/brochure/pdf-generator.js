@@ -92,22 +92,22 @@ function p1(d, logo, W, H) {
   fill(d, '#D21414'); d.rect(W / 2 - 24, 140, 48, 2, 'F');
 
   // Subtítulo
-  d.setFont('helvetica', 'normal'); d.setFontSize(11);
+  d.setFont('helvetica', 'normal'); d.setFontSize(13);
   text(d, '#7A8DA6');
-  d.text('SERVICIOS GENERALES E.I.R.L.', W / 2, 155, { align: 'center' });
+  d.text('SERVICIOS GENERALES E.I.R.L.', W / 2, 156, { align: 'center' });
 
   // Badge cápsula
   d.setLineWidth(0.4); stroke(d, '#3CB4FF');
   d.roundedRect(W / 2 - 42, 165, 84, 13, 6.5, 6.5);
-  d.setFont('helvetica', 'bold'); d.setFontSize(7);
+  d.setFont('helvetica', 'bold'); d.setFontSize(8.5);
   text(d, '#3CB4FF');
-  d.text('BROCHURE CORPORATIVO 2026', W / 2, 173, { align: 'center' });
+  d.text('BROCHURE CORPORATIVO 2026', W / 2, 172.5, { align: 'center' });
 
   // Frase
-  d.setFont('helvetica', 'bold'); d.setFontSize(28);
-  text(d, '#FFFFFF'); d.text('"SOMOS TU', W / 2, 215, { align: 'center' });
+  d.setFont('helvetica', 'bold'); d.setFontSize(32);
+  text(d, '#FFFFFF'); d.text('"SOMOS TU', W / 2, 212, { align: 'center' });
   text(d, '#3CB4FF'); d.text('SOLUCION', W / 2, 230, { align: 'center' });
-  text(d, '#D21414'); d.text('INTEGRAL"', W / 2, 245, { align: 'center' });
+  text(d, '#D21414'); d.text('INTEGRAL"', W / 2, 248, { align: 'center' });
 
   // Barra inferior
   d.setGState(new d.GState({ opacity: 0.3 }));
@@ -133,7 +133,7 @@ function p2(d, svcCount, W, H) {
   fill(d, '#3CB4FF'); d.rect(28, 18, 20, 1.5, 'F');
   fill(d, '#D21414'); d.rect(48, 18, 20, 1.5, 'F');
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(14);
+  d.setFont('helvetica', 'bold'); d.setFontSize(17);
   text(d, '#FFFFFF'); d.text('CONTENIDO', 28, 30);
 
   const items = [
@@ -146,9 +146,9 @@ function p2(d, svcCount, W, H) {
   items.forEach((it, i) => {
     const y = 45 + i * 20;
     const c = i % 2 === 0 ? '#3CB4FF' : '#D21414';
-    d.setFont('helvetica', 'bold'); d.setFontSize(16);
+    d.setFont('helvetica', 'bold'); d.setFontSize(19);
     text(d, c); d.text(it.n, 28, y + 5);
-    d.setFontSize(9); text(d, '#FFFFFF'); d.text(it.t, 48, y + 2);
+    d.setFontSize(11.5); text(d, '#FFFFFF'); d.text(it.t, 48, y + 2);
     stroke(d, c); d.setLineWidth(0.1); d.line(48, y + 7, W - 15, y + 7);
   });
 
@@ -173,11 +173,11 @@ function p3(d, logo, bg, W, H) {
   text(d, '#020610'); d.text('03', W - 14, 10, { align: 'center' });
 
   const cy = H * 0.38;
-  d.setFont('helvetica', 'bold'); d.setFontSize(18);
-  text(d, '#FFFFFF'); d.text('QUIENES', 10, cy + 5);
-  text(d, '#3CB4FF'); d.text('SOMOS?', 10, cy + 13);
-  fill(d, '#3CB4FF'); d.rect(10, cy + 16, 18, 1.2, 'F');
-  fill(d, '#D21414'); d.rect(28, cy + 16, 18, 1.2, 'F');
+  d.setFont('helvetica', 'bold'); d.setFontSize(22);
+  text(d, '#FFFFFF'); d.text('QUIENES', 10, cy + 6);
+  text(d, '#3CB4FF'); d.text('SOMOS?', 10, cy + 15);
+  fill(d, '#3CB4FF'); d.rect(10, cy + 18, 18, 1.2, 'F');
+  fill(d, '#D21414'); d.rect(28, cy + 18, 18, 1.2, 'F');
 
   if (logo) img(d, logo, W - 30, cy - 3, 20, 15);
 
@@ -188,7 +188,7 @@ function p3(d, logo, bg, W, H) {
   d.setGState(new d.GState({ opacity: 1 }));
   stroke(d, '#3CB4FF'); d.setLineWidth(0.15); d.roundedRect(8, by, W - 16, H - by - 20, 4, 4, 'S');
 
-  d.setFont('helvetica', 'normal'); d.setFontSize(7);
+  d.setFont('helvetica', 'normal'); d.setFontSize(9.5);
   text(d, '#A8B8CC');
   const paras = [
     'Somos ATENTO5 SERVICIOS GENERALES E.I.R.L., una empresa peruana especializada en brindar diversas lineas de servicios y suministros.',
@@ -199,16 +199,16 @@ function p3(d, logo, bg, W, H) {
   paras.forEach(p => {
     const lines = d.splitTextToSize(p, W - 26);
     d.text(lines, 14, py);
-    py += lines.length * 3.5 + 4;
+    py += lines.length * 4.5 + 5;
   });
 
   // Frase destacada
   d.setGState(new d.GState({ opacity: 0.06 }));
-  fill(d, '#D21414'); d.roundedRect(12, py + 2, W - 24, 10, 3, 3, 'F');
+  fill(d, '#D21414'); d.roundedRect(12, py + 2, W - 24, 13, 3, 3, 'F');
   d.setGState(new d.GState({ opacity: 1 }));
-  d.setFont('helvetica', 'bold'); d.setFontSize(6.5);
+  d.setFont('helvetica', 'bold'); d.setFontSize(8.5);
   text(d, '#D21414');
-  d.text('No somos un simple proveedor, SOMOS TU MEJOR SOCIO ESTRATEGICO.', W / 2, py + 9, { align: 'center' });
+  d.text('No somos un simple proveedor, SOMOS TU MEJOR SOCIO ESTRATEGICO.', W / 2, py + 10, { align: 'center' });
 
   d.setGState(new d.GState({ opacity: 0.3 }));
   fill(d, '#3CB4FF'); d.rect(0, H - 3, W / 2, 3, 'F');
@@ -232,11 +232,11 @@ function p4(d, W, H) {
   text(d, '#020610'); d.text('04', W - 14, 10, { align: 'center' });
 
   // Título
-  d.setFont('helvetica', 'bold'); d.setFontSize(18);
+  d.setFont('helvetica', 'bold'); d.setFontSize(22);
   text(d, '#FFFFFF'); d.text('NUESTRA', W / 2 - 8, 28, { align: 'center' });
   text(d, '#3CB4FF'); d.text('ESENCIA', W / 2 + 12, 28, { align: 'left' });
-  fill(d, '#3CB4FF'); d.rect(W / 2 - 12, 31, 12, 1.2, 'F');
-  fill(d, '#D21414'); d.rect(W / 2, 31, 12, 1.2, 'F');
+  fill(d, '#3CB4FF'); d.rect(W / 2 - 12, 31.5, 12, 1.2, 'F');
+  fill(d, '#D21414'); d.rect(W / 2, 31.5, 12, 1.2, 'F');
 
   // Misión
   const cx = 10, cw = W - 20, ch = 45;
@@ -246,12 +246,12 @@ function p4(d, W, H) {
   stroke(d, '#3CB4FF'); d.setLineWidth(0.2); d.roundedRect(cx, 40, cw, ch, 5, 5, 'S');
   fill(d, '#3CB4FF'); d.rect(cx, 40, cw, 2, 'F');
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(12);
+  d.setFont('helvetica', 'bold'); d.setFontSize(15);
   text(d, '#3CB4FF'); d.text('MISION', W / 2, 52, { align: 'center' });
-  d.setFont('helvetica', 'normal'); d.setFontSize(7);
+  d.setFont('helvetica', 'normal'); d.setFontSize(9.5);
   text(d, '#A8B8CC');
   const ml = d.splitTextToSize('Brindar soluciones integrales de alta calidad adaptadas a las exigencias corporativas y estatales, optimizando los tiempos de respuesta y superando las expectativas de nuestros clientes.', cw - 12);
-  d.text(ml, W / 2, 59, { align: 'center' });
+  d.text(ml, W / 2, 58, { align: 'center' });
 
   // Visión
   const vy = 40 + ch + 8;
@@ -261,12 +261,12 @@ function p4(d, W, H) {
   stroke(d, '#D21414'); d.setLineWidth(0.2); d.roundedRect(cx, vy, cw, ch, 5, 5, 'S');
   fill(d, '#D21414'); d.rect(cx, vy, cw, 2, 'F');
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(12);
+  d.setFont('helvetica', 'bold'); d.setFontSize(15);
   text(d, '#D21414'); d.text('VISION', W / 2, vy + 12, { align: 'center' });
-  d.setFont('helvetica', 'normal'); d.setFontSize(7);
+  d.setFont('helvetica', 'normal'); d.setFontSize(9.5);
   text(d, '#A8B8CC');
   const vl = d.splitTextToSize('Ser reconocidos a nivel nacional como la empresa lider en servicios generales y soluciones integrales, destacando por nuestra innovacion y excelencia operativa.', cw - 12);
-  d.text(vl, W / 2, vy + 19, { align: 'center' });
+  d.text(vl, W / 2, vy + 18, { align: 'center' });
 
   // Valores
   const vals = ['COMPROMISO', 'CALIDAD', 'EFICIENCIA', 'CONFIANZA'];
@@ -279,9 +279,9 @@ function p4(d, W, H) {
     fill(d, '#0A1929'); d.roundedRect(vx, valY, valW, 16, 3, 3, 'F');
     d.setGState(new d.GState({ opacity: 1 }));
     stroke(d, c); d.setLineWidth(0.15); d.roundedRect(vx, valY, valW, 16, 3, 3, 'S');
-    d.setFont('helvetica', 'bold'); d.setFontSize(6);
+    d.setFont('helvetica', 'bold'); d.setFontSize(7.5);
     text(d, c); d.text(v, vx + valW / 2, valY + 8, { align: 'center' });
-    fill(d, c); d.rect(vx + valW / 2 - 5, valY + 11, 10, 0.8, 'F');
+    fill(d, c); d.rect(vx + valW / 2 - 5, valY + 11.5, 10, 0.8, 'F');
   });
 
   d.setGState(new d.GState({ opacity: 0.3 }));
@@ -298,15 +298,15 @@ function p5(d, W, H) {
   d.setFont('helvetica', 'bold'); d.setFontSize(5);
   text(d, '#020610'); d.text('05', W - 14, 10, { align: 'center' });
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(18);
+  d.setFont('helvetica', 'bold'); d.setFontSize(22);
   text(d, '#FFFFFF'); d.text('POR QUE', W / 2 - 8, 25, { align: 'center' });
   text(d, '#3CB4FF'); d.text('ELEGIRNOS?', W / 2 + 12, 25, { align: 'left' });
   fill(d, '#3CB4FF'); d.rect(W / 2 - 12, 28, 12, 1.2, 'F');
   fill(d, '#D21414'); d.rect(W / 2, 28, 12, 1.2, 'F');
 
-  d.setFont('helvetica', 'normal'); d.setFontSize(7);
+  d.setFont('helvetica', 'normal'); d.setFontSize(9.5);
   text(d, '#7A8DA6');
-  d.text('Nuestra ventaja diferencial se basa en un enfoque integral orientado a resultados.', W / 2, 36, { align: 'center' });
+  d.text('Nuestra ventaja diferencial se basa en un enfoque integral orientado a resultados.', W / 2, 37, { align: 'center' });
 
   const items = [
     { t: 'EXPERIENCIA', d: 'Mas de 10 anos con los mas altos estandares.', c: '#3CB4FF' },
@@ -323,9 +323,9 @@ function p5(d, W, H) {
     d.setGState(new d.GState({ opacity: 1 }));
     stroke(d, it.c); d.setLineWidth(0.15); d.roundedRect(x, y, cw, ch, 4, 4, 'S');
     fill(d, it.c); d.rect(x, y, cw, 1.5, 'F');
-    d.setFont('helvetica', 'bold'); d.setFontSize(8);
+    d.setFont('helvetica', 'bold'); d.setFontSize(10.5);
     text(d, '#FFFFFF'); d.text(it.t, x + cw / 2, y + 10, { align: 'center' });
-    d.setFont('helvetica', 'normal'); d.setFontSize(6);
+    d.setFont('helvetica', 'normal'); d.setFontSize(7.5);
     text(d, '#7A8DA6');
     const lines = d.splitTextToSize(it.d, cw - 10);
     d.text(lines, x + cw / 2, y + 17, { align: 'center' });
@@ -337,9 +337,9 @@ function p5(d, W, H) {
   fill(d, '#3CB4FF'); d.roundedRect(8, by, W - 16, 12, 4, 4, 'F');
   d.setGState(new d.GState({ opacity: 1 }));
   stroke(d, '#3CB4FF'); d.setLineWidth(0.15); d.roundedRect(8, by, W - 16, 12, 4, 4, 'S');
-  d.setFont('helvetica', 'bold'); d.setFontSize(8);
+  d.setFont('helvetica', 'bold'); d.setFontSize(10);
   text(d, '#FFFFFF');
-  d.text('EL ALIADO ESTRATEGICO QUE TU EMPRESA NECESITA', W / 2, by + 8, { align: 'center' });
+  d.text('EL ALIADO ESTRATEGICO QUE TU EMPRESA NECESITA', W / 2, by + 8.5, { align: 'center' });
 
   d.setGState(new d.GState({ opacity: 0.3 }));
   fill(d, '#3CB4FF'); d.rect(0, H - 3, W / 2, 3, 'F');
@@ -351,11 +351,11 @@ function p5(d, W, H) {
 function pSvc(d, svcs, logo, cache, idx, W, H) {
   fill(d, '#020610'); d.rect(0, 0, W, H, 'F');
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(14);
+  d.setFont('helvetica', 'bold'); d.setFontSize(18);
   text(d, '#FFFFFF'); d.text('NUESTROS', 10, 14);
-  text(d, '#3CB4FF'); d.text('SERVICIOS', 38, 14);
-  fill(d, '#3CB4FF'); d.rect(10, 17, 16, 1.2, 'F');
-  fill(d, '#D21414'); d.rect(26, 17, 16, 1.2, 'F');
+  text(d, '#3CB4FF'); d.text('SERVICIOS', 44, 14);
+  fill(d, '#3CB4FF'); d.rect(10, 19, 16, 1.2, 'F');
+  fill(d, '#D21414'); d.rect(26, 19, 16, 1.2, 'F');
 
   const pg = idx + 6;
   fill(d, '#3CB4FF'); d.roundedRect(W - 22, 5, 16, 7, 2, 2);
@@ -372,9 +372,9 @@ function pSvc(d, svcs, logo, cache, idx, W, H) {
     else { fill(d, '#0A1929'); d.rect(x + 0.5, y + 0.5, cw - 1, ih - 1, 'F'); }
     fill(d, '#020610'); d.rect(x, y + ih, cw, ch - ih, 'F');
     fill(d, '#D21414'); d.rect(x + cw / 2 - 4, y + ih + 3, 8, 1, 'F');
-    d.setFont('helvetica', 'bold'); d.setFontSize(7);
-    text(d, '#FFFFFF'); d.text(s.title.toUpperCase(), x + cw / 2, y + ih + 10, { align: 'center' });
-    d.setFont('helvetica', 'normal'); d.setFontSize(5.5);
+    d.setFont('helvetica', 'bold'); d.setFontSize(9);
+    text(d, '#FFFFFF'); d.text(s.title.toUpperCase(), x + cw / 2, y + ih + 9, { align: 'center' });
+    d.setFont('helvetica', 'normal'); d.setFontSize(7.5);
     text(d, '#7A8DA6');
     const lines = d.splitTextToSize(s.description, cw - 8);
     d.text(lines, x + cw / 2, y + ih + 15, { align: 'center' });
@@ -408,11 +408,11 @@ function pContact(d, logo, W, H) {
 
   if (logo) img(d, logo, W / 2 - 22, 40, 44, 40);
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(32);
+  d.setFont('helvetica', 'bold'); d.setFontSize(36);
   text(d, '#3CB4FF'); d.text('ATENTO5', W / 2, 100, { align: 'center' });
-  d.setFont('helvetica', 'normal'); d.setFontSize(9);
+  d.setFont('helvetica', 'normal'); d.setFontSize(11);
   text(d, '#7A8DA6'); d.text('SERVICIOS GENERALES E.I.R.L.', W / 2, 110, { align: 'center' });
-  fill(d, '#D21414'); d.rect(W / 2 - 14, 114, 28, 1.5, 'F');
+  fill(d, '#D21414'); d.rect(W / 2 - 14, 116, 28, 1.5, 'F');
 
   d.setFont('helvetica', 'bold'); d.setFontSize(15);
   text(d, '#FFFFFF'); d.text('CONTACTANOS', W / 2, 128, { align: 'center' });
@@ -420,7 +420,7 @@ function pContact(d, logo, W, H) {
   const contacts = [
     { l: 'TELEFONO', v: '+51 955 295 390' },
     { l: 'TELEFONO 2', v: '+51 928 006 765' },
-    { l: 'CORREO', v: 'contacto@atento5.com' },
+    { l: 'CORREO', v: 'Juan.ampuero@atento5.com' },
     { l: 'UBICACION', v: 'Lima, Peru' },
   ];
   const cw = (W - 26) / 2, ch = 28, sx = 8, sy = 138;
@@ -431,9 +431,9 @@ function pContact(d, logo, W, H) {
     fill(d, '#0A1929'); d.roundedRect(x, y, cw, ch, 5, 5, 'F');
     d.setGState(new d.GState({ opacity: 1 }));
     stroke(d, '#3CB4FF'); d.setLineWidth(0.15); d.roundedRect(x, y, cw, ch, 5, 5, 'S');
-    d.setFont('helvetica', 'bold'); d.setFontSize(4.5);
+    d.setFont('helvetica', 'bold'); d.setFontSize(6);
     text(d, '#4A5A6E'); d.text(c.l, x + cw / 2, y + 10, { align: 'center' });
-    d.setFontSize(7.5); text(d, '#FFFFFF'); d.text(c.v, x + cw / 2, y + 19, { align: 'center' });
+    d.setFontSize(9.5); text(d, '#FFFFFF'); d.text(c.v, x + cw / 2, y + 19, { align: 'center' });
   });
 
   // Redes sociales
@@ -445,10 +445,10 @@ function pContact(d, logo, W, H) {
     stroke(d, '#FFFFFF'); d.setLineWidth(0.15); d.circle(sX + i * 10 + 4, sY, 4, 'S');
   });
 
-  d.setFont('helvetica', 'bold'); d.setFontSize(6);
+  d.setFont('helvetica', 'bold'); d.setFontSize(8);
   text(d, '#5A6A7E'); d.text('ATENTO5 SERVICIOS GENERALES E.I.R.L.', W / 2, sY + 15, { align: 'center' });
-  d.setFont('helvetica', 'normal'); d.setFontSize(5);
-  text(d, '#3A4A5E'); d.text('Tu socio estrategico en servicios integrales', W / 2, sY + 21, { align: 'center' });
+  d.setFont('helvetica', 'normal'); d.setFontSize(7);
+  text(d, '#3A4A5E'); d.text('Tu socio estrategico en servicios integrales', W / 2, sY + 22, { align: 'center' });
 
   d.setGState(new d.GState({ opacity: 0.5 }));
   fill(d, '#3CB4FF'); d.rect(0, H - 3, W / 2, 3, 'F');

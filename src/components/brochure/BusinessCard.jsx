@@ -9,7 +9,7 @@ FN:Juan Jose Ampuero Torres
 TITLE:Gerente General
 ORG:ATENTO5 SERVICIOS GENERALES E.I.R.L.
 TEL;TYPE=CELL:+51955295390
-EMAIL:contacto@atento5.com
+EMAIL:Juan.ampuero@atento5.com
 URL:https://atento5.com
 END:VCARD`;
     const blob = new Blob([vCardData], {

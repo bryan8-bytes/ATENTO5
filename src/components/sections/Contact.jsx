@@ -32,7 +32,7 @@ export default function Contact() {
     {
       icon: Mail,
       title: 'Email',
-      detail: 'contacto@atento5.com',
+      detail: 'Juan.ampuero@atento5.com',
     },
     {
       icon: MapPin,

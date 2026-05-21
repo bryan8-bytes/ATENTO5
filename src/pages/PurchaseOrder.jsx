@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
@@ -10,7 +10,7 @@ const ATENTO5 = {
   ruc: '20612345678',
   direccion: 'Asoc. Villa el Rosario, MZ D, Lote 1, Calle 3, Chaclacayo, Lima, Perú',
   telefono: '+51 955 295 390',
-  correo: 'contacto@atento5.com',
+  correo: 'Juan.ampuero@atento5.com',
   web: 'www.atento5.com'
 };
 
@@ -41,6 +41,27 @@ const getFutureDate = (days) => {
 };
 
 const PurchaseOrder = () => {
+  const [scale, setScale] = useState(0.65);
+
+  useEffect(() => {
+    const updateScale = () => {
+      const availableHeight = window.innerHeight - 220; // Adjusted for padding, header and title margins
+      const sheetHeight = 1122.5; // 297mm in pixels at 96dpi
+      let newScale = availableHeight / sheetHeight;
+      
+      const availableWidth = window.innerWidth * 0.60 - 40; // 60% width minus padding
+      const sheetWidth = 793.7; // 210mm in pixels at 96dpi
+      const widthScale = availableWidth / sheetWidth;
+      
+      newScale = Math.min(newScale, widthScale, 1.0);
+      setScale(newScale);
+    };
+    
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
   const [documento, setDocumento] = useState({
     numero: '',
     fecha: getTodayDate(),
@@ -115,8 +136,9 @@ const PurchaseOrder = () => {
       margin: 0,
       filename: 'OrdenCompra_' + (documento.numero || '000') + '.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { scale: 2, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css'] }
     }).from(element).save();
   };
 
@@ -143,9 +165,9 @@ const PurchaseOrder = () => {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', color: 'white', padding: '40px 24px', overflow: 'auto' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+    <div style={{ height: '100vh', background: '#0f172a', color: 'white', padding: '24px', overflow: 'hidden', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <Link to="/home" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
             <ChevronLeft size={20} />
             <span>Volver</span>
@@ -162,9 +184,10 @@ const PurchaseOrder = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        <div style={{ display: 'flex', gap: '24px' }}>
-          <div style={{ width: '45%', flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: '20px', maxHeight: '100vh', overflowY: 'auto' }}>
+      <div style={{ display: 'flex', gap: '24px', flex: 1, minHeight: 0, maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
+        <div style={{ width: '40%', flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
             <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(60, 180, 255, 0.2)' }}>
               <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#3CB4FF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileText size={20} /> Datos del Documento
@@ -307,151 +330,170 @@ const PurchaseOrder = () => {
             </div>
           </div>
         </div>
-          <div style={{ width: '55%', flex: '1', display: 'flex', justifyContent: 'center', padding: '20px', overflowY: 'auto' }}>
-            <div style={{ background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', minHeight: '297mm' }}>
-              <div style={{ background: 'white', color: '#000', width: '210mm', minHeight: '297mm', padding: '15mm', boxSizing: 'border-box', position: 'relative' }} ref={previewRef}>
-                <div style={{ background: 'linear-gradient(135deg, #3CB4FF, #D21414)', color: 'white', padding: '20px', borderRadius: '0', margin: '-15mm -15mm 20px -15mm' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                      <img src={logo} alt="Logo" style={{ height: '55px', width: 'auto', objectFit: 'contain' }} />
+          <div style={{ width: '60%', flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden' }}>
+            <div style={{ textAlign: 'center', marginBottom: '12px', flexShrink: 0 }}>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0 }}>VISTA PREVIA</h2>
+              <p style={{ fontSize: '12px', color: '#9ca3af', margin: '4px 0 0 0' }}>Así se verá tu orden de compra PDF</p>
+            </div>
+            <div className="custom-scrollbar" style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'flex-start',
+              height: 'calc(100vh - 200px)',
+              overflowY: 'auto',
+              paddingBottom: '20px',
+              boxSizing: 'border-box'
+            }}>
+              <div style={{
+                transform: `scale(${scale})`,
+                transformOrigin: 'top center',
+                width: '210mm',
+                height: '297mm',
+                flexShrink: 0,
+                marginBottom: `-${1122.5 * (1 - scale)}px`
+              }}>
+                <div style={{ background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', height: '297mm' }}>
+                  <div style={{ background: 'white', color: '#000', width: '210mm', height: '295mm', padding: '8mm 12mm 6mm 12mm', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} ref={previewRef}>
+                <div style={{ background: 'linear-gradient(135deg, #3CB4FF, #D21414)', color: 'white', padding: '12px 16px', borderRadius: '0', margin: '-8mm -12mm 8px -12mm' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <img src={logo} alt="Logo" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
                       <div>
-                        <h1 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', lineHeight: 1.3 }}>{ATENTO5.nombre}</h1>
-                        <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.9)' }}>RUC: {ATENTO5.ruc}</p>
+                        <h1 style={{ fontSize: '17px', fontWeight: 'bold', color: 'white', lineHeight: 1.2 }}>{ATENTO5.nombre}</h1>
+                        <p style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.9)', margin: 0 }}>RUC: {ATENTO5.ruc}</p>
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <h2 style={{ fontSize: '26px', fontWeight: '800', color: 'white', letterSpacing: '0.05em' }}>ORDEN DE COMPRA</h2>
-                      <p style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>N° {documento.numero || '000'}</p>
+                      <h2 style={{ fontSize: '22px', fontWeight: '800', color: 'white', letterSpacing: '0.05em', margin: 0 }}>ORDEN DE COMPRA</h2>
+                      <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600', margin: 0 }}>N° {documento.numero || '000'}</p>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ background: '#f1f5f9', padding: '16px', borderRadius: '8px', borderLeft: '4px solid #64748b', marginBottom: '16px' }}>
-                  <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', marginBottom: '10px' }}>Datos del Documento</h3>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', fontSize: '13px', color: '#1e293b' }}>
+                <div style={{ background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px', borderLeft: '4px solid #64748b', marginBottom: '8px' }}>
+                  <h3 style={{ fontSize: '11.5px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', margin: '0 0 4px 0' }}>Datos del Documento</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', fontSize: '12px', color: '#1e293b' }}>
                     <div>
-                      <p style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold' }}>Fecha de Emisión</p>
-                      <p style={{ fontWeight: '600', color: '#1e293b' }}>{formatDate(documento.fecha)}</p>
+                      <p style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold', margin: 0 }}>Fecha Emisión</p>
+                      <p style={{ fontWeight: '600', color: '#1e293b', fontSize: '12.5px', margin: 0 }}>{formatDate(documento.fecha)}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold' }}>Fecha de Vencimiento</p>
-                      <p style={{ fontWeight: '600', color: '#1e293b' }}>{formatDate(documento.vencimiento)}</p>
+                      <p style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold', margin: 0 }}>Vence</p>
+                      <p style={{ fontWeight: '600', color: '#1e293b', fontSize: '12.5px', margin: 0 }}>{formatDate(documento.validezHasta)}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold' }}>Moneda</p>
-                      <p style={{ fontWeight: '600', color: '#1e293b' }}>{documento.moneda === 'PEN' ? 'Soles (S/.)' : 'Dólares (US$)'}</p>
+                      <p style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold', margin: 0 }}>Moneda</p>
+                      <p style={{ fontWeight: '600', color: '#1e293b', fontSize: '12.5px', margin: 0 }}>{documento.moneda === 'PEN' ? 'Soles (S/.)' : 'Dólares (US$)'}</p>
                     </div>
                     <div>
-                      <p style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold' }}>Tipo de Cambio</p>
-                      <p style={{ fontWeight: '600', color: '#1e293b' }}>{documento.tipoCambio || '-'}</p>
+                      <p style={{ fontSize: '9.5px', color: '#64748b', textTransform: 'uppercase', fontWeight: 'bold', margin: 0 }}>T. Cambio</p>
+                      <p style={{ fontWeight: '600', color: '#1e293b', fontSize: '12.5px', margin: 0 }}>{documento.tipoCambio || '-'}</p>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px' }}>
-                  <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #3CB4FF' }}>
-                    <h3 style={{ fontSize: '10px', fontWeight: 'bold', color: '#3CB4FF', textTransform: 'uppercase', marginBottom: '8px' }}>Emisor (Comprador)</h3>
-                    <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#111' }}>{ATENTO5.nombre}</p>
-                    <p style={{ fontSize: '11px', color: '#475569' }}>RUC: {ATENTO5.ruc}</p>
-                    <p style={{ fontSize: '11px', color: '#475569' }}>Dirección: {ATENTO5.direccion}</p>
-                    <p style={{ fontSize: '11px', color: '#475569' }}>Telf: {ATENTO5.telefono} | Correo: {ATENTO5.correo}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '8px' }}>
+                  <div style={{ background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', borderLeft: '3px solid #3CB4FF' }}>
+                    <h3 style={{ fontSize: '10.5px', fontWeight: 'bold', color: '#3CB4FF', textTransform: 'uppercase', margin: '0 0 2px 0' }}>Emisor (Comprador)</h3>
+                    <p style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#111', margin: 0 }}>{ATENTO5.nombre}</p>
+                    <p style={{ fontSize: '11px', color: '#475569', margin: 0 }}>RUC: {ATENTO5.ruc}</p>
+                    <p style={{ fontSize: '11px', color: '#475569', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Dirección: {ATENTO5.direccion}</p>
                   </div>
-                  <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px', borderLeft: '4px solid #D21414' }}>
-                    <h3 style={{ fontSize: '10px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', marginBottom: '8px' }}>Proveedor (Vendedor)</h3>
-                    <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#111' }}>{proveedor.nombre || 'Nombre del Proveedor'}</p>
-                    {proveedor.ruc && <p style={{ fontSize: '11px', color: '#475569' }}>RUC: {proveedor.ruc}</p>}
-                    <p style={{ fontSize: '11px', color: '#475569' }}>Atención: {proveedor.contacto || '-'}</p>
-                    <p style={{ fontSize: '11px', color: '#475569' }}>Telf: {proveedor.telefono || '-'}</p>
-                    <p style={{ fontSize: '11px', color: '#475569' }}>Email: {proveedor.correo || '-'}</p>
+                  <div style={{ background: '#f8fafc', padding: '6px 10px', borderRadius: '6px', borderLeft: '3px solid #D21414' }}>
+                    <h3 style={{ fontSize: '10.5px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', margin: '0 0 2px 0' }}>Proveedor (Vendedor)</h3>
+                    <p style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#111', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{proveedor.nombre || 'Nombre del Proveedor'}</p>
+                    {proveedor.ruc && <p style={{ fontSize: '11px', color: '#475569', margin: 0 }}>RUC: {proveedor.ruc}</p>}
+                    <p style={{ fontSize: '11px', color: '#475569', margin: 0 }}>Telf: {proveedor.telefono || '-'} | Email: {proveedor.email || '-'}</p>
                   </div>
                 </div>
 
-                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', marginBottom: '16px' }}>
-                  <thead>
-                    <tr style={{ background: 'linear-gradient(to right, #1e293b, #334155)', color: 'white' }}>
-                      <th style={{ padding: '10px', textAlign: 'left', width: '30px', borderTopLeftRadius: '6px' }}>Item</th>
-                      <th style={{ padding: '10px', textAlign: 'left' }}>Descripción / Detalle</th>
-                      <th style={{ padding: '10px', textAlign: 'center', width: '60px' }}>U. Medida</th>
-                      <th style={{ padding: '10px', textAlign: 'center', width: '50px' }}>Cant.</th>
-                      <th style={{ padding: '10px', textAlign: 'right', width: '80px' }}>P. Unit</th>
-                      <th style={{ padding: '10px', textAlign: 'right', width: '90px', borderTopRightRadius: '6px' }}>Importe</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((item, index) => (
-                      <tr key={item.id} style={{ borderBottom: '1px solid #e2e8f0', color: '#334155' }}>
-                        <td style={{ padding: '10px', fontWeight: 'bold' }}>{index + 1}</td>
-                        <td style={{ padding: '10px' }}>
-                          <p style={{ fontWeight: 'bold', color: '#0f172a' }}>{item.descripcion.split('\n')[0] || 'Descripción'}</p>
-                          {item.descripcion.split('\n').slice(1).length > 0 && (
-                            <ul style={{ fontSize: '10px', color: '#64748b', marginTop: '2px', paddingLeft: '0', listStyle: 'none' }}>
-                              {item.descripcion.split('\n').slice(1).map((l, i) => <li key={i}>• {l}</li>)}
-                            </ul>
-                          )}
-                        </td>
-                        <td style={{ padding: '10px', textAlign: 'center' }}>{item.unidad || '-'}</td>
-                        <td style={{ padding: '10px', textAlign: 'center' }}>{item.cantidad || 0}</td>
-                        <td style={{ padding: '10px', textAlign: 'right' }}>{formatCurrency(item.precio)}</td>
-                        <td style={{ padding: '10px', textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency((item.precio || 0) * (item.cantidad || 0))}</td>
+                <div style={{ flex: 1, minHeight: '150px', marginBottom: '6px' }}>
+                  <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ background: 'linear-gradient(to right, #1e293b, #334155)', color: 'white' }}>
+                        <th style={{ padding: '5px 8px', textAlign: 'left', width: '25px', borderTopLeftRadius: '6px' }}>Item</th>
+                        <th style={{ padding: '5px 8px', textAlign: 'left' }}>Descripción / Detalle</th>
+                        <th style={{ padding: '5px 8px', textAlign: 'center', width: '50px' }}>U. Medida</th>
+                        <th style={{ padding: '5px 8px', textAlign: 'center', width: '40px' }}>Cant.</th>
+                        <th style={{ padding: '5px 8px', textAlign: 'right', width: '70px' }}>P. Unit</th>
+                        <th style={{ padding: '5px 8px', textAlign: 'right', width: '80px', borderTopRightRadius: '6px' }}>Importe</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {items.map((item, index) => (
+                        <tr key={item.id} style={{ borderBottom: '1px solid #e2e8f0', color: '#334155' }}>
+                          <td style={{ padding: '5px 8px', fontWeight: 'bold', verticalAlign: 'top' }}>{index + 1}</td>
+                          <td style={{ padding: '5px 8px', verticalAlign: 'top' }}>
+                            <p style={{ fontWeight: 'bold', color: '#0f172a', fontSize: '12px', margin: 0 }}>{item.descripcion.split('\n')[0] || 'Descripción'}</p>
+                            {item.descripcion.split('\n').slice(1).length > 0 && (
+                              <ul style={{ fontSize: '10px', color: '#64748b', marginTop: '1px', paddingLeft: '0', listStyle: 'none', margin: 0 }}>
+                                {item.descripcion.split('\n').slice(1).map((l, i) => <li key={i}>• {l}</li>)}
+                              </ul>
+                            )}
+                          </td>
+                          <td style={{ padding: '5px 8px', textAlign: 'center', verticalAlign: 'top' }}>{item.unidad || '-'}</td>
+                          <td style={{ padding: '5px 8px', textAlign: 'center', verticalAlign: 'top' }}>{item.cantidad || 0}</td>
+                          <td style={{ padding: '5px 8px', textAlign: 'right', verticalAlign: 'top' }}>{formatCurrency(parseFloat(item.precioUnitario))}</td>
+                          <td style={{ padding: '5px 8px', textAlign: 'right', fontWeight: 'bold', verticalAlign: 'top' }}>{formatCurrency((parseFloat(item.precioUnitario) || 0) * (parseFloat(item.cantidad) || 0))}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-                  <div style={{ width: '220px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '12px', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '6px' }}>
+                  <div style={{ width: '200px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '12px', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
                       <span>Subtotal</span>
                       <span style={{ fontWeight: '600' }}>{formatCurrency(subtotal)}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', fontSize: '12px', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '12px', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>
                       <span>IGV (18%)</span>
                       <span style={{ fontWeight: '600' }}>{formatCurrency(igv)}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', fontSize: '13px', background: 'linear-gradient(to right, #3CB4FF, #D21414)', color: 'white', borderRadius: '6px', fontWeight: 'bold', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 10px', fontSize: '13.5px', background: 'linear-gradient(to right, #3CB4FF, #D21414)', color: 'white', borderRadius: '6px', fontWeight: 'bold', marginTop: '2px' }}>
                       <span>Total Neto</span>
                       <span>{formatCurrency(total)}</span>
                     </div>
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                  <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', marginBottom: '6px' }}>Condiciones y Términos Comerciales</p>
-                    <p style={{ fontSize: '12px', color: '#475569' }}><span style={{ fontWeight: '600' }}>Lugar de Entrega:</span> {condiciones.lugarEntrega}</p>
-                    <p style={{ fontSize: '12px', color: '#475569' }}><span style={{ fontWeight: '600' }}>Forma de Pago:</span> {documento.formaPago}</p>
-                    <p style={{ fontSize: '12px', color: '#475569' }}><span style={{ fontWeight: '600' }}>Tipo de Cambio:</span> {documento.tipoCambio}</p>
-                    <p style={{ fontSize: '12px', color: '#475569' }}><span style={{ fontWeight: '600' }}>Elaborado por:</span> {documento.elaboradoPor}</p>
-                    <p style={{ fontSize: '12px', color: '#475569' }}><span style={{ fontWeight: '600' }}>Cargo:</span> {documento.cargo}</p>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '12px', marginBottom: '6px' }}>
+                  <div style={{ background: '#f8fafc', padding: '6px 10px', borderRadius: '6px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', margin: '0 0 2px 0' }}>Condiciones y Términos Comerciales</p>
+                    <p style={{ fontSize: '11.5px', color: '#475569', margin: '1px 0' }}><span style={{ fontWeight: '600' }}>Lugar de Entrega:</span> {condiciones.lugarEntrega || ATENTO5.direccion}</p>
+                    <p style={{ fontSize: '11.5px', color: '#475569', margin: '1px 0' }}><span style={{ fontWeight: '600' }}>Forma de Pago:</span> {documento.formaPago}</p>
+                    <p style={{ fontSize: '11.5px', color: '#475569', margin: '1px 0' }}><span style={{ fontWeight: '600' }}>Elaborado por:</span> {documento.elaboradoPor} ({documento.cargo})</p>
                   </div>
-                  <div style={{ background: '#f1f5f9', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', marginBottom: '6px' }}>Dirección de Entrega</p>
-                    <p style={{ fontSize: '12px', color: '#475569' }}>{ATENTO5.direccion}</p>
+                  <div style={{ background: '#f1f5f9', padding: '6px 10px', borderRadius: '6px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', margin: '0 0 2px 0' }}>Dirección de Entrega</p>
+                    <p style={{ fontSize: '11.5px', color: '#475569', margin: 0 }}>{ATENTO5.direccion}</p>
                   </div>
                 </div>
 
                 {condiciones.observaciones && (
-                  <div style={{ background: '#fefce8', padding: '12px', borderRadius: '8px', border: '1px solid #fde047', marginBottom: '16px' }}>
-                    <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#854d0e', textTransform: 'uppercase', marginBottom: '4px' }}>Observaciones</p>
-                    <p style={{ fontSize: '13px', color: '#713f12' }}>{condiciones.observaciones}</p>
+                  <div style={{ background: '#fefce8', padding: '4px 8px', borderRadius: '6px', border: '1px solid #fde047', marginBottom: '6px' }}>
+                    <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#854d0e', textTransform: 'uppercase', margin: '0 0 1px 0' }}>Observaciones</p>
+                    <p style={{ fontSize: '11.5px', color: '#713f12', margin: 0 }}>{condiciones.observaciones}</p>
                   </div>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginTop: '32px', paddingTop: '16px', borderTop: '2px solid #cbd5e1' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: 'auto', paddingTop: '6px', borderTop: '2px solid #cbd5e1' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ height: '60px', borderBottom: '2px solid #64748b', marginBottom: '8px' }}></div>
-                    <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b' }}>{firmas.responsable}</p>
-                    <p style={{ fontSize: '11px', color: '#64748b' }}>Responsable ATENTO5</p>
+                    <div style={{ height: '24px', borderBottom: '1px solid #64748b', marginBottom: '4px' }}></div>
+                    <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>{firmas.responsable}</p>
+                    <p style={{ fontSize: '10.5px', color: '#64748b', margin: 0 }}>Responsable ATENTO5</p>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ height: '60px', borderBottom: '2px solid #64748b', marginBottom: '8px' }}></div>
-                    <p style={{ fontSize: '13px', fontWeight: 'bold', color: '#1e293b' }}>{firmas.proveedor || 'Proveedor'}</p>
-                    <p style={{ fontSize: '11px', color: '#64748b' }}>Representante Proveedor</p>
+                    <div style={{ height: '24px', borderBottom: '1px solid #64748b', marginBottom: '4px' }}></div>
+                    <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e293b', margin: 0 }}>{firmas.proveedor || 'Proveedor'}</p>
+                    <p style={{ fontSize: '10.5px', color: '#64748b', margin: 0 }}>Representante Proveedor</p>
                   </div>
                 </div>
 
-                <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #e2e8f0', textAlign: 'center', fontSize: '10px', color: '#64748b' }}>
-                  <p>{ATENTO5.direccion} | Tel: {ATENTO5.telefono} | Email: {ATENTO5.correo}</p>
+                <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #e2e8f0', textAlign: 'center', fontSize: '10px', color: '#64748b' }}>
+                  <p style={{ margin: 0 }}>{ATENTO5.direccion} | Tel: {ATENTO5.telefono} | Email: {ATENTO5.correo}</p>
                 </div>
               </div>
             </div>
@@ -459,6 +501,7 @@ const PurchaseOrder = () => {
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

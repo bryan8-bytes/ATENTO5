@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { Menu, X } from 'lucide-react'
-import logoA5 from '../../logo_a5.png'
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -27,13 +26,13 @@ export default function Navbar() {
       scrolled ? 'bg-dark-900/95 backdrop-blur-md shadow-lg' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
-          {/* Logo */}
-          <div className="flex-shrink-0 flex items-center">
-            <a href="#hero" className="flex items-center">
-              <img src={logoA5} alt="ATENTO5" className="h-10 sm:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300" />
-            </a>
-          </div>
+         <div className="flex items-center justify-between h-20">
+           {/* Logo */}
+           <div className="flex-shrink-0 flex items-center">
+             <a href="#hero" className="flex items-center">
+               <span className="text-faguade-light-blue text-xl font-bold">ATENTO5</span>
+             </a>
+           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:block">

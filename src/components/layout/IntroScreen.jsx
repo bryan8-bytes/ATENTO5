@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import logoA5 from '../../logo_a5.png'
 
 export default function IntroScreen() {
   return (
@@ -10,26 +9,13 @@ export default function IntroScreen() {
         transition={{ duration: 0.5 }}
         className="text-center"
       >
-        <motion.div
-          animate={{ 
-            scale: [1, 1.05, 1],
-          }}
-          transition={{ 
-            duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-          className="flex justify-center mb-6"
-        >
-          <img src={logoA5} alt="ATENTO5" className="h-20 sm:h-24 w-auto object-contain" />
-        </motion.div>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-gray-400 text-xl"
+          className="text-faguade-light-blue text-4xl font-bold mb-6"
         >
-          Servicios Generales E.I.R.L.
+          SERVICIOS GENERALES E.I.R.L.
         </motion.p>
         
         {/* Loading bar */}
