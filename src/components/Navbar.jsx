@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, User as UserIcon, Menu, X } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, X, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/Logo Atento5.png';
 
@@ -124,7 +124,8 @@ const Navbar = () => {
         justifyContent: 'space-between',
         height: '140px', // Premium height
         boxSizing: 'border-box',
-        position: 'relative'
+        position: 'relative',
+        overflow: 'visible'
       }}>
         {/* LOGO COLUMN */}
         <Link 
@@ -138,70 +139,49 @@ const Navbar = () => {
           }}
         >
           <motion.div
-            animate={{ y: [-3, 3, -3] }}
+            animate={{ y: [-5, 5, -5] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            whileHover={{ transition: { duration: 0.1, delay: 0 }, scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            style={{ position: 'relative' }}
+            style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
           >
-            <img 
-              src={logo} 
-              alt="ATENTO5" 
-              style={{ 
-                height: '150px', 
-                width: '150px',
-                objectFit: 'contain',
-                position: 'relative',
-                zIndex: 1,
-                filter: 'drop-shadow(0 0 15px rgba(60, 180, 255, 0.6))',
+            {/* Dual Glow effect */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                inset: '-20px',
+                borderRadius: '50%',
+                filter: 'blur(20px)',
               }}
+              animate={{
+                background: [
+                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(210, 20, 20,0.25) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)'
+                ],
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 0.8, 0.5]
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             />
-
-            {/* Sparkle Effects */}
-            {[...Array(6)].map((_, i) => {
-              const dotColor = i % 2 === 0 ? '#3CB4FF' : '#D21414';
-              return (
-                <motion.div
-                  key={i}
-                  style={{
-                    position: 'absolute',
-                    width: '3.5px',
-                    height: '3.5px',
-                    backgroundColor: dotColor,
-                    borderRadius: '50%',
-                    boxShadow: `0 0 8px ${dotColor}, 0 0 15px ${dotColor}`,
-                    left: `calc(${50 + 45 * Math.cos((i * 60 * Math.PI) / 180)}% - 1.75px)`,
-                    top: `calc(${50 + 45 * Math.sin((i * 60 * Math.PI) / 180)}% - 1.75px)`,
-                    zIndex: 15,
-                  }}
-                  animate={{
-                    scale: [0, 1.5, 0],
-                    opacity: [0, 1, 0],
-                    x: [0, 8 * Math.cos((i * 60 * Math.PI) / 180), 0],
-                    y: [0, 8 * Math.sin((i * 60 * Math.PI) / 180), 0],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: i * 0.4,
-                    ease: 'easeInOut',
-                  }}
-                />
-              );
-            })}
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              style={{ position: 'relative', zIndex: 1 }}
+            >
+              <img 
+                src={logo} 
+                alt="ATENTO5" 
+                style={{ 
+                  height: '300px', 
+                  width: '300px',
+                  objectFit: 'contain',
+                  display: 'block',
+                  filter: 'drop-shadow(0 0 20px rgba(60, 180, 255, 0.7))',
+                }}
+              />
+            </motion.div>
           </motion.div>
           
-          <span style={{
-            fontSize: '22px',
-            fontWeight: 850,
-            letterSpacing: '0.18em',
-            background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-          }}>
-            ATENTO5
-          </span>
+
         </Link>
 
         {/* DESKTOP CENTER NAVIGATION LINKS */}
@@ -308,6 +288,35 @@ const Navbar = () => {
                 ORDEN DE COMPRA
               </motion.button>
             </Link>
+
+            {/* Email button — only visible when logged in */}
+            {user && (
+              <Link to="/email" style={{ textDecoration: 'none' }}>
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(167,139,250,0.5)' }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+                    color: 'white',
+                    padding: '10px 22px',
+                    borderRadius: '30px',
+                    border: 'none',
+                    fontWeight: 800,
+                    fontSize: '12px',
+                    letterSpacing: '0.08em',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 15px rgba(124,58,237,0.35)',
+                    transition: 'all 0.3s ease',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '7px',
+                  }}
+                >
+                  <Mail size={14} />
+                  CORREO
+                </motion.button>
+              </Link>
+            )}
 
             {/* Vertical Divider */}
             <span style={{ 
@@ -607,6 +616,35 @@ const Navbar = () => {
                     ORDEN DE COMPRA
                   </motion.button>
                 </Link>
+
+                {/* Mobile email button */}
+                {user && (
+                  <Link to="/email" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      style={{
+                        width: '100%',
+                        background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+                        color: 'white',
+                        padding: '12px',
+                        borderRadius: '12px',
+                        border: 'none',
+                        fontWeight: 800,
+                        fontSize: '12px',
+                        letterSpacing: '0.08em',
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 15px rgba(124,58,237,0.25)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                      }}
+                    >
+                      <Mail size={14} /> MI CORREO
+                    </motion.button>
+                  </Link>
+                )}
 
                 {user ? (
                   <div style={{ 

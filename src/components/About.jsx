@@ -20,10 +20,10 @@ const About = () => {
     stat: '500+',
     gradient: 'linear-gradient(135deg, rgba(60, 180, 255,0.2), rgba(210, 20, 20,0.1))'
   }, {
-    title: 'Experiencia Comprobada',
-    desc: 'Años de trayectoria exitosa en el sector de servicios generales',
+    title: 'Enfoque en Calidad',
+    desc: 'Comprometidos con los más altos estándares en cada proyecto del sector de servicios generales',
     icon: <Clock size={28} />,
-    stat: '10+',
+    stat: '★★★',
     gradient: 'linear-gradient(135deg, rgba(210, 20, 20,0.2), rgba(60, 180, 255,0.1))'
   }];
   const timeline = [{

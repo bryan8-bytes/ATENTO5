@@ -248,8 +248,8 @@ const Hero = () => {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          Empresa líder en servicios generales con más de 10 años de experiencia.
-          Brindamos soluciones integrales de calidad.
+          Empresa especializada en servicios generales comprometida con la excelencia.
+          Brindamos soluciones integrales de la más alta calidad.
         </motion.p>
 
         {/* CTA Button - Simple */}

@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import ManagerProfile from './pages/ManagerProfile';
 import QuotationGenerator from './pages/QuotationGenerator';
 import PurchaseOrder from './pages/PurchaseOrder';
+import EmailLauncher from './pages/EmailLauncher';
 
 function App() {
   return (
@@ -30,6 +31,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <PurchaseOrder />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/email" 
+            element={
+              <ProtectedRoute>
+                <EmailLauncher />
               </ProtectedRoute>
             } 
           />

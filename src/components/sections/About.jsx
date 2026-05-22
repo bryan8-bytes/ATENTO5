@@ -50,8 +50,8 @@ export default function About() {
               que contribuyan al crecimiento y éxito de nuestros clientes.
             </p>
             <p className="text-gray-400">
-              Con años de experiencia en el mercado, hemos construido una reputación solida 
-              basada en la calidad, profesionalismo y compromiso con cada proyecto.
+              Nos distinguimos por nuestra dedicación a la calidad, el profesionalismo 
+              y el compromiso absoluto con cada proyecto que emprendemos.
             </p>
           </motion.div>
 

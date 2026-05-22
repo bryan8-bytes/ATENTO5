@@ -1,62 +1,103 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
+// import { motion } from 'framer-motion'; // Removed unused import
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
-import { Download, Plus, Trash2, Building2, CreditCard, User, FileText, Palette, ChevronLeft } from 'lucide-react';
+import { Download, Plus, Trash2, Building2, User, FileText, Palette, ChevronLeft, Check, Calculator } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
 
-const ATENTO5 = {
-  nombre: 'ATENTO5 SERVICIOS GENERALES E.I.R.L.',
-  ruc: '20612345678',
-  direccion: 'Asoc. Villa el Rosario, MZ D, Lote 1, Calle 3, Chaclacayo, Lima, Perú',
-  telefono: '+51 955 295 390',
-  correo: 'Juan.ampuero@atento5.com',
-  web: 'www.atento5.com'
-};
-
-const formatDate = (date) => {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const year = d.getFullYear();
-  return `${day}/${month}/${year}`;
-};
-
 const QuotationGenerator = () => {
-  const today = new Date();
-  const vencimiento = new Date(today);
-  vencimiento.setDate(vencimiento.getDate() + 30);
-
-  const [empresa, setEmpresa] = useState({
-    nombre: '', ruc: '', direccion: '', telefono: '', correo: '', web: ''
-  });
-
-  const [banco, setBanco] = useState({
-    nombre: '', cuentaSoles: '', cciSoles: '', cuentaDolares: '', cciDolares: ''
+  // --- Estados Iniciales Basados en "Cotizacion Atento5.pdf" ---
+  const [header, setHeader] = useState(() => {
+    const getNextQuotationNumber = () => {
+      const today = new Date();
+      const year = today.getFullYear().toString().slice(-2);
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const datePrefix = `${year}-${month}-${day}`;
+      
+      const lastData = JSON.parse(localStorage.getItem('quotationCounter') || '{}');
+      let nextNumber = 1;
+      if (lastData.datePrefix === datePrefix && lastData.number) {
+        nextNumber = lastData.number + 1;
+      }
+      return `${datePrefix}-${nextNumber.toString().padStart(3, '0')}`;
+    };
+    return {
+      titulo: 'PRESUPUESTO DE SERVICIO DE TRANSPORTE DE CARGA',
+      codigo: 'TYLROV-014-01',
+      revision: '02',
+      numero: getNextQuotationNumber() // Se generará automáticamente
+    };
   });
 
   const [cliente, setCliente] = useState({
-    tipo: 'empresa',
-    nombre: '', ruc: '', contacto: '', telefono: '', correo: '', direccion: ''
+    senores: 'Señores:',
+    nombre: 'ATENTO5 SERVICIOS GENERALES E.I.R.L.',
+    atencion: 'Corina Añorga'
   });
 
-  const [cotizacion, setCotizacion] = useState({
-    numero: '',
-    fecha: formatDate(today),
-    vencimiento: formatDate(vencimiento),
-    formaPago: '',
-    garantia: '',
-    validez: '30 días'
+  const [intro, setIntro] = useState({
+    saludo: 'Estimados Señores:',
+    descripcion: 'De acuerdo con su solicitud presentamos nuestra propuesta económica según detalle de ruta:'
   });
 
   const [items, setItems] = useState([
-    { id: 1, descripcion: '', cantidad: '', unidad: '', precio: '' }
+    { id: 1, tipoUnidad: 'Remolcador / Plataforma hasta 32 TM', ruta: 'Lurin a Trujillo', descripcion: 'Estructuras', total: '3,600.00' },
+    { id: 2, tipoUnidad: 'Remolcador / Plataforma hasta 32 TM', ruta: 'Lurin a Chepen', descripcion: 'Estructuras', total: '4,400.00' }
   ]);
+
+  const [condiciones, setCondiciones] = useState([
+    'No Incluye I.G.V.',
+    'Tiempo libre de carga y descarga 8 horas.',
+    'Permiso para ingreso a todos los almacenes. (no puertos)',
+    'Unidades equipadas con todo lo esencial para la carga.',
+    'Sistema GPS 24/7.',
+    'Todos los seguros y requisitos para personal.'
+  ]);
+
+  const [cierre, setCierre] = useState({
+    formaPago: 'contado',
+    despedidaTexto: 'Sin más por el momento quedamos atentos a cualquier consulta que estime conveniente.',
+    atentamente: 'Atentamente,',
+    firmaEmpresa: 'ATENTO5 SERVICIOS GENERALES E.I.R.L.',
+    firmaNombre: 'Juan Ampuero',
+    firmaCargo: 'Gerente General',
+    mostrarSello: true,
+    firmaImagen: '' // base64 string for signature image
+  });
+
+  const [emisor, setEmisor] = useState({
+    nombre: 'ATENTO5 SERVICIOS GENERALES E.I.R.L.',
+    ruc: '20612345678',
+    direccion: 'Dirección Fiscal: Asoc. Villa el Rosario, MZ D, Lote 1, Calle 3, Chaclacayo, Lima - Lima',
+    base: 'Base Chimbote: Av. NN 11960 Urb. Los Álamos Nuevo Chimbote - Santa'
+  });
+
+  const handleSignatureUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCierre(prev => ({
+          ...prev,
+          firmaImagen: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const [showCalculations, setShowCalculations] = useState(true);
+  const [descuento, setDescuento] = useState('0.00');
 
   const previewRef = useRef();
 
+  // --- Manejo de Items de la Tabla ---
   const addItem = () => {
-    setItems([...items, { id: Date.now(), descripcion: '', cantidad: '', unidad: '', precio: '' }]);
+    setItems([
+      ...items,
+      { id: Date.now(), tipoUnidad: '', ruta: '', descripcion: '', total: '' }
+    ]);
   };
 
   const removeItem = (id) => {
@@ -67,151 +108,318 @@ const QuotationGenerator = () => {
     setItems(items.map(item => item.id === id ? { ...item, [field]: value } : item));
   };
 
+  // --- Manejo de Condiciones/Viñetas ---
+  const addCondicion = () => {
+    setCondiciones([...condiciones, 'Nueva condición o término']);
+  };
+
+  const removeCondicion = (index) => {
+    setCondiciones(condiciones.filter((_, i) => i !== index));
+  };
+
+  const handleCondicionChange = (index, value) => {
+    const updated = [...condiciones];
+    updated[index] = value;
+    setCondiciones(updated);
+  };
+
+  // --- Cálculos Automáticos de Totales ---
+  const parseAmount = (val) => {
+    if (!val) return 0;
+    // Remueve símbolos de moneda, comas y espacios, y parsea a float
+    const clean = val.toString().replace(/[^\d.]/g, '');
+    return parseFloat(clean) || 0;
+  };
+
+  const subtotal = items.reduce((acc, item) => acc + parseAmount(item.total), 0);
+  const descuentoValue = parseAmount(descuento);
+  const subtotalConDescuento = subtotal - descuentoValue;
+  const igv = subtotalConDescuento * 0.18;
+  const total = subtotalConDescuento + igv;
+
+  const formatCurrency = (val) => 'S/ ' + (val || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // --- Exportación a PDF (Pixel-perfect A4) ---
   const handleExportPDF = () => {
     const element = previewRef.current;
+
+    // Actualizar el contador en localStorage ANTES de descargar
+    // Extraer el número del formato 'YY-MM-DD-NNN'
+    const parts = header.numero ? header.numero.split('-') : [];
+    if (parts.length === 4) {
+      const datePrefix = `${parts[0]}-${parts[1]}-${parts[2]}`;
+      const numberFromHeader = parseInt(parts[3], 10);
+      if (numberFromHeader > 0) {
+        localStorage.setItem('quotationCounter', JSON.stringify({ datePrefix: datePrefix, number: numberFromHeader }));
+        
+        // Actualizar el número de cotización para el siguiente
+        const nextNumber = numberFromHeader + 1;
+        const nextQuotationNumber = `${datePrefix}-${nextNumber.toString().padStart(3, '0')}`;
+        setHeader({...header, numero: nextQuotationNumber});
+      }
+    }
+
     html2pdf().set({
       margin: 0,
-      filename: 'Cotizacion_' + (cotizacion.numero || '000') + '.pdf',
+      filename: 'Cotizacion_' + (header.numero || '000') + '.pdf',
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
+      html2canvas: { scale: 2.5, useCORS: true, logging: false },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['avoid-all', 'css'] }
     }).from(element).save();
   };
 
-  const subtotal = items.reduce((acc, item) => acc + (parseFloat(item.precio || 0) * parseFloat(item.cantidad || 0)), 0);
-  const igv = subtotal * 0.18;
-  const total = subtotal + igv;
-
-  const formatCurrency = (val) => 'S/ ' + (val || 0).toFixed(2);
-
   return (
-    <div style={{display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden'}}>
-      <EditorPanel 
-        empresa={empresa} setEmpresa={setEmpresa}
-        banco={banco} setBanco={setBanco}
-        cliente={cliente} setCliente={setCliente}
-        cotizacion={cotizacion} setCotizacion={setCotizacion}
-        items={items} setItems={setItems}
-        addItem={addItem} removeItem={removeItem}
-        handleItemChange={handleItemChange}
-        handleExportPDF={handleExportPDF}
-      />
-      <PreviewPanel 
-        previewRef={previewRef}
-        empresa={empresa}
-        banco={banco}
-        cliente={cliente}
-        cotizacion={cotizacion}
-        items={items}
-        subtotal={subtotal}
-        igv={igv}
-        total={total}
-        formatCurrency={formatCurrency}
-      />
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', fontFamily: "'Outfit', sans-serif" }}>
+       <EditorPanel 
+         header={header} setHeader={setHeader}
+         cliente={cliente} setCliente={setCliente}
+         intro={intro} setIntro={setIntro}
+         items={items} addItem={addItem} removeItem={removeItem} handleItemChange={handleItemChange}
+         condiciones={condiciones} addCondicion={addCondicion} removeCondicion={removeCondicion} handleCondicionChange={handleCondicionChange}
+         cierre={cierre} setCierre={setCierre}
+         emisor={emisor} setEmisor={setEmisor}
+         handleExportPDF={handleExportPDF}
+         showCalculations={showCalculations} setShowCalculations={setShowCalculations}
+         descuento={descuento} setDescuento={setDescuento}
+         handleSignatureUpload={handleSignatureUpload}
+         subtotal={subtotal} igv={igv} total={total} formatCurrency={formatCurrency}
+       />
+       <PreviewPanel 
+         previewRef={previewRef}
+         header={header}
+         cliente={cliente}
+         intro={intro}
+         items={items}
+         condiciones={condiciones}
+         cierre={cierre}
+         emisor={emisor}
+         subtotal={subtotal}
+         descuentoValue={descuentoValue}
+         igv={igv}
+         total={total}
+         formatCurrency={formatCurrency}
+         showCalculations={showCalculations}
+         handleSignatureUpload={handleSignatureUpload}
+       />
     </div>
   );
 };
 
-const EditorPanel = ({empresa, setEmpresa, banco, setBanco, cliente, setCliente, cotizacion, setCotizacion, items, addItem, removeItem, handleItemChange, handleExportPDF}) => {
+// ==========================================
+// PANEL DE EDICIÓN (Izquierda)
+// ==========================================
+const EditorPanel = ({
+  header, setHeader,
+  cliente, setCliente,
+  intro, setIntro,
+  items, addItem, removeItem, handleItemChange,
+  condiciones, addCondicion, removeCondicion, handleCondicionChange,
+  cierre, setCierre,
+  emisor, setEmisor,
+  handleExportPDF,
+  showCalculations, setShowCalculations,
+  descuento, setDescuento,
+  handleSignatureUpload,
+  subtotal, igv, total, formatCurrency
+}) => {
   return (
-    <div style={{width: '40%', height: '100vh', overflowY: 'auto', backgroundColor: '#080c17', borderRight: '2px solid #3CB4FF', padding: '20px'}}>
-      <Link to="/home" style={{display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', marginBottom: '16px', textDecoration: 'none', fontSize: '14px', fontWeight: '500'}}>
+    <div style={{ width: '40%', height: '100vh', overflowY: 'auto', backgroundColor: '#060b13', borderRight: '2px solid #3CB4FF', padding: '24px', boxSizing: 'border-box' }}>
+      <Link to="/home" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', marginBottom: '20px', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.target.style.color = '#fff'} onMouseLeave={(e) => e.target.style.color = '#3CB4FF'}>
         <ChevronLeft size={20} />
-        <span>Regresar</span>
+        <span>Regresar al Inicio</span>
       </Link>
-      <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
-        <SectionCard num="1" title="Tu Empresa (Opcional)" icon={<Building2 size={18}/>} color="#3CB4FF">
-          <p style={{fontSize: '11px', color: '#9ca3af', marginBottom: '8px'}}>Si deseas, puedes agregar datos de tu empresa para mostrar en los datos de pago del PDF.</p>
-          <FieldBox label="Nombre" value={empresa.nombre} onChange={(v) => setEmpresa({...empresa, nombre: v})} placeholder="Mi Empresa" />
-          <FieldBox label="RUC" value={empresa.ruc} onChange={(v) => setEmpresa({...empresa, ruc: v})} placeholder="20123456789" />
-        </SectionCard>
-
-        <SectionCard num="2" title="DATOS BANCARIOS" icon={<CreditCard size={18}/>} color="#a855f7">
-          <FieldBox label="Banco" value={banco.nombre} onChange={(v) => setBanco({...banco, nombre: v})} placeholder="Banco de Crédito" />
-          <FieldBox label="Cuenta Soles" value={banco.cuentaSoles} onChange={(v) => setBanco({...banco, cuentaSoles: v})} placeholder="201-12345678901" />
-          <FieldBox label="CCI Soles" value={banco.cciSoles} onChange={(v) => setBanco({...banco, cciSoles: v})} placeholder="002-201-12345678" />
-          <FieldBox label="Cuenta Dólares" value={banco.cuentaDolares} onChange={(v) => setBanco({...banco, cuentaDolares: v})} placeholder="201-98765432109" />
-          <FieldBox label="CCI Dólares" value={banco.cciDolares} onChange={(v) => setBanco({...banco, cciDolares: v})} placeholder="002-201-98765432109" />
-        </SectionCard>
-
-        <SectionCard num="3" title="CLIENTE" icon={<User size={18}/>} color="#eab308">
-          <div style={{display: 'flex', gap: '8px', marginBottom: '12px'}}>
-            <button onClick={() => setCliente({...cliente, tipo: 'empresa'})} style={{flex: 1, padding: '10px', borderRadius: '8px', border: cliente.tipo === 'empresa' ? '2px solid #3CB4FF' : '1px solid rgba(255,255,255,0.1)', background: cliente.tipo === 'empresa' ? 'rgba(60, 180, 255,0.1)' : 'transparent', color: cliente.tipo === 'empresa' ? '#3CB4FF' : '#9ca3af', cursor: 'pointer', fontWeight: '600', fontSize: '13px'}}>Empresa</button>
-            <button onClick={() => setCliente({...cliente, tipo: 'persona'})} style={{flex: 1, padding: '10px', borderRadius: '8px', border: cliente.tipo === 'persona' ? '2px solid #D21414' : '1px solid rgba(255,255,255,0.1)', background: cliente.tipo === 'persona' ? 'rgba(210, 20, 20,0.1)' : 'transparent', color: cliente.tipo === 'persona' ? '#D21414' : '#9ca3af', cursor: 'pointer', fontWeight: '600', fontSize: '13px'}}>Persona</button>
-          </div>
-          {cliente.tipo === 'empresa' ? (
-            <>
-              <FieldBox label="Razón Social" value={cliente.nombre} onChange={(v) => setCliente({...cliente, nombre: v})} placeholder="Empresa XYZ S.A.C." />
-              <FieldBox label="RUC" value={cliente.ruc} onChange={(v) => setCliente({...cliente, ruc: v})} placeholder="20123456789" />
-            </>
-          ) : (
-            <FieldBox label="Nombre Completo" value={cliente.nombre} onChange={(v) => setCliente({...cliente, nombre: v})} placeholder="Juan Pérez García" />
-          )}
-          <FieldBox label="Persona de Contacto" value={cliente.contacto} onChange={(v) => setCliente({...cliente, contacto: v})} placeholder="Juan Pérez" />
-          <FieldBox label="Teléfono" value={cliente.telefono} onChange={(v) => setCliente({...cliente, telefono: v})} placeholder="+51 987 654 321" />
-          <FieldBox label="Correo" value={cliente.correo} onChange={(v) => setCliente({...cliente, correo: v})} placeholder="juan@empresa.com" />
-          <FieldBox label="Dirección" value={cliente.direccion} onChange={(v) => setCliente({...cliente, direccion: v})} placeholder="Av. Cliente 456" />
-        </SectionCard>
-
-        <SectionCard num="4" title="COTIZACIÓN" icon={<FileText size={18}/>} color="#22c55e">
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px'}}>
-            <FieldBox label="N° Cotización" value={cotizacion.numero} onChange={(v) => setCotizacion({...cotizacion, numero: v})} placeholder="COT-001" />
-            <FieldBox label="Fecha" value={cotizacion.fecha} onChange={(v) => setCotizacion({...cotizacion, fecha: v})} placeholder="14/04/2026" />
-          </div>
-          <FieldBox label="Vencimiento" value={cotizacion.vencimiento} onChange={(v) => setCotizacion({...cotizacion, vencimiento: v})} placeholder="14/05/2026" />
-          <FieldBox label="Forma de Pago" value={cotizacion.formaPago} onChange={(v) => setCotizacion({...cotizacion, formaPago: v})} placeholder="50% anticipo" />
-          <FieldBox label="Garantía" value={cotizacion.garantia} onChange={(v) => setCotizacion({...cotizacion, garantia: v})} placeholder="12 meses" />
-          <FieldBox label="Validez" value={cotizacion.validez} onChange={(v) => setCotizacion({...cotizacion, validez: v})} placeholder="30 días" />
-        </SectionCard>
-
-        <SectionCard num="5" title="SERVICIOS" icon={<Palette size={18}/>} color="#ec4899">
-          {items.map((item, index) => (
-            <motion.div key={item.id} initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}} style={{background: 'linear-gradient(135deg, #1a2332 0%, #162028 100%)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(139, 92, 246, 0.2)', marginBottom: '12px'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
-                <span style={{background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', color: 'white', fontSize: '11px', fontWeight: '600', padding: '4px 10px', borderRadius: '6px'}}>Item {index + 1}</span>
-                {items.length > 1 && (
-                  <button onClick={() => removeItem(item.id)} style={{background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'none', padding: '6px', borderRadius: '8px', cursor: 'pointer'}}>
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-              <div style={{marginBottom: '12px'}}>
-                <label style={{display: 'block', fontSize: '11px', fontWeight: '600', color: '#9ca3af', marginBottom: '6px', textTransform: 'uppercase'}}>Descripción</label>
-                <textarea value={item.descripcion} onChange={(e) => handleItemChange(item.id, 'descripcion', e.target.value)} style={{width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '80px', resize: 'vertical'}} placeholder="Describe el servicio..." />
-              </div>
-              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px'}}>
-                <div>
-                  <label style={{display: 'block', fontSize: '11px', fontWeight: '600', color: '#9ca3af', marginBottom: '6px', textTransform: 'uppercase'}}>Cantidad</label>
-                  <input type="text" value={item.cantidad} onChange={(e) => handleItemChange(item.id, 'cantidad', e.target.value)} style={{width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '10px', fontSize: '13px', color: '#fff', textAlign: 'center', outline: 'none'}} placeholder="1" />
-                </div>
-                <div>
-                  <label style={{display: 'block', fontSize: '11px', fontWeight: '600', color: '#9ca3af', marginBottom: '6px', textTransform: 'uppercase'}}>Unidad</label>
-                  <input type="text" value={item.unidad} onChange={(e) => handleItemChange(item.id, 'unidad', e.target.value)} style={{width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '10px', fontSize: '13px', color: '#fff', textAlign: 'center', outline: 'none'}} placeholder="UND" />
-                </div>
-                <div>
-                  <label style={{display: 'block', fontSize: '11px', fontWeight: '600', color: '#9ca3af', marginBottom: '6px', textTransform: 'uppercase'}}>Precio</label>
-                  <input type="text" value={item.precio} onChange={(e) => handleItemChange(item.id, 'precio', e.target.value)} style={{width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '10px', fontSize: '13px', color: '#fff', textAlign: 'center', outline: 'none'}} placeholder="0.00" />
-                </div>
-              </div>
-            </motion.div>
-          ))}
-          <button onClick={addItem} style={{width: '100%', padding: '14px', border: '2px dashed rgba(60, 180, 255, 0.3)', borderRadius: '12px', background: 'transparent', color: '#3CB4FF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'}}>
-            <Plus size={18} />
-            <span>Agregar Item</span>
-          </button>
-        </SectionCard>
+      
+      <div style={{ marginBottom: '24px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#fff', margin: '0 0 6px 0', background: 'linear-gradient(135deg, #3CB4FF, #D21414)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GENERADOR DE COTIZACIÓN</h2>
+        <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Edita los campos y mira la vista previa estilo original</p>
       </div>
 
-      <button onClick={handleExportPDF} style={{width: '100%', padding: '16px', border: 'none', borderRadius: '14px', background: 'linear-gradient(135deg, #3CB4FF 0%, #8764B2 50%, #D21414 100%)', color: 'white', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '20px', boxShadow: '0 4px 15px rgba(60, 180, 255, 0.3)'}}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '30px' }}>
+        
+        {/* 1. CABECERA DOCUMENTAL */}
+        <SectionCard num="1" title="CABECERA DOCUMENTAL" icon={<FileText size={18}/>} color="#3CB4FF">
+          <FieldBox label="Título Principal del Presupuesto" value={header.titulo} onChange={(v) => setHeader({...header, titulo: v})} placeholder="PRESUPUESTO DE SERVICIO..." />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '12px' }}>
+            <FieldBox label="Código de Doc." value={header.codigo} onChange={(v) => setHeader({...header, codigo: v})} placeholder="TYLROV-014-01" />
+            <FieldBox label="N° Cotización (Editable)" value={header.numero} onChange={(v) => setHeader({...header, numero: v})} placeholder="26-05-21-001" />
+          </div>
+          <FieldBox label="Revisión" value={header.revision} onChange={(v) => setHeader({...header, revision: v})} placeholder="02" />
+        </SectionCard>
+
+        {/* 2. CLIENTE (SEÑORES) */}
+        <SectionCard num="2" title="DATOS DEL CLIENTE" icon={<User size={18}/>} color="#eab308">
+          <FieldBox label="Texto Señores" value={cliente.senores} onChange={(v) => setCliente({...cliente, senores: v})} placeholder="Señores:" />
+          <FieldBox label="Razón Social/Nombre" value={cliente.nombre} onChange={(v) => setCliente({...cliente, nombre: v})} placeholder="ATENTO5 SERVICIOS GENERALES E.I.R.L." />
+          <FieldBox label="Atención (Contacto/Representante)" value={cliente.atencion} onChange={(v) => setCliente({...cliente, atencion: v})} placeholder="Corina Añorga" />
+        </SectionCard>
+
+        {/* 3. TEXTOS DE INTRODUCCIÓN */}
+        <SectionCard num="3" title="TEXTOS DE INTRODUCCIÓN" icon={<Building2 size={18}/>} color="#a855f7">
+          <FieldBox label="Saludo" value={intro.saludo} onChange={(v) => setIntro({...intro, saludo: v})} placeholder="Estimados Señores:" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Texto descriptivo</label>
+            <textarea value={intro.descripcion} onChange={(e) => setIntro({...intro, descripcion: e.target.value})} style={{ width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '60px', resize: 'vertical', fontFamily: 'inherit' }} placeholder="De acuerdo con su solicitud..." />
+          </div>
+        </SectionCard>
+
+        {/* 4. DETALLE DE RUTA / SERVICIOS */}
+        <SectionCard num="4" title="SERVICIOS (DETALLE DE RUTA)" icon={<Palette size={18}/>} color="#ec4899">
+           {items.map((item, index) => (
+             <div key={item.id} style={{ background: 'linear-gradient(135deg, #0d1525 0%, #091020 100%)', borderRadius: '14px', padding: '16px', border: '1px solid rgba(60, 180, 255, 0.15)', marginBottom: '12px' }}>
+               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                 <span style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', color: 'white', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '6px' }}>Item {index + 1}</span>
+                 {items.length > 1 && (
+                   <button onClick={() => removeItem(item.id)} style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'none', padding: '6px', borderRadius: '8px', cursor: 'pointer', transition: 'background 0.2s' }}
+                           onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.3)'} onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.15)'}>
+                     <Trash2 size={14} />
+                   </button>
+                 )}
+               </div>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                 <FieldBox label="Tipo de Unidad" value={item.tipoUnidad} onChange={(v) => handleItemChange(item.id, 'tipoUnidad', v)} placeholder="Remolcador / Plataforma hasta 32 TM" />
+                 <FieldBox label="Ruta" value={item.ruta} onChange={(v) => handleItemChange(item.id, 'ruta', v)} placeholder="Lurin a Trujillo" />
+                 <FieldBox label="Descripción Contenido" value={item.descripcion} onChange={(v) => handleItemChange(item.id, 'descripcion', v)} placeholder="Estructuras" />
+                 <FieldBox label="Total por Unidad (Soles)" value={item.total} onChange={(v) => handleItemChange(item.id, 'total', v)} placeholder="3,600.00" />
+               </div>
+             </div>
+           ))}
+          <button onClick={addItem} style={{ width: '100%', padding: '14px', border: '2px dashed rgba(60, 180, 255, 0.3)', borderRadius: '12px', background: 'transparent', color: '#3CB4FF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
+                  onMouseEnter={(e) => { e.target.style.borderColor = '#3CB4FF'; e.target.style.background = 'rgba(60, 180, 255, 0.05)'; }} onMouseLeave={(e) => { e.target.style.borderColor = 'rgba(60, 180, 255, 0.3)'; e.target.style.background = 'transparent'; }}>
+            <Plus size={18} />
+            <span>Agregar Item / Servicio</span>
+          </button>
+        </SectionCard>
+
+        {/* 5. CÁLCULOS Y TOTALES AUTOMÁTICOS */}
+        <SectionCard num="5" title="CÁLCULOS Y TOTALES AUTOMÁTICOS" icon={<Calculator size={18}/>} color="#3CB4FF">
+          <FieldBox label="Descuento (Soles)" value={descuento} onChange={setDescuento} placeholder="0.00" />
+          <div style={{ background: '#0a0e17', borderRadius: '12px', padding: '14px', border: '1px solid rgba(60, 180, 255, 0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#94a3b8' }}>Subtotal:</span>
+              <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatCurrency(subtotal)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#94a3b8' }}>I.G.V. (18%):</span>
+              <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatCurrency(igv)}</span>
+            </div>
+            <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.08)', margin: '4px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: '#3CB4FF', fontWeight: 'bold' }}>Total General:</span>
+              <span style={{ color: '#3CB4FF', fontWeight: 'bold' }}>{formatCurrency(total)}</span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+            <input 
+              type="checkbox" 
+              id="showCalculations" 
+              checked={showCalculations} 
+              onChange={(e) => setShowCalculations(e.target.checked)} 
+              style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#3CB4FF' }} 
+            />
+            <label htmlFor="showCalculations" style={{ fontSize: '12px', color: '#fff', fontWeight: '500', cursor: 'pointer' }}>
+              Mostrar cuadro de cálculos en el PDF/Vista Previa
+            </label>
+          </div>
+        </SectionCard>
+
+        {/* 6. TÉRMINOS Y CONDICIONES (VIÑETAS) */}
+        <SectionCard num="6" title="TÉRMINOS Y CONDICIONES" icon={<FileText size={18}/>} color="#22c55e">
+          <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 10px 0' }}>Agrega o edita las viñetas que aparecen abajo de la tabla</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {condiciones.map((cond, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#3CB4FF', fontWeight: 'bold' }}>•</span>
+                <input type="text" value={cond} onChange={(e) => handleCondicionChange(idx, e.target.value)} style={{ flex: 1, background: 'linear-gradient(135deg, #0a0f18 0%, #0d1422 100%)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: '#fff', outline: 'none' }} />
+                <button onClick={() => removeCondicion(idx)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                        onMouseEnter={(e) => e.target.style.color = '#ef4444'} onMouseLeave={(e) => e.target.style.color = '#64748b'}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+            <button onClick={addCondicion} style={{ padding: '10px', border: '1px dashed rgba(34, 197, 94, 0.4)', borderRadius: '8px', background: 'transparent', color: '#22c55e', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '4px' }}>
+              <Plus size={14} />
+              <span>Agregar viñeta de condición</span>
+            </button>
+          </div>
+        </SectionCard>
+
+        {/* 7. CIERRE, FIRMA Y PIE DE PÁGINA */}
+        <SectionCard num="7" title="CIERRE Y FIRMA" icon={<Check size={18}/>} color="#f43f5e">
+          <FieldBox label="Forma de Pago" value={cierre.formaPago} onChange={(v) => setCierre({...cierre, formaPago: v})} placeholder="contado" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Texto de Despedida</label>
+            <textarea value={cierre.despedidaTexto} onChange={(e) => setCierre({...cierre, despedidaTexto: e.target.value})} style={{ width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '50px', resize: 'vertical', fontFamily: 'inherit' }} placeholder="Sin más por el momento..." />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <FieldBox label="Firma: Nombre" value={cierre.firmaNombre} onChange={(v) => setCierre({...cierre, firmaNombre: v})} placeholder="Juan Ampuero" />
+            <FieldBox label="Firma: Cargo" value={cierre.firmaCargo} onChange={(v) => setCierre({...cierre, firmaCargo: v})} placeholder="Gerente General" />
+          </div>
+          <FieldBox label="Firma: Razón Social" value={cierre.firmaEmpresa} onChange={(v) => setCierre({...cierre, firmaEmpresa: v})} placeholder="ATENTO5 SERVICIOS GENERALES E.I.R.L." />
+          
+           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+             <input type="checkbox" id="showStamp" checked={cierre.mostrarSello} onChange={(e) => setCierre({...cierre, mostrarSello: e.target.checked})} style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#3CB4FF' }} />
+             <label htmlFor="showStamp" style={{ fontSize: '12px', color: '#fff', fontWeight: '500', cursor: 'pointer' }}>Mostrar sello de firma digital</label>
+           </div>
+           <div style={{ marginTop: '12px' }}>
+             <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
+               Subir imagen de firma (PNG, JPG)
+             </label>
+             <input 
+               type="file"
+               accept="image/*"
+               onChange={handleSignatureUpload}
+               style={{ 
+                 width: '100%', 
+                 padding: '10px', 
+                 background: 'linear-gradient(135deg, #0a0e17 0%, #0c121e 100%)', 
+                 border: '1px solid rgba(255, 255, 255, 0.08)', 
+                 borderRadius: '10px', 
+                 color: '#fff', 
+                 fontSize: '13px'
+               }} 
+             />
+           </div>
+
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '10px 0' }} />
+          <h3 style={{ fontSize: '11px', fontWeight: 'bold', color: '#f43f5e', textTransform: 'uppercase', margin: '0 0 6px 0' }}>DATOS EMISOR (PIE DE PÁGINA)</h3>
+          <FieldBox label="Dirección Fiscal Emisor" value={emisor.direccion} onChange={(v) => setEmisor({...emisor, direccion: v})} placeholder="Dirección..." />
+          <FieldBox label="Bases / Contacto Secundario" value={emisor.base} onChange={(v) => setEmisor({...emisor, base: v})} placeholder="Bases..." />
+        </SectionCard>
+
+      </div>
+
+      <button onClick={handleExportPDF} style={{ width: '100%', padding: '16px', border: 'none', borderRadius: '14px', background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)', color: 'white', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '10px', boxShadow: '0 4px 15px rgba(60, 180, 255, 0.3)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+              onMouseEnter={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(60, 180, 255, 0.4)'; }} onMouseLeave={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(60, 180, 255, 0.3)'; }}>
         <Download size={22} />
-        <span>Descargar PDF</span>
+        <span>DESCARGAR PDF</span>
       </button>
     </div>
   );
 };
 
-const PreviewPanel = ({previewRef, empresa, banco, cliente, cotizacion, items, subtotal, igv, total, formatCurrency}) => {
+// ==========================================
+// VISTA PREVIA (Derecha)
+// ==========================================
+const PreviewPanel = ({
+  previewRef,
+  header,
+  cliente,
+  intro,
+  items,
+  condiciones,
+  cierre,
+  emisor,
+  subtotal,
+  descuentoValue,
+  igv,
+  total,
+  formatCurrency,
+  showCalculations,
+  handleSignatureUpload
+}) => {
   const [scale, setScale] = useState(0.65);
 
   useEffect(() => {
@@ -220,7 +428,7 @@ const PreviewPanel = ({previewRef, empresa, banco, cliente, cotizacion, items, s
       const sheetHeight = 1122.5; // 297mm in pixels at 96dpi
       let newScale = availableHeight / sheetHeight;
       
-      const availableWidth = window.innerWidth * 0.6 - 40; // 60% width minus padding
+      const availableWidth = window.innerWidth * 0.6 - 48; // 60% width minus padding
       const sheetWidth = 793.7; // 210mm in pixels at 96dpi
       const widthScale = availableWidth / sheetWidth;
       
@@ -234,17 +442,18 @@ const PreviewPanel = ({previewRef, empresa, banco, cliente, cotizacion, items, s
   }, []);
 
   return (
-    <div style={{width: '60%', height: '100vh', overflow: 'hidden', backgroundColor: '#0a0e17', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-      <div style={{textAlign: 'center', marginBottom: '12px', flexShrink: 0}}>
-        <h2 style={{fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0}}>VISTA PREVIA</h2>
-        <p style={{fontSize: '12px', color: '#9ca3af', margin: '4px 0 0 0'}}>Así se verá tu cotización PDF</p>
+    <div style={{ width: '60%', height: '100vh', overflow: 'hidden', backgroundColor: '#0a0e17', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
+      <div style={{ textAlign: 'center', marginBottom: '12px', flexShrink: 0 }}>
+        <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'white', margin: 0, letterSpacing: '1px' }}>VISTA PREVIA DEL PRESUPUESTO</h2>
+        <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>Se ajusta automáticamente a una sola página A4</p>
       </div>
+
       <div style={{
         width: '100%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        height: 'calc(100vh - 100px)',
+        height: 'calc(100vh - 110px)',
         overflow: 'hidden',
         flexShrink: 0
       }}>
@@ -256,187 +465,279 @@ const PreviewPanel = ({previewRef, empresa, banco, cliente, cotizacion, items, s
           flexShrink: 0,
           marginBottom: `-${1122.5 * (1 - scale)}px`
         }}>
-          <div style={{background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', height: '297mm'}}>
-            <div ref={previewRef} style={{background: 'white', color: 'black', width: '210mm', height: '295mm', padding: '8mm 12mm 8mm 12mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column'}}>
+          {/* Hoja A4 de la Cotización */}
+          <div style={{ background: 'white', overflow: 'hidden', width: '210mm', height: '297mm', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+            
+            {/* Contenedor del PDF */}
+            <div ref={previewRef} style={{ background: 'white', color: 'black', width: '210mm', height: '297mm', padding: '9mm 12mm 9mm 12mm', boxSizing: 'border-box', overflow: 'hidden', position: 'relative', display: 'flex', flexDirection: 'column' }}>
               
-              {/* Header */}
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px'}}>
-                <div style={{display: 'flex', alignItems: 'center', gap: '12px'}}>
-                  <img src={logo} alt="Logo" style={{height: '52px', width: 'auto', objectFit: 'contain'}} />
-                  <div>
-                    <h1 style={{fontSize: '16px', fontWeight: '800', color: '#111', lineHeight: 1.1, margin: 0}}>{ATENTO5.nombre}</h1>
-                    <p style={{fontSize: '9.5px', color: '#6b7280', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px', margin: '2px 0 0 0'}}>SOLUCIONES INTEGRALES</p>
+              {/* CABECERA INDUSTRIAL (3 Columnas con Bordes Modernos y Destacados) */}
+              <div style={{ display: 'flex', width: '100%', height: '34mm', border: '2px solid #1e293b', borderRadius: '8px', overflow: 'hidden', boxSizing: 'border-box', marginBottom: '8mm', flexShrink: 0, boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+                {/* Columna Izquierda: Logo */}
+                <div style={{
+                  width: '35%',
+                  borderRight: '2px solid #1e293b',
+                  background: '#f8fafc',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '6px 10px',
+                  boxSizing: 'border-box',
+                  position: 'relative'
+                }}>
+                  {/* Barra lateral de acento degradado */}
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'linear-gradient(180deg, #3CB4FF, #D21414)' }} />
+                  <img 
+                    src={logo} 
+                    alt="Logo" 
+                    style={{ 
+                      width: '100%', 
+                      height: '100%', 
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain', 
+                      filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' 
+                    }} 
+                  />
+                </div>
+                {/* Columna Central: Título */}
+                <div style={{ width: '40%', borderRight: '2px solid #1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', textAlign: 'center', boxSizing: 'border-box' }}>
+                  <h1 style={{ fontSize: '12px', fontWeight: '900', color: '#0f172a', margin: 0, lineHeight: '1.4', textTransform: 'uppercase', letterSpacing: '0.2px', fontFamily: "'Arial', sans-serif" }}>
+                    {header.titulo || 'PRESUPUESTO DE SERVICIO DE TRANSPORTE'}
+                  </h1>
+                </div>
+                {/* Columna Derecha: Código/Revisión/Número */}
+                <div style={{ width: '25%', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', background: '#f8fafc' }}>
+                  <div style={{ flex: 1, display: 'flex', borderBottom: '2px solid #1e293b', boxSizing: 'border-box' }}>
+                    <div style={{ width: '45%', borderRight: '2px solid #1e293b', fontSize: '8.5px', fontWeight: 'bold', display: 'flex', alignItems: 'center', paddingLeft: '6px', color: '#475569' }}>CÓDIGO:</div>
+                    <div style={{ width: '55%', fontSize: '9px', display: 'flex', alignItems: 'center', paddingLeft: '6px', fontWeight: '800', color: '#0f172a' }}>{header.codigo}</div>
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', borderBottom: '2px solid #1e293b', boxSizing: 'border-box' }}>
+                    <div style={{ width: '45%', borderRight: '2px solid #1e293b', fontSize: '8.5px', fontWeight: 'bold', display: 'flex', alignItems: 'center', paddingLeft: '6px', color: '#475569' }}>REVISIÓN:</div>
+                    <div style={{ width: '55%', fontSize: '9px', display: 'flex', alignItems: 'center', paddingLeft: '6px', fontWeight: '800', color: '#0f172a' }}>{header.revision}</div>
+                  </div>
+                  <div style={{ flex: 1, display: 'flex', boxSizing: 'border-box' }}>
+                    <div style={{ width: '45%', borderRight: '2px solid #1e293b', fontSize: '8.5px', fontWeight: 'bold', display: 'flex', alignItems: 'center', paddingLeft: '6px', color: '#475569' }}>COTIZACIÓN:</div>
+                    <div style={{ width: '55%', fontSize: '10px', fontWeight: '900', display: 'flex', alignItems: 'center', paddingLeft: '6px', color: '#D21414' }}>{header.numero}</div>
                   </div>
                 </div>
-                <div style={{textAlign: 'right'}}>
-                  <h2 style={{fontSize: '18px', fontWeight: '800', color: '#D21414', letterSpacing: '0.05em', margin: 0}}>COTIZACION N° {cotizacion.numero || '000'}</h2>
-                </div>
               </div>
 
-          <div style={{height: '1px', background: '#cbd5e1', marginBottom: '8px'}} />
-
-          {/* Top Info Grid */}
-          <div style={{display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', marginBottom: '8px'}}>
-            <div>
-              <h3 style={{fontSize: '11.5px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0'}}>CLIENTE:</h3>
-              <p style={{fontSize: '14px', fontWeight: 'bold', color: '#111', margin: 0}}>{cliente.nombre || (cliente.tipo === 'empresa' ? 'Nombre de Empresa' : 'Nombre del Cliente')}</p>
-              {cliente.tipo === 'empresa' && cliente.ruc && <p style={{fontSize: '11px', color: '#4b5563', margin: '1px 0 0 0'}}><span style={{fontWeight: '600'}}>RUC:</span> {cliente.ruc}</p>}
-            </div>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11.5px', color: '#111', justifyContent: 'center'}}>
-              <div style={{display: 'flex', justifyContent: 'space-between'}}><span style={{fontWeight: 'bold', color: '#4b5563'}}>Fecha:</span> <span>{cotizacion.fecha}</span></div>
-              <div style={{display: 'flex', justifyContent: 'space-between'}}><span style={{fontWeight: 'bold', color: '#4b5563'}}>Vencimiento:</span> <span>{cotizacion.vencimiento}</span></div>
-            </div>
-          </div>
-
-          {/* Contact and Payment Grid */}
-          <div style={{display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '16px', marginBottom: '8px', background: '#f8fafc', padding: '8px 10px', borderRadius: '6px', border: '1px solid #e2e8f0'}}>
-            <div>
-              <h3 style={{fontSize: '11px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0'}}>PERSONA DE CONTACTO:</h3>
-              <div style={{fontSize: '11px', color: '#374151', display: 'flex', flexDirection: 'column', gap: '2px'}}>
-                <div><span style={{fontWeight: '600'}}>Atención:</span> {cliente.contacto || '-'}</div>
-                <div><span style={{fontWeight: '600'}}>Telf:</span> {cliente.telefono || '-'}</div>
-                <div><span style={{fontWeight: '600'}}>Correo:</span> {cliente.correo || '-'}</div>
-                {cliente.direccion && <div style={{whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}><span style={{fontWeight: '600'}}>Dirección:</span> {cliente.direccion}</div>}
+              {/* SECCIÓN SEÑORES / CLIENTE - EDITABLE */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '6mm', fontSize: '11.5px', lineHeight: '1.3', flexShrink: 0 }}>
+                <div contentEditable={true} suppressContentEditableWarning={true} onBlur={(e) => setCliente({...cliente, senores: e.currentTarget.textContent})} style={{ fontWeight: 'bold', color: '#000', outline: 'none', minHeight: '1.5em', padding: '2px 0' }}>{cliente.senores || 'Señores:'}</div>
+                <div contentEditable={true} suppressContentEditableWarning={true} onBlur={(e) => setCliente({...cliente, nombre: e.currentTarget.textContent})} style={{ fontWeight: 'bold', color: '#000', fontSize: '12px', textTransform: 'uppercase', outline: 'none', minHeight: '1.5em', padding: '2px 0' }}>{cliente.nombre || 'Nombre de la empresa'}</div>
+                <div contentEditable={true} suppressContentEditableWarning={true} onBlur={(e) => setCliente({...cliente, atencion: e.currentTarget.textContent.replace('Atencion: ', '').replace('Atencion:', '')})} style={{ color: '#111', outline: 'none', minHeight: '1.5em', padding: '2px 0' }}>Atencion: {cliente.atencion || ''}</div>
               </div>
-            </div>
-            <div>
-              <h3 style={{fontSize: '11px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0'}}>DATOS DE PAGO / {banco.nombre || 'BANCO'}:</h3>
-              <div style={{fontSize: '10.5px', color: '#374151', display: 'flex', flexDirection: 'column', gap: '2px'}}>
-                {banco.cuentaSoles && <div><span style={{fontWeight: '600'}}>Soles:</span> {banco.cuentaSoles}</div>}
-                {banco.cciSoles && <div><span style={{fontWeight: '600'}}>CCI:</span> {banco.cciSoles}</div>}
-                {banco.cuentaDolares && <div><span style={{fontWeight: '600'}}>Dólares:</span> {banco.cuentaDolares}</div>}
-                {banco.cciDolares && <div><span style={{fontWeight: '600'}}>CCI:</span> {banco.cciDolares}</div>}
-                {!banco.cuentaSoles && !banco.cuentaDolares && <div>No especificados</div>}
-              </div>
-            </div>
-          </div>
 
-          {/* Table */}
-          <div style={{flex: 1, minHeight: '160px', marginBottom: '8px'}}>
-            <table style={{width: '100%', fontSize: '11.5px', borderCollapse: 'collapse'}}>
-              <thead>
-                <tr style={{background: '#111', color: 'white'}}>
-                  <th style={{padding: '5px 8px', textAlign: 'left', width: '25px'}}>N°</th>
-                  <th style={{padding: '5px 8px', textAlign: 'left'}}>DESCRIPCION</th>
-                  <th style={{padding: '5px 8px', textAlign: 'center', width: '40px'}}>CANT</th>
-                  <th style={{padding: '5px 8px', textAlign: 'center', width: '40px'}}>UND</th>
-                  <th style={{padding: '5px 8px', textAlign: 'right', width: '80px'}}>P. / UND</th>
-                  <th style={{padding: '5px 8px', textAlign: 'right', width: '90px'}}>TOTAL</th>
-                </tr>
-              </thead>
-              <tbody style={{color: '#374151'}}>
-                {items.map((item, index) => {
-                  const lines = (item.descripcion || '').split('\n');
-                  const first = lines[0];
-                  const rest = lines.slice(1);
-                  return (
-                    <tr key={item.id} style={{borderBottom: '1px solid #e2e8f0'}}>
-                      <td style={{padding: '5px 8px', fontWeight: 'bold', verticalAlign: 'top'}}>{index + 1}</td>
-                      <td style={{padding: '5px 8px', verticalAlign: 'top'}}>
-                        <p style={{fontWeight: 'bold', color: '#D21414', fontSize: '11.5px', margin: 0}}>{first || 'Descripción'}</p>
-                        {rest.length > 0 && (
-                          <ul style={{fontSize: '10px', marginTop: '2px', color: '#4b5563', listStyle: 'none', paddingLeft: 0, margin: 0}}>
-                            {rest.map((l, i) => <li key={i} style={{marginBottom: '1px'}}>• {l}</li>)}
-                          </ul>
-                        )}
-                      </td>
-                      <td style={{padding: '5px 8px', textAlign: 'center', fontWeight: '500', verticalAlign: 'top'}}>{item.cantidad || '0'}</td>
-                      <td style={{padding: '5px 8px', textAlign: 'center', fontWeight: '500', verticalAlign: 'top'}}>{item.unidad || 'UND'}</td>
-                      <td style={{padding: '5px 8px', textAlign: 'right', verticalAlign: 'top'}}>{formatCurrency(parseFloat(item.precio))}</td>
-                      <td style={{padding: '5px 8px', textAlign: 'right', fontWeight: 'bold', verticalAlign: 'top'}}>{formatCurrency((parseFloat(item.precio) || 0) * (parseFloat(item.cantidad) || 0))}</td>
+              {/* TEXTO INTRODUCTORIO */}
+              <div style={{ fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '5mm', lineHeight: '1.4', color: '#111', flexShrink: 0 }}>
+                {intro.saludo && <span style={{ fontWeight: 'bold', color: '#000' }}>{intro.saludo}</span>}
+                {intro.descripcion && <span>{intro.descripcion}</span>}
+              </div>
+
+              {/* TABLA DE DETALLE DE RUTA / SERVICIOS */}
+              <div style={{ flex: 1, minHeight: '110px', marginBottom: '6mm', overflow: 'hidden', flexShrink: 0 }}>
+                <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', border: '1px solid #000', boxSizing: 'border-box' }}>
+                  <thead>
+                    <tr style={{ background: '#3577b2', color: 'white', borderBottom: '1px solid #000' }}>
+                      <th style={{ padding: '7px 5px', textAlign: 'center', borderRight: '1px solid #000', width: '8%', fontWeight: 'bold' }}>Ítem</th>
+                      <th style={{ padding: '7px 7px', textAlign: 'left', borderRight: '1px solid #000', width: '38%', fontWeight: 'bold' }}>Tipo de Unidad</th>
+                      <th style={{ padding: '7px 7px', textAlign: 'left', borderRight: '1px solid #000', width: '25%', fontWeight: 'bold' }}>Ruta</th>
+                      <th style={{ padding: '7px 7px', textAlign: 'left', borderRight: '1px solid #000', width: '17%', fontWeight: 'bold' }}>Descripción Contenido</th>
+                      <th style={{ padding: '7px 7px', textAlign: 'center', width: '12%', fontWeight: 'bold' }}>Total por Unidad</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Totals & Commercial Conditions Row */}
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', marginBottom: '8px'}}>
-            
-            {/* Commercial Conditions */}
-            <div style={{flex: 1.2}}>
-              <h3 style={{fontSize: '11px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 4px 0'}}>CONDICIONES COMERCIALES:</h3>
-              <div style={{fontSize: '10.5px', color: '#374151', display: 'flex', flexDirection: 'column', gap: '2px'}}>
-                <div><span style={{fontWeight: '600'}}>Forma de Pago:</span> {cotizacion.formaPago || '-'}</div>
-                <div><span style={{fontWeight: '600'}}>Garantía:</span> {cotizacion.garantia || '-'}</div>
-                <div><span style={{fontWeight: '600'}}>Moneda:</span> Soles</div>
-                <div><span style={{fontWeight: '600'}}>Validez:</span> {cotizacion.validez || '-'}</div>
+                  </thead>
+                  <tbody style={{ color: '#000' }}>
+                    {items.map((item, index) => (
+                      <tr key={item.id} style={{ borderBottom: '1px solid #000' }}>
+                        <td style={{ padding: '7px 5px', textAlign: 'center', borderRight: '1px solid #000', fontWeight: 'normal', verticalAlign: 'middle' }}>{index + 1}</td>
+                        <td style={{ padding: '7px 7px', textAlign: 'left', borderRight: '1px solid #000', verticalAlign: 'middle' }}>{item.tipoUnidad || '-'}</td>
+                        <td style={{ padding: '7px 7px', textAlign: 'left', borderRight: '1px solid #000', verticalAlign: 'middle' }}>{item.ruta || '-'}</td>
+                        <td style={{ padding: '7px 7px', textAlign: 'left', borderRight: '1px solid #000', verticalAlign: 'middle' }}>{item.descripcion || '-'}</td>
+                        <td style={{ padding: '7px 7px', textAlign: 'center', fontWeight: 'bold', verticalAlign: 'middle', whiteSpace: 'nowrap' }}>
+                          {item.total ? (
+                            (() => {
+                              let clean = item.total.toString().trim();
+                              if (!clean.startsWith('S/')) {
+                                clean = 'S/ ' + clean;
+                              }
+                              if (!clean.toLowerCase().includes('+ igv') && !clean.toLowerCase().includes('+igv')) {
+                                clean = clean + ' + IGV';
+                              }
+                              return clean;
+                            })()
+                          ) : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
 
-              {/* Other Details / Stamp Area */}
-              <div style={{marginTop: '6px'}}>
-                <h3 style={{fontSize: '10.5px', fontWeight: 'bold', color: '#D21414', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 2px 0'}}>OTROS DETALLES:</h3>
-                <div style={{fontSize: '9.5px', color: '#4b5563', display: 'flex', flexDirection: 'column', gap: '1px'}}>
-                  <div>• Personal con SCTR</div>
-                  <div>• Precios incluyen IGV (18%)</div>
+              {/* TÉRMINOS Y CÁLCULOS (Lado a Lado para Máxima Visualización y Distribución) */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8mm', marginBottom: '6mm', flexShrink: 0 }}>
+                {/* Columna Izquierda: Condiciones / Viñetas */}
+                <div style={{ width: showCalculations ? '58%' : '100%', display: 'flex', flexDirection: 'column', gap: '3mm' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {condiciones.map((cond, idx) => (
+                      <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '10px', color: '#000', lineHeight: '1.3' }}>
+                        <span style={{ fontSize: '9px', marginTop: '1px', flexShrink: 0 }}>•</span>
+                        <span>{cond}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {cierre.formaPago && (
+                    <div style={{ fontSize: '10.5px', fontWeight: 'bold', color: '#000' }}>
+                      <span>Forma de Pago: {cierre.formaPago}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Columna Derecha: Cuadro de Cálculos Automáticos Estilo Premium */}
+                {showCalculations && (
+                  <div style={{ width: '38%', display: 'flex', flexDirection: 'column', border: '1.5px solid #1e293b', borderRadius: '6px', overflow: 'hidden', fontSize: '11px', boxSizing: 'border-box', boxShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 8px', borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                      <span style={{ fontWeight: '600', color: '#475569' }}>SUBTOTAL</span>
+                      <span style={{ fontWeight: '700', color: '#0f172a' }}>{formatCurrency(subtotal)}</span>
+                    </div>
+                    {descuentoValue > 0 && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 8px', borderBottom: '1px solid #cbd5e1', background: '#f8fafc', color: '#D21414' }}>
+                        <span style={{ fontWeight: '600' }}>DESCUENTO</span>
+                        <span style={{ fontWeight: '700' }}>- {formatCurrency(descuentoValue)}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 8px', borderBottom: '1px solid #cbd5e1', background: '#f8fafc' }}>
+                      <span style={{ fontWeight: '600', color: '#475569' }}>I.G.V. (18%)</span>
+                      <span style={{ fontWeight: '700', color: '#0f172a' }}>{formatCurrency(igv)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 8px', background: '#3577b2', color: '#fff' }}>
+                      <span style={{ fontWeight: 'bold' }}>TOTAL GENERAL</span>
+                      <span style={{ fontWeight: 'bold' }}>{formatCurrency(total)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* DESPEDIDA */}
+              {cierre.despedidaTexto && (
+                <div style={{ fontSize: '11px', color: '#000', lineHeight: '1.4', marginBottom: '6mm', flexShrink: 0 }}>
+                  <span>{cierre.despedidaTexto}</span>
+                </div>
+              )}
+
+              {/* ATENTAMENTE Y FIRMA */}
+              <div style={{ display: 'flex', flexDirection: 'column', fontSize: '11px', color: '#000', marginBottom: '4mm', flexShrink: 0, position: 'relative', alignItems: 'center', textAlign: 'center' }}>
+                <span style={{ marginBottom: '4mm' }}>{cierre.atentamente}</span>
+                <div style={{ height: '38mm', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', position: 'relative' }}>
+                   {cierre.mostrarSello && cierre.firmaImagen ? (
+                     <div style={{
+                       position: 'relative',
+                       width: '80mm',
+                       height: '38mm',
+                       border: '1.5px dashed rgba(53, 124, 201, 0.4)',
+                       borderRadius: '6px',
+                       background: 'transparent',
+                       display: 'flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       padding: '0',
+                       boxSizing: 'border-box',
+                       overflow: 'hidden',
+                       zIndex: 10
+                     }}>
+                       <img
+                         src={cierre.firmaImagen}
+                         alt="Firma Digital"
+                         style={{
+                           width: '100%',
+                           height: '100%',
+                           objectFit: 'contain',
+                           display: 'block',
+                           imageRendering: 'auto'
+                         }}
+                       />
+                     </div>
+                   ) : (
+                     <>
+                       {cierre.mostrarSello && (
+                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                           <div style={{ fontSize: '7px', color: '#3577b2', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Firmado Digitalmente por</div>
+                           <div style={{ fontSize: '8.5px', color: '#D21414', fontWeight: '900', margin: '2px 0 1px 0', textTransform: 'uppercase' }}>{cierre.firmaEmpresa}</div>
+                           <div style={{ fontSize: '7.5px', color: '#000', fontWeight: 'bold' }}>Representante: {cierre.firmaNombre}</div>
+                           <div style={{ fontSize: '7px', color: '#555', fontStyle: 'italic' }}>Autenticidad Garantizada</div>
+                         </div>
+                       )}
+                       {!cierre.mostrarSello && cierre.firmaImagen && (
+                         <img src={cierre.firmaImagen} alt="Firma" style={{ width: '80mm', height: '38mm', objectFit: 'contain' }} />
+                       )}
+                     </>
+                   )}
+                   {/* Línea simulada de firma manuscrita (solo si no hay imagen de firma y no se muestra sello */}
+                   {(!cierre.mostrarSello && !cierre.firmaImagen) || (!cierre.mostrarSello && cierre.firmaImagen === '') && (
+                     <div style={{ width: '55mm', borderBottom: '1px solid #333', marginBottom: '2px' }} />
+                   )}
+                 </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginTop: '4mm', zIndex: 11, alignItems: 'center', textAlign: 'center', width: '100%' }}>
+                  <span style={{ fontWeight: 'bold', color: '#000', fontSize: '11px' }}>{cierre.firmaNombre}</span>
+                  <span style={{ fontSize: '10px', color: '#444' }}>{cierre.firmaCargo}</span>
+                  <span style={{ fontSize: '9px', color: '#666', fontWeight: 'bold' }}>{cierre.firmaEmpresa}</span>
                 </div>
               </div>
-            </div>
 
-            {/* Totals Box & Stamp/Signature Placeholder */}
-            <div style={{flex: 0.8, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px'}}>
-              <div style={{width: '100%', maxWidth: '200px'}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '11.5px', borderBottom: '1px solid #e2e8f0'}}>
-                  <span style={{color: '#4b5563', fontWeight: '600'}}>SUB-TOTAL</span>
-                  <span style={{fontWeight: '700'}}>{formatCurrency(subtotal)}</span>
-                </div>
-                <div style={{display: 'flex', justifyContent: 'space-between', padding: '3px 0', fontSize: '11.5px', borderBottom: '1px solid #e2e8f0'}}>
-                  <span style={{color: '#4b5563', fontWeight: '600'}}>IGV (18%)</span>
-                  <span style={{fontWeight: '700'}}>{formatCurrency(igv)}</span>
-                </div>
-                <div style={{display: 'flex', justifyContent: 'space-between', padding: '5px 8px', fontSize: '13px', background: '#111', color: 'white', fontWeight: 'bold', marginTop: '2px'}}>
-                  <span>TOTAL</span>
-                  <span>{formatCurrency(total)}</span>
+              {/* PIE DE PÁGINA (DATOS FISCALES DEL EMISOR) */}
+              <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
+                {/* Línea horizontal en rojo oscuro/guinda */}
+                <div style={{ borderTop: '2.5px solid #a61f1f', width: '100%', marginBottom: '4px' }} />
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', fontSize: '9px', color: '#222', lineHeight: '1.4', fontWeight: '500' }}>
+                  <span style={{ fontWeight: 'bold', fontSize: '9.5px', color: '#000' }}>{emisor.nombre}</span>
+                  <span>RUC: {emisor.ruc}</span>
+                  <span>{emisor.direccion}</span>
+                  <span>{emisor.base}</span>
                 </div>
               </div>
 
-              {/* Stamp / Digital Signature */}
-              <div style={{marginTop: '4px', textAlign: 'center', alignSelf: 'center', border: '1px dashed #cbd5e1', padding: '4px 8px', borderRadius: '4px', background: '#fafafa', width: '100%'}}>
-                <p style={{fontSize: '8.5px', color: '#6b7280', margin: 0, fontStyle: 'italic'}}>Firmado digitalmente por:</p>
-                <p style={{fontSize: '9px', fontWeight: 'bold', color: '#D21414', margin: '2px 0 0 0'}}>ATENTO5 S.G. E.I.R.L.</p>
-                <p style={{fontSize: '7.5px', color: '#9ca3af', margin: 0}}>RUC: 20612345678</p>
-              </div>
             </div>
-          </div>
 
-          {/* Footer Details */}
-          <div style={{marginTop: 'auto', display: 'flex', flexDirection: 'column'}}>
-            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: '10px', color: '#4b5563', borderTop: '1px solid #e2e8f0'}}>
-              <span>{ATENTO5.direccion}</span>
-              <span style={{fontWeight: 'bold'}}>{ATENTO5.correo} | {ATENTO5.telefono}</span>
-            </div>
-            
-            {/* Red bottom bar */}
-            <div style={{background: '#D21414', margin: '0 -12mm -8mm -12mm', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-              <a href={`https://${ATENTO5.web}`} target="_blank" rel="noopener noreferrer" style={{color: 'white', textDecoration: 'none', fontSize: '11.5px', fontWeight: 'bold', letterSpacing: '1px'}}>{ATENTO5.web}</a>
-            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
   );
 };
 
-const SectionCard = ({num, title, icon, color, children}) => (
-  <div style={{background: 'linear-gradient(145deg, #0d1525 0%, #091020 100%)', border: '1px solid rgba(60, 180, 255, 0.1)', borderRadius: '16px', overflow: 'hidden', marginBottom: '0'}}>
-    <div style={{display: 'flex', alignItems: 'center', padding: '14px 16px', background: 'linear-gradient(90deg, rgba(60, 180, 255, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderBottom: '1px solid rgba(60, 180, 255, 0.15)'}}>
-      <span style={{display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: 'linear-gradient(135deg, #3CB4FF 0%, #8764B2 100%)', borderRadius: '6px', fontSize: '12px', fontWeight: '800', color: '#000', marginRight: '10px'}}>{num}</span>
-      <span style={{color: color, marginRight: '8px'}}>{icon}</span>
-      <h3 style={{fontSize: '13px', fontWeight: '700', color: '#fff', letterSpacing: '0.8px'}}>{title}</h3>
+// ==========================================
+// TARJETA DE SECCIÓN DEL EDITOR
+// ==========================================
+const SectionCard = ({ num, title, icon, color, children }) => (
+  <div style={{ background: 'linear-gradient(145deg, #09101d 0%, #060b13 100%)', border: '1px solid rgba(60, 180, 255, 0.12)', borderRadius: '16px', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', background: 'linear-gradient(90deg, rgba(60, 180, 255, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderBottom: '1px solid rgba(60, 180, 255, 0.15)' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: 'linear-gradient(135deg, #3CB4FF, #D21414)', borderRadius: '6px', fontSize: '12px', fontWeight: '900', color: '#fff', marginRight: '10px' }}>{num}</span>
+      <span style={{ color: color, marginRight: '8px', display: 'flex', alignItems: 'center' }}>{icon}</span>
+      <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#fff', letterSpacing: '0.8px', margin: 0 }}>{title}</h3>
     </div>
-    <div style={{padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(0, 0, 0, 0.15)'}}>
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(0, 0, 0, 0.15)' }}>
       {children}
     </div>
   </div>
 );
 
-const FieldBox = ({label, value, onChange, placeholder}) => (
-  <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
-    <label style={{fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px'}}>{label}</label>
-    <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} style={{width: '100%', background: 'linear-gradient(135deg, #0a0f18 0%, #0d1422 100%)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '12px 14px', fontSize: '14px', color: '#fff', outline: 'none', transition: 'all 0.25s ease'}} />
+// ==========================================
+// CAMPO DE TEXTO DEL EDITOR
+// ==========================================
+const FieldBox = ({ label, value, onChange, placeholder }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+    <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</label>
+    <input 
+      type="text" 
+      value={value} 
+      onChange={(e) => onChange(e.target.value)} 
+      placeholder={placeholder} 
+      style={{ width: '100%', background: 'linear-gradient(135deg, #0a0e17 0%, #0c121e 100%)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '10px', padding: '12px 14px', fontSize: '13.5px', color: '#fff', outline: 'none', transition: 'all 0.25s ease', boxSizing: 'border-box' }}
+      onFocus={(e) => { e.target.style.borderColor = '#3CB4FF'; e.target.style.boxShadow = '0 0 10px rgba(60, 180, 255, 0.2)'; }}
+      onBlur={(e) => { e.target.style.borderColor = 'rgba(255, 255, 255, 0.08)'; e.target.style.boxShadow = 'none'; }}
+    />
   </div>
 );
 

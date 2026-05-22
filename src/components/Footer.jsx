@@ -41,6 +41,89 @@ const Footer = () => {
     }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
         
+        {/* Logo Header — above the grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '48px' }}
+        >
+          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            {/* Dual Glow */}
+            <motion.div
+              style={{
+                position: 'absolute',
+                inset: '-20px',
+                borderRadius: '50%',
+                filter: 'blur(20px)',
+              }}
+              animate={{
+                background: [
+                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(210, 20, 20,0.25) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)'
+                ],
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 0.8, 0.5]
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.img
+              src={logo}
+              alt="ATENTO5"
+              style={{
+                height: '400px',
+                width: '400px',
+                objectFit: 'contain',
+                position: 'relative',
+                zIndex: 1,
+                filter: 'drop-shadow(0 0 30px rgba(60, 180, 255, 0.7))',
+              }}
+              animate={{ y: [-5, 5, -5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            />
+          </div>
+          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'center' }}>
+            SERVICIOS GENERALES E.I.R.L.
+          </p>
+          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.4)', marginBottom: '20px', lineHeight: 1.6, textAlign: 'center', maxWidth: '480px' }}>
+            Comprometidos con la excelencia en cada proyecto. Soluciones integrales para tus necesidades de servicios generales.
+          </p>
+
+          {/* Social Links */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {socialLinks.map((social, index) => (
+              <motion.a
+                key={index}
+                href={social.href}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(229, 231, 235, 0.5)',
+                  textDecoration: 'none'
+                }}
+                whileHover={{ transition: { duration: 0.1, delay: 0 }, scale: 1.1,
+                  background: 'rgba(60, 180, 255, 0.1)',
+                  borderColor: 'rgba(60, 180, 255, 0.3)',
+                  color: '#3CB4FF'
+                }}
+              >
+                {social.icon}
+              </motion.a>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Divider */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginBottom: '48px' }} />
+
         {/* Main Footer Content */}
         <div style={{ 
           display: 'grid', 
@@ -48,64 +131,6 @@ const Footer = () => {
           gap: '48px',
           marginBottom: '48px'
         }}>
-          {/* Company Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
-              <motion.img 
-                src={logo}
-                alt="ATENTO5" 
-                style={{ 
-                  height: '160px',
-                  width: 'auto',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 0 20px rgba(60, 180, 255, 0.6))',
-                }}
-                animate={{ y: [-3, 3, -3] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-              />
-            </div>
-            <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.05em' }}>
-              SERVICIOS GENERALES E.I.R.L.
-            </p>
-            <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.4)', marginBottom: '20px', lineHeight: 1.6 }}>
-              Comprometidos con la excelencia en cada proyecto. Soluciones integrales para tus necesidades de servicios generales.
-            </p>
-            
-            {/* Social Links */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              {socialLinks.map((social, index) => (
-                <motion.a
-                  key={index}
-                  href={social.href}
-                  style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '10px',
-                    background: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.06)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'rgba(229, 231, 235, 0.5)',
-                    textDecoration: 'none'
-                  }}
-                  whileHover={{ transition: { duration: 0.1, delay: 0 }, scale: 1.1,
-                    background: 'rgba(60, 180, 255, 0.1)',
-                    borderColor: 'rgba(60, 180, 255, 0.3)',
-                    color: '#3CB4FF'
-                  }}
-                >
-                  {social.icon}
-                </motion.a>
-              ))}
-            </div>
-          </motion.div>
-
           {/* Quick Links */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
