@@ -525,9 +525,9 @@ const PreviewPanel = ({
 
               {/* SECCIÓN SEÑORES / CLIENTE - EDITABLE */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '6mm', fontSize: '11.5px', lineHeight: '1.3', flexShrink: 0 }}>
-                <div style={{ fontWeight: 'bold', color: '#000', outline: 'none', minHeight: '1.5em', padding: '2px 0' }}>{cliente.senores || 'Señores:'}</div>
-                <div style={{ fontWeight: 'bold', color: '#000', fontSize: '12px', textTransform: 'uppercase', outline: 'none', minHeight: '1.5em', padding: '2px 0' }}>{cliente.nombre || 'Nombre de la empresa'}</div>
-                <div style={{ color: '#111', outline: 'none', minHeight: '1.5em', padding: '2px 0' }}>Atencion: {cliente.atencion || ''}</div>
+                <div contentEditable={true} suppressContentEditableWarning={true} onBlur={(e) => setCliente({...cliente, senores: e.currentTarget.textContent})} style={{ fontWeight: 'bold', color: '#000', outline: 'none', minHeight: '1.5em', padding: '2px 0' }} dangerouslySetInnerHTML={{ __html: cliente.senores || 'Señores:' }} />
+                <div contentEditable={true} suppressContentEditableWarning={true} onBlur={(e) => setCliente({...cliente, nombre: e.currentTarget.textContent})} style={{ fontWeight: 'bold', color: '#000', fontSize: '12px', textTransform: 'uppercase', outline: 'none', minHeight: '1.5em', padding: '2px 0' }} dangerouslySetInnerHTML={{ __html: cliente.nombre || 'Nombre de la empresa' }} />
+                <div contentEditable={true} suppressContentEditableWarning={true} onBlur={(e) => setCliente({...cliente, atencion: e.currentTarget.textContent.replace('Atencion: ', '').replace('Atencion:', '')})} style={{ color: '#111', outline: 'none', minHeight: '1.5em', padding: '2px 0' }} dangerouslySetInnerHTML={{ __html: 'Atencion: ' + (cliente.atencion || '') }} />
               </div>
 
               {/* TEXTO INTRODUCTORIO */}
