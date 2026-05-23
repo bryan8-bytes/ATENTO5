@@ -5,6 +5,48 @@ import { Link } from 'react-router-dom';
 import { Download, Plus, Trash2, Building2, User, FileText, Palette, ChevronLeft, Check, Calculator } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
 
+const EditableField = ({ value, onChange, placeholder, style, prefix = '' }) => {
+  const divRef = useRef(null);
+
+  useEffect(() => {
+    if (divRef.current) {
+      const expectedText = prefix + (value || placeholder);
+      if (divRef.current.textContent !== expectedText) {
+        divRef.current.textContent = expectedText;
+      }
+    }
+  }, [value, placeholder, prefix]);
+
+  return (
+    <div
+      ref={divRef}
+      contentEditable={true}
+      suppressContentEditableWarning={true}
+      onBlur={(e) => {
+        let text = e.currentTarget.textContent;
+        if (prefix && text.startsWith(prefix)) {
+          text = text.substring(prefix.length);
+        }
+        if (text === placeholder) {
+          onChange('');
+        } else {
+          onChange(text);
+        }
+      }}
+      onFocus={(e) => {
+        let text = e.currentTarget.textContent;
+        if (prefix && text.startsWith(prefix)) {
+          text = text.substring(prefix.length);
+        }
+        if (text === placeholder) {
+          e.currentTarget.textContent = prefix;
+        }
+      }}
+      style={{ outline: 'none', minHeight: '1.5em', ...style }}
+    />
+  );
+};
+
 const QuotationGenerator = () => {
   // --- Estados Iniciales Basados en "Cotizacion Atento5.pdf" ---
   const [header, setHeader] = useState(() => {
@@ -525,30 +567,25 @@ const PreviewPanel = ({
 
               {/* SECCIÓN SEÑORES / CLIENTE - EDITABLE */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', marginBottom: '6mm', fontSize: '11.5px', lineHeight: '1.3', flexShrink: 0 }}>
-                <input
-                  type="text"
+                <EditableField
                   value={cliente.senores}
-                  onChange={(e) => setCliente({...cliente, senores: e.target.value})}
+                  onChange={(val) => setCliente({...cliente, senores: val})}
                   placeholder="Señores:"
-                  style={{ fontWeight: 'bold', color: '#000', outline: 'none', border: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: 'inherit', width: '100%', padding: '2px 0', margin: 0 }}
+                  style={{ fontWeight: 'bold', color: '#000', padding: '2px 0' }}
                 />
-                <input
-                  type="text"
+                <EditableField
                   value={cliente.nombre}
-                  onChange={(e) => setCliente({...cliente, nombre: e.target.value})}
+                  onChange={(val) => setCliente({...cliente, nombre: val})}
                   placeholder="Nombre de la empresa"
-                  style={{ fontWeight: 'bold', color: '#000', fontSize: '12px', textTransform: 'uppercase', outline: 'none', border: 'none', background: 'transparent', fontFamily: 'inherit', width: '100%', padding: '2px 0', margin: 0 }}
+                  style={{ fontWeight: 'bold', color: '#000', fontSize: '12px', textTransform: 'uppercase', padding: '2px 0' }}
                 />
-                <div style={{ display: 'flex', alignItems: 'center', color: '#111', minHeight: '1.5em', padding: '2px 0' }}>
-                  <span style={{ whiteSpace: 'pre' }}>Atencion: </span>
-                  <input
-                    type="text"
-                    value={cliente.atencion}
-                    onChange={(e) => setCliente({...cliente, atencion: e.target.value})}
-                    placeholder=""
-                    style={{ flex: 1, color: 'inherit', outline: 'none', border: 'none', background: 'transparent', fontFamily: 'inherit', fontSize: 'inherit', padding: 0, margin: 0 }}
-                  />
-                </div>
+                <EditableField
+                  value={cliente.atencion}
+                  onChange={(val) => setCliente({...cliente, atencion: val})}
+                  placeholder=""
+                  prefix="Atencion: "
+                  style={{ color: '#111', padding: '2px 0' }}
+                />
               </div>
 
               {/* TEXTO INTRODUCTORIO */}
