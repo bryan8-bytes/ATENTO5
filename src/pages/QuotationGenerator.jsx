@@ -1,9 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-// import { motion } from 'framer-motion'; // Removed unused import
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
 import { Download, Plus, Trash2, Building2, User, FileText, Palette, ChevronLeft, Check, Calculator } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
+
+GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const EditableField = ({ value, onChange, placeholder, style, prefix = '' }) => {
   const divRef = useRef(null);
@@ -105,7 +108,12 @@ const QuotationGenerator = () => {
     firmaNombre: 'Juan Ampuero',
     firmaCargo: 'Gerente General',
     mostrarSello: true,
-    firmaImagen: '' // base64 string for signature image
+    firmaImagen: '', // base64 string for signature image
+    firmaZoom: 1,    // default zoom
+    firmaX: 0,       // default X translation
+    firmaY: 0,       // default Y translation
+    firmaAncho: 55,  // default width in mm
+    firmaAlto: 35    // default height in mm
   });
 
   const [emisor, setEmisor] = useState({
@@ -115,20 +123,55 @@ const QuotationGenerator = () => {
     base: 'Base Chimbote: Av. NN 11960 Urb. Los Álamos Nuevo Chimbote - Santa'
   });
 
-  const handleSignatureUpload = (e) => {
+  const handleSignatureUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
+    if (!file) return;
+    
+    if (file.type === 'application/pdf') {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const loadingTask = getDocument({ data: arrayBuffer }).promise;
+        const pdf = await loadingTask;
+        const page = await pdf.getPage(1);
+        const scale = 2.5; // High resolution rendering
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        await page.render(renderContext).promise;
+        const imageData = canvas.toDataURL('image/png');
+        setCierre(prev => ({
+          ...prev,
+          firmaImagen: imageData,
+          firmaZoom: 1,
+          firmaX: 0,
+          firmaY: 0
+        }));
+      } catch (error) {
+        console.error('Error reading PDF:', error);
+        alert('No se pudo leer el PDF. Por favor, intente con otro archivo.');
+      }
+    } else {
       const reader = new FileReader();
       reader.onloadend = () => {
         setCierre(prev => ({
           ...prev,
-          firmaImagen: reader.result
+          firmaImagen: reader.result,
+          firmaZoom: 1,
+          firmaX: 0,
+          firmaY: 0
         }));
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const [isExporting, setIsExporting] = useState(false);
   const [showCalculations, setShowCalculations] = useState(true);
   const [descuento, setDescuento] = useState('0.00');
 
@@ -183,8 +226,6 @@ const QuotationGenerator = () => {
 
   // --- Exportación a PDF (Pixel-perfect A4) ---
   const handleExportPDF = () => {
-    const element = previewRef.current;
-
     // Actualizar el contador en localStorage ANTES de descargar
     // Extraer el número del formato 'YY-MM-DD-NNN'
     const parts = header.numero ? header.numero.split('-') : [];
@@ -201,14 +242,26 @@ const QuotationGenerator = () => {
       }
     }
 
-    html2pdf().set({
-      margin: 0,
-      filename: 'Cotizacion_' + (header.numero || '000') + '.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2.5, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['avoid-all', 'css'] }
-    }).from(element).save();
+    setIsExporting(true);
+
+    setTimeout(() => {
+      const element = previewRef.current;
+      html2pdf().set({
+        margin: 0,
+        filename: 'Cotizacion_' + (header.numero || '000') + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2.5, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css'] }
+      }).from(element).save()
+      .then(() => {
+        setIsExporting(false);
+      })
+      .catch((err) => {
+        console.error('Error al exportar PDF:', err);
+        setIsExporting(false);
+      });
+    }, 150);
   };
 
   return (
@@ -243,6 +296,7 @@ const QuotationGenerator = () => {
          formatCurrency={formatCurrency}
          showCalculations={showCalculations}
          handleSignatureUpload={handleSignatureUpload}
+         isExporting={isExporting}
        />
     </div>
   );
@@ -407,11 +461,11 @@ const EditorPanel = ({
            </div>
            <div style={{ marginTop: '12px' }}>
              <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
-               Subir imagen de firma (PNG, JPG)
+               Subir imagen de firma (PNG, JPG) o PDF escaneado
              </label>
              <input 
                type="file"
-               accept="image/*"
+               accept="image/*,application/pdf"
                onChange={handleSignatureUpload}
                style={{ 
                  width: '100%', 
@@ -423,6 +477,113 @@ const EditorPanel = ({
                  fontSize: '13px'
                }} 
              />
+             {cierre.firmaImagen && (
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px', padding: '14px', background: '#0a0e17', borderRadius: '12px', border: '1px solid rgba(60, 180, 255, 0.15)' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                   <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                     <Check size={14} /> FIRMA CARGADA
+                   </span>
+                   <div style={{ display: 'flex', gap: '6px' }}>
+                     <button 
+                       onClick={() => setCierre(prev => ({ ...prev, firmaZoom: 1, firmaX: 0, firmaY: 0, firmaAncho: 55, firmaAlto: 35 }))}
+                       style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600', transition: 'background 0.2s' }}
+                       onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
+                       onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.08)'}
+                     >
+                       Reset
+                     </button>
+                     <button 
+                       onClick={() => setCierre(prev => ({ ...prev, firmaImagen: '', firmaZoom: 1, firmaX: 0, firmaY: 0, firmaAncho: 55, firmaAlto: 35 }))}
+                       style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600', transition: 'background 0.2s' }}
+                       onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.25)'}
+                       onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.15)'}
+                     >
+                       Quitar
+                     </button>
+                   </div>
+                 </div>
+                 
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                     <span>ANCHO DEL RECUADRO</span>
+                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaAncho || 45}mm</span>
+                   </div>
+                   <input 
+                     type="range" 
+                     min="20" 
+                     max="100" 
+                     step="1" 
+                     value={cierre.firmaAncho || 45} 
+                     onChange={(e) => setCierre(prev => ({ ...prev, firmaAncho: parseInt(e.target.value, 10) }))} 
+                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
+                   />
+                 </div>
+
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                     <span>ALTO DEL RECUADRO</span>
+                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaAlto || 45}mm</span>
+                   </div>
+                   <input 
+                     type="range" 
+                     min="20" 
+                     max="100" 
+                     step="1" 
+                     value={cierre.firmaAlto || 45} 
+                     onChange={(e) => setCierre(prev => ({ ...prev, firmaAlto: parseInt(e.target.value, 10) }))} 
+                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
+                   />
+                 </div>
+
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                     <span>ZOOM DE FIRMA</span>
+                     <span style={{ color: '#3CB4FF' }}>{(cierre.firmaZoom || 1).toFixed(2)}x</span>
+                   </div>
+                   <input 
+                     type="range" 
+                     min="0.5" 
+                     max="15" 
+                     step="0.05" 
+                     value={cierre.firmaZoom || 1} 
+                     onChange={(e) => setCierre(prev => ({ ...prev, firmaZoom: parseFloat(e.target.value) }))} 
+                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
+                   />
+                 </div>
+
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                     <span>DESPLAZAMIENTO HORIZONTAL (X)</span>
+                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaX || 0}px</span>
+                   </div>
+                   <input 
+                     type="range" 
+                     min="-600" 
+                     max="600" 
+                     step="1" 
+                     value={cierre.firmaX || 0} 
+                     onChange={(e) => setCierre(prev => ({ ...prev, firmaX: parseInt(e.target.value, 10) }))} 
+                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
+                   />
+                 </div>
+
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
+                     <span>DESPLAZAMIENTO VERTICAL (Y)</span>
+                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaY || 0}px</span>
+                   </div>
+                   <input 
+                     type="range" 
+                     min="-600" 
+                     max="600" 
+                     step="1" 
+                     value={cierre.firmaY || 0} 
+                     onChange={(e) => setCierre(prev => ({ ...prev, firmaY: parseInt(e.target.value, 10) }))} 
+                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
+                   />
+                 </div>
+               </div>
+             )}
            </div>
 
           <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '10px 0' }} />
@@ -460,9 +621,11 @@ const PreviewPanel = ({
   total,
   formatCurrency,
   showCalculations,
-  handleSignatureUpload
+  handleSignatureUpload,
+  isExporting
 }) => {
   const [scale, setScale] = useState(0.65);
+  const [hoverSignature, setHoverSignature] = useState(false);
 
   useEffect(() => {
     const updateScale = () => {
@@ -685,59 +848,67 @@ const PreviewPanel = ({
               )}
 
               {/* ATENTAMENTE Y FIRMA */}
-              <div style={{ display: 'flex', flexDirection: 'column', fontSize: '11px', color: '#000', marginBottom: '4mm', flexShrink: 0, position: 'relative', alignItems: 'center', textAlign: 'center' }}>
-                <span style={{ marginBottom: '4mm' }}>{cierre.atentamente}</span>
-                <div style={{ height: '38mm', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', position: 'relative' }}>
-                   {cierre.mostrarSello && cierre.firmaImagen ? (
-                     <div style={{
-                       position: 'relative',
-                       width: '80mm',
-                       height: '38mm',
-                       border: '1.5px dashed rgba(53, 124, 201, 0.4)',
-                       borderRadius: '6px',
-                       background: 'transparent',
-                       display: 'flex',
-                       alignItems: 'center',
-                       justifyContent: 'center',
-                       padding: '0',
-                       boxSizing: 'border-box',
-                       overflow: 'hidden',
-                       zIndex: 10
-                     }}>
-                       <img
-                         src={cierre.firmaImagen}
-                         alt="Firma Digital"
-                         style={{
-                           width: '100%',
-                           height: '100%',
-                           objectFit: 'contain',
-                           display: 'block',
-                           imageRendering: 'auto'
-                         }}
-                       />
-                     </div>
-                   ) : (
-                     <>
-                       {cierre.mostrarSello && (
-                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                           <div style={{ fontSize: '7px', color: '#3577b2', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Firmado Digitalmente por</div>
-                           <div style={{ fontSize: '8.5px', color: '#D21414', fontWeight: '900', margin: '2px 0 1px 0', textTransform: 'uppercase' }}>{cierre.firmaEmpresa}</div>
-                           <div style={{ fontSize: '7.5px', color: '#000', fontWeight: 'bold' }}>Representante: {cierre.firmaNombre}</div>
-                           <div style={{ fontSize: '7px', color: '#555', fontStyle: 'italic' }}>Autenticidad Garantizada</div>
-                         </div>
-                       )}
-                       {!cierre.mostrarSello && cierre.firmaImagen && (
-                         <img src={cierre.firmaImagen} alt="Firma" style={{ width: '80mm', height: '38mm', objectFit: 'contain' }} />
-                       )}
-                     </>
-                   )}
-                   {/* Línea simulada de firma manuscrita (solo si no hay imagen de firma y no se muestra sello */}
-                   {(!cierre.mostrarSello && !cierre.firmaImagen) || (!cierre.mostrarSello && cierre.firmaImagen === '') && (
-                     <div style={{ width: '55mm', borderBottom: '1px solid #333', marginBottom: '2px' }} />
-                   )}
-                 </div>
+              <div style={{ display: 'flex', flexDirection: 'column', fontSize: '11px', color: '#000', marginBottom: '2.5mm', flexShrink: 0, position: 'relative', alignItems: 'center', textAlign: 'center' }}>
+                <span style={{ marginBottom: '2.5mm' }}>{cierre.atentamente}</span>
+                <div style={{ 
+                  width: `${cierre.firmaAncho || 45}mm`,
+                  height: `${cierre.firmaAlto || 45}mm`, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  boxSizing: 'border-box', 
+                  position: 'relative',
+                  border: isExporting ? 'none' : '1.5px dashed #3CB4FF',
+                  borderRadius: '6px',
+                  background: isExporting ? 'transparent' : 'rgba(60, 180, 255, 0.02)',
+                  transition: 'border 0.2s ease',
+                  padding: '2px'
+                }}>
+                  {cierre.firmaImagen ? (
+                    <div 
+                      style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        background: 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxSizing: 'border-box',
+                        overflow: 'visible',
+                        zIndex: 10
+                      }}
+                    >
+                      <img
+                        src={cierre.firmaImagen}
+                        alt="Firma Digital"
+                        style={{
+                          position: 'absolute',
+                          width: `${(cierre.firmaZoom || 1) * 100}%`,
+                          height: `${(cierre.firmaZoom || 1) * 100}%`,
+                          left: `${(1 - (cierre.firmaZoom || 1)) * 50}%`,
+                          top: `${(1 - (cierre.firmaZoom || 1)) * 50}%`,
+                          marginLeft: `${cierre.firmaX || 0}px`,
+                          marginTop: `${cierre.firmaY || 0}px`,
+                          objectFit: 'contain',
+                          display: 'block',
+                          imageRendering: 'auto'
+                        }}
+                      />
+                    </div>
+                  ) : cierre.mostrarSello ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+                      <div style={{ fontSize: '7px', color: '#3577b2', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px', margin: 0 }}>Firmado Digitalmente por</div>
+                      <div style={{ fontSize: '8px', color: '#D21414', fontWeight: '900', margin: '1px 0', textTransform: 'uppercase' }}>{cierre.firmaEmpresa}</div>
+                      <div style={{ fontSize: '7.5px', color: '#000', fontWeight: 'bold' }}>Representante: {cierre.firmaNombre}</div>
+                      <div style={{ fontSize: '6.5px', color: '#555', fontStyle: 'italic' }}>Autenticidad Garantizada</div>
+                    </div>
+                  ) : (
+                    <div style={{ width: '100%', borderBottom: '1px solid #333', marginBottom: '2px' }} />
+                  )}
+                </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginTop: '4mm', zIndex: 11, alignItems: 'center', textAlign: 'center', width: '100%' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', marginTop: '2.5mm', zIndex: 11, alignItems: 'center', textAlign: 'center', width: '100%' }}>
                   <span style={{ fontWeight: 'bold', color: '#000', fontSize: '11px' }}>{cierre.firmaNombre}</span>
                   <span style={{ fontSize: '10px', color: '#444' }}>{cierre.firmaCargo}</span>
                   <span style={{ fontSize: '9px', color: '#666', fontWeight: 'bold' }}>{cierre.firmaEmpresa}</span>

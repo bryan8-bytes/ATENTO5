@@ -12,7 +12,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState('INICIO');
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1200);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1280);
 
   const navLinks = [
     { name: 'INICIO', id: 'hero' },
@@ -30,8 +30,8 @@ const Navbar = () => {
     };
     
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 1200);
-      if (window.innerWidth >= 1200) {
+      setIsMobile(window.innerWidth < 1280);
+      if (window.innerWidth >= 1280) {
         setIsOpen(false);
       }
     };
@@ -118,10 +118,11 @@ const Navbar = () => {
         width: '100%',
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0 40px',
+        padding: '0 20px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
+        gap: '32px',
         height: '140px', // Premium height
         boxSizing: 'border-box',
         position: 'relative',
@@ -171,11 +172,11 @@ const Navbar = () => {
                 src={logo} 
                 alt="ATENTO5" 
                 style={{ 
-                  height: '300px', 
-                  width: '300px',
+                  height: '250px', 
+                  width: '250px',
                   objectFit: 'contain',
                   display: 'block',
-                  filter: 'drop-shadow(0 0 20px rgba(60, 180, 255, 0.7))',
+                  filter: 'drop-shadow(0 0 25px rgba(60, 180, 255, 0.85))',
                 }}
               />
             </motion.div>
@@ -190,8 +191,7 @@ const Navbar = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            flexGrow: 1,
-            margin: '0 24px',
+            margin: '0 12px',
           }}>
             <div style={{
               display: 'flex',
@@ -212,8 +212,8 @@ const Navbar = () => {
                   <button
                     onClick={() => handleNavClick(link.id, link.name)}
                     style={{
-                      padding: '8px 16px',
-                      fontSize: '12.5px',
+                      padding: '8px 18px',
+                      fontSize: '13.5px',
                       fontWeight: 750,
                       letterSpacing: '0.08em',
                       color: activeLink === link.name ? '#3CB4FF' : 'rgba(229, 231, 235, 0.75)',
@@ -242,7 +242,7 @@ const Navbar = () => {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '14px',
+            gap: '12px',
             flexShrink: 0
           }}>
             <Link to="/cotizador" style={{ textDecoration: 'none' }}>
@@ -256,7 +256,7 @@ const Navbar = () => {
                   borderRadius: '30px',
                   border: 'none',
                   fontWeight: 800,
-                  fontSize: '12px',
+                  fontSize: '12.5px',
                   letterSpacing: '0.08em',
                   cursor: 'pointer',
                   boxShadow: '0 4px 15px rgba(60, 180, 255, 0.3)',
@@ -278,7 +278,7 @@ const Navbar = () => {
                   borderRadius: '30px',
                   border: 'none',
                   fontWeight: 800,
-                  fontSize: '12px',
+                  fontSize: '12.5px',
                   letterSpacing: '0.05em',
                   cursor: 'pointer',
                   boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
@@ -302,7 +302,7 @@ const Navbar = () => {
                     borderRadius: '30px',
                     border: 'none',
                     fontWeight: 800,
-                    fontSize: '12px',
+                    fontSize: '12.5px',
                     letterSpacing: '0.08em',
                     cursor: 'pointer',
                     boxShadow: '0 4px 15px rgba(124,58,237,0.35)',
@@ -328,40 +328,40 @@ const Navbar = () => {
 
             {/* Auth capsule */}
             {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <motion.div 
                   whileHover={{ scale: 1.03 }}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
+                    gap: '12px',
                     background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.15) 0%, rgba(210, 20, 20, 0.08) 100%)',
                     border: '1px solid rgba(60, 180, 255, 0.3)',
-                    borderRadius: '25px',
-                    padding: '4px 14px 4px 4px',
+                    borderRadius: '30px',
+                    padding: '6px 18px 6px 6px',
                     backdropFilter: 'blur(10px)',
-                    boxShadow: '0 0 15px rgba(60, 180, 255, 0.1)'
+                    boxShadow: '0 0 20px rgba(60, 180, 255, 0.15)'
                   }}
                 >
                   <div style={{
-                    width: '28px',
-                    height: '28px',
+                    width: '38px',
+                    height: '38px',
                     borderRadius: '50%',
                     background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '11px',
+                    fontSize: '13px',
                     fontWeight: 800,
                     color: 'white',
-                    boxShadow: '0 0 8px rgba(60, 180, 255, 0.4)'
+                    boxShadow: '0 0 10px rgba(60, 180, 255, 0.5)'
                   }}>
                     {user.avatar || 'AD'}
                   </div>
                   
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
                     <span style={{
-                      fontSize: '11px',
+                      fontSize: '13.5px',
                       fontWeight: 800,
                       color: 'white',
                       lineHeight: '1.2',
@@ -370,7 +370,7 @@ const Navbar = () => {
                       {user.name}
                     </span>
                     <span style={{
-                      fontSize: '8px',
+                      fontSize: '10px',
                       fontWeight: 600,
                       color: 'rgba(255, 255, 255, 0.5)',
                       lineHeight: '1',
@@ -388,8 +388,8 @@ const Navbar = () => {
                   whileTap={{ scale: 0.9 }}
                   title="Cerrar Sesión"
                   style={{
-                    width: '36px',
-                    height: '36px',
+                    width: '42px',
+                    height: '42px',
                     borderRadius: '50%',
                     backgroundColor: 'rgba(255, 255, 255, 0.03)',
                     border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -402,7 +402,7 @@ const Navbar = () => {
                     padding: 0
                   }}
                 >
-                  <LogOut size={16} />
+                  <LogOut size={18} />
                 </motion.button>
               </div>
             ) : (
@@ -413,21 +413,21 @@ const Navbar = () => {
                   style={{
                     background: 'rgba(255, 255, 255, 0.02)',
                     color: 'white',
-                    padding: '10px 20px',
+                    padding: '12px 24px',
                     borderRadius: '30px',
                     border: '1.5px solid rgba(255, 255, 255, 0.12)',
                     fontWeight: 750,
-                    fontSize: '11px',
+                    fontSize: '12px',
                     letterSpacing: '0.1em',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '8px',
+                    gap: '10px',
                     transition: 'all 0.25s ease',
                     textTransform: 'uppercase'
                   }}
                 >
-                  <UserIcon size={12} />
+                  <UserIcon size={14} />
                   <span>ACCESO ADMIN</span>
                 </motion.button>
               </Link>
