@@ -42,6 +42,7 @@ const getFutureDate = (days) => {
 
 const PurchaseOrder = () => {
   const [scale, setScale] = useState(0.65);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const updateScale = () => {
@@ -131,15 +132,45 @@ const PurchaseOrder = () => {
   };
 
   const exportarPDF = () => {
-    const element = previewRef.current;
-    html2pdf().set({
-      margin: 0,
-      filename: 'OrdenCompra_' + (documento.numero || '000') + '.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, logging: false },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak: { mode: ['avoid-all', 'css'] }
-    }).from(element).save();
+    setIsExporting(true);
+    setTimeout(() => {
+      const originalElement = previewRef.current;
+      if (!originalElement) return;
+
+      const clonedElement = originalElement.cloneNode(true);
+      
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.width = '210mm';
+      container.style.height = '297mm';
+      container.style.overflow = 'hidden';
+      container.style.background = 'white';
+
+      container.appendChild(clonedElement);
+      document.body.appendChild(container);
+
+      html2pdf().set({
+        margin: 0,
+        filename: 'OrdenCompra_' + (documento.numero || '000') + '.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2.5, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css'] }
+      }).from(clonedElement).save()
+      .then(() => {
+        document.body.removeChild(container);
+        setIsExporting(false);
+      })
+      .catch((err) => {
+        console.error('Error al exportar:', err);
+        if (document.body.contains(container)) {
+          document.body.removeChild(container);
+        }
+        setIsExporting(false);
+      });
+    }, 100);
   };
 
   const inputStyle = {
@@ -356,7 +387,7 @@ const PurchaseOrder = () => {
                   {/* Columna Izquierda: Logo - ocupa la mitad del ancho */}
                   <div style={{ width: '50%', borderRight: '2px solid #1e293b', background: 'linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', boxSizing: 'border-box', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '5px', height: '100%', background: 'linear-gradient(180deg, #3CB4FF, #D21414)' }} />
-                    <img src={logo} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 3px 10px rgba(0,0,0,0.18))' }} />
+                    <img src={logo} alt="Logo" style={{ maxWidth: '90%', maxHeight: '90%', objectFit: 'contain', filter: 'drop-shadow(0 3px 10px rgba(0,0,0,0.18))', display: 'block' }} />
                   </div>
                   {/* Columna Central: Título + empresa */}
                   <div style={{ width: '28%', borderRight: '2px solid #1e293b', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '8px 6px', textAlign: 'center', boxSizing: 'border-box', gap: '4px' }}>

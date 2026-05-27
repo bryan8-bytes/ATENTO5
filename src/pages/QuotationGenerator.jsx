@@ -133,7 +133,7 @@ const QuotationGenerator = () => {
         const loadingTask = getDocument({ data: arrayBuffer }).promise;
         const pdf = await loadingTask;
         const page = await pdf.getPage(1);
-        const scale = 2.5; // High resolution rendering
+        const scale = 5.0; // Ultra high resolution rendering for signature import
         const viewport = page.getViewport({ scale });
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
@@ -245,7 +245,25 @@ const QuotationGenerator = () => {
     setIsExporting(true);
 
     setTimeout(() => {
-      const element = previewRef.current;
+      const originalElement = previewRef.current;
+      if (!originalElement) return;
+
+      // Clonar el nodo del preview para renderizar en segundo plano
+      const clonedElement = originalElement.cloneNode(true);
+
+      // Crear un contenedor fuera de pantalla (off-screen) sin escala transformadora
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.width = '210mm';
+      container.style.height = '297mm';
+      container.style.overflow = 'hidden';
+      container.style.background = 'white';
+
+      container.appendChild(clonedElement);
+      document.body.appendChild(container);
+
       html2pdf().set({
         margin: 0,
         filename: 'Cotizacion_' + (header.numero || '000') + '.pdf',
@@ -253,15 +271,20 @@ const QuotationGenerator = () => {
         html2canvas: { scale: 2.5, useCORS: true, logging: false },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
         pagebreak: { mode: ['avoid-all', 'css'] }
-      }).from(element).save()
+      }).from(clonedElement).save()
       .then(() => {
+        // Limpiar el contenedor del DOM y restaurar estado
+        document.body.removeChild(container);
         setIsExporting(false);
       })
       .catch((err) => {
         console.error('Error al exportar PDF:', err);
+        if (document.body.contains(container)) {
+          document.body.removeChild(container);
+        }
         setIsExporting(false);
       });
-    }, 150);
+    }, 100);
   };
 
   return (
@@ -696,12 +719,11 @@ const PreviewPanel = ({
                     src={logo} 
                     alt="Logo" 
                     style={{ 
-                      width: '100%', 
-                      height: '100%', 
-                      maxWidth: '100%',
-                      maxHeight: '100%',
+                      maxWidth: '90%',
+                      maxHeight: '90%',
                       objectFit: 'contain', 
-                      filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))' 
+                      filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.12))',
+                      display: 'block'
                     }} 
                   />
                 </div>
@@ -865,17 +887,15 @@ const PreviewPanel = ({
                   padding: '2px'
                 }}>
                   {cierre.firmaImagen ? (
-                    <div 
+                    <div
                       style={{
-                        position: 'relative',
+                        position: 'absolute',
                         width: '100%',
                         height: '100%',
-                        background: 'transparent',
+                        overflow: 'visible',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxSizing: 'border-box',
-                        overflow: 'visible',
                         zIndex: 10
                       }}
                     >
@@ -884,13 +904,14 @@ const PreviewPanel = ({
                         alt="Firma Digital"
                         style={{
                           position: 'absolute',
-                          width: `${(cierre.firmaZoom || 1) * 100}%`,
-                          height: `${(cierre.firmaZoom || 1) * 100}%`,
-                          left: `${(1 - (cierre.firmaZoom || 1)) * 50}%`,
-                          top: `${(1 - (cierre.firmaZoom || 1)) * 50}%`,
-                          marginLeft: `${cierre.firmaX || 0}px`,
-                          marginTop: `${cierre.firmaY || 0}px`,
-                          objectFit: 'contain',
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          width: 'auto',
+                          height: 'auto',
+                          left: '50%',
+                          top: '50%',
+                          transform: `translate(calc(-50% + ${cierre.firmaX || 0}px), calc(-50% + ${cierre.firmaY || 0}px)) scale(${cierre.firmaZoom || 1})`,
+                          transformOrigin: 'center center',
                           display: 'block',
                           imageRendering: 'auto'
                         }}
