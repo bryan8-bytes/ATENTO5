@@ -12,7 +12,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState('INICIO');
   const [isOpen, setIsOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1280);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 1280 : false);
 
   const navLinks = [
     { name: 'INICIO', id: 'hero' },
@@ -28,7 +28,7 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1280);
       if (window.innerWidth >= 1280) {
@@ -38,7 +38,7 @@ const Navbar = () => {
 
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('resize', handleResize);
-    
+
     handleScroll();
     handleResize();
 
@@ -48,13 +48,12 @@ const Navbar = () => {
     };
   }, []);
 
-  // ScrollSpy to highlight nav links as user scrolls down the home page
   useEffect(() => {
     if (location.pathname !== '/home') return;
 
     const handleScrollSpy = () => {
-      const scrollPosition = window.scrollY + 150; // offset for navbar height
-      
+      const scrollPosition = window.scrollY + 150;
+
       for (const link of navLinks) {
         const el = document.getElementById(link.id);
         if (el) {
@@ -77,7 +76,6 @@ const Navbar = () => {
     setActiveLink(linkName);
     if (location.pathname !== '/home') {
       navigate('/home');
-      // Delay slightly to allow navigation page load before scrolling
       setTimeout(() => {
         const element = document.getElementById(linkId);
         if (element) {
@@ -100,14 +98,15 @@ const Navbar = () => {
         left: 0,
         right: 0,
         zIndex: 50,
-        background: isScrolled 
-          ? 'rgba(5, 11, 20, 0.95)' 
-          : 'rgba(5, 11, 20, 0.4)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: isScrolled ? '1px solid rgba(60, 180, 255, 0.2)' : '1px solid transparent',
+        background: isScrolled
+          ? 'rgba(5, 11, 20, 0.85)'
+          : 'rgba(5, 11, 20, 0.6)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderBottom: isScrolled ? '1px solid rgba(60, 180, 255, 0.12)' : '1px solid transparent',
         transition: 'all 0.4s ease',
-        boxShadow: isScrolled 
-          ? '0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(60, 180, 255, 0.15)' 
+        boxShadow: isScrolled
+          ? '0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(60, 180, 255, 0.08)'
           : 'none',
       }}
       initial={{ y: -100, opacity: 0 }}
@@ -118,22 +117,21 @@ const Navbar = () => {
         width: '100%',
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '0 20px',
+        padding: '0 24px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         gap: '32px',
-        height: '140px', // Premium height
+        height: '80px',
         boxSizing: 'border-box',
         position: 'relative',
         overflow: 'visible'
       }}>
-        {/* LOGO COLUMN */}
-        <Link 
-          to="/home" 
-          style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+        <Link
+          to="/home"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
             textDecoration: 'none',
             gap: '16px',
             flexShrink: 0
@@ -144,7 +142,6 @@ const Navbar = () => {
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
             style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
           >
-            {/* Dual Glow effect */}
             <motion.div
               style={{
                 position: 'absolute',
@@ -168,12 +165,12 @@ const Navbar = () => {
               whileTap={{ scale: 0.95 }}
               style={{ position: 'relative', zIndex: 1 }}
             >
-              <img 
-                src={logo} 
-                alt="ATENTO5" 
-                style={{ 
-                  height: '250px', 
-                  width: '250px',
+              <img
+                src={logo}
+                alt="ATENTO5"
+                style={{
+                  height: '70px',
+                  width: '70px',
                   objectFit: 'contain',
                   display: 'block',
                   filter: 'drop-shadow(0 0 25px rgba(60, 180, 255, 0.85))',
@@ -181,76 +178,16 @@ const Navbar = () => {
               />
             </motion.div>
           </motion.div>
-          
-
         </Link>
 
-        {/* DESKTOP CENTER NAVIGATION LINKS */}
-        {!isMobile && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            margin: '0 12px',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              padding: '6px 12px',
-              borderRadius: '30px',
-              backdropFilter: 'blur(10px)',
-            }}>
-              {navLinks.map((link) => (
-                <motion.div
-                  key={link.name}
-                  whileHover={{ transition: { duration: 0.1, delay: 0 }, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <button
-                    onClick={() => handleNavClick(link.id, link.name)}
-                    style={{
-                      padding: '8px 18px',
-                      fontSize: '13.5px',
-                      fontWeight: 750,
-                      letterSpacing: '0.08em',
-                      color: activeLink === link.name ? '#3CB4FF' : 'rgba(229, 231, 235, 0.75)',
-                      background: activeLink === link.name 
-                        ? 'linear-gradient(135deg, rgba(60, 180, 255, 0.15) 0%, rgba(210, 20, 20, 0.1) 100%)' 
-                        : 'transparent',
-                      border: activeLink === link.name 
-                        ? '1px solid rgba(60, 180, 255, 0.4)' 
-                        : '1px solid transparent',
-                      borderRadius: '20px',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      boxShadow: activeLink === link.name ? '0 0 15px rgba(60, 180, 255, 0.1)' : 'none',
-                    }}
-                  >
-                    {link.name}
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* DESKTOP RIGHT ACTIONS COLUMN */}
-        {!isMobile && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            flexShrink: 0
-          }}>
-            <Link to="/cotizador" style={{ textDecoration: 'none' }}>
+        <div className="hidden sm:flex items-center gap-1">
+          {user && (
+            <Link to="/correo" style={{ textDecoration: 'none' }}>
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(60, 180, 255, 0.4)' }}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(167,139,250,0.5)' }}
                 whileTap={{ scale: 0.95 }}
                 style={{
-                  background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
+                  background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
                   color: 'white',
                   padding: '10px 22px',
                   borderRadius: '30px',
@@ -259,183 +196,126 @@ const Navbar = () => {
                   fontSize: '12.5px',
                   letterSpacing: '0.08em',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(60, 180, 255, 0.3)',
+                  boxShadow: '0 4px 15px rgba(124,58,237,0.35)',
                   transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '7px',
                 }}
               >
-                COTIZAR
+                <Mail size={14} />
+                CORREO
               </motion.button>
             </Link>
-            
-            <Link to="/purchase-order" style={{ textDecoration: 'none' }}>
+          )}
+
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <motion.div
+                whileHover={{ scale: 1.03 }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.15) 0%, rgba(210, 20, 20, 0.08) 100%)',
+                  border: '1px solid rgba(60, 180, 255, 0.3)',
+                  borderRadius: '30px',
+                  padding: '6px 18px 6px 6px',
+                  backdropFilter: 'blur(10px)',
+                  boxShadow: '0 0 20px rgba(60, 180, 255, 0.15)'
+                }}
+              >
+                <div style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  color: 'white',
+                  boxShadow: '0 0 10px rgba(60, 180, 255, 0.5)'
+                }}>
+                  {user.avatar || 'AD'}
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{
+                    fontSize: '13.5px',
+                    fontWeight: 800,
+                    color: 'white',
+                    lineHeight: '1.2',
+                    letterSpacing: '0.02em'
+                  }}>
+                    {user.name}
+                  </span>
+                  <span style={{
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    color: 'rgba(255, 255, 255, 0.5)',
+                    lineHeight: '1',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
+                  }}>
+                    {user.role}
+                  </span>
+                </div>
+              </motion.div>
+
               <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(16, 185, 129, 0.4)' }}
+                onClick={logout}
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.4)' }}
+                whileTap={{ scale: 0.9 }}
+                title="Cerrar Sesión"
+                style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease',
+                  padding: 0
+                }}
+              >
+                <LogOut size={18} />
+              </motion.button>
+            </div>
+          ) : (
+            <Link to="/login" style={{ textDecoration: 'none' }}>
+              <motion.button
+                whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.08)', boxShadow: '0 0 15px rgba(255,255,255,0.05)' }}
                 whileTap={{ scale: 0.95 }}
                 style={{
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  background: 'rgba(255, 255, 255, 0.02)',
                   color: 'white',
-                  padding: '10px 22px',
+                  padding: '12px 24px',
                   borderRadius: '30px',
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: '12.5px',
-                  letterSpacing: '0.05em',
+                  border: '1.5px solid rgba(255, 255, 255, 0.12)',
+                  fontWeight: 750,
+                  fontSize: '12px',
+                  letterSpacing: '0.1em',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  transition: 'all 0.25s ease',
+                  textTransform: 'uppercase'
                 }}
               >
-                ORDEN DE COMPRA
+                <UserIcon size={14} />
+                <span>ACCESO ADMIN</span>
               </motion.button>
             </Link>
+          )}
+        </div>
 
-            {/* Email button — only visible when logged in */}
-            {user && (
-              <Link to="/email" style={{ textDecoration: 'none' }}>
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(167,139,250,0.5)' }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
-                    color: 'white',
-                    padding: '10px 22px',
-                    borderRadius: '30px',
-                    border: 'none',
-                    fontWeight: 800,
-                    fontSize: '12.5px',
-                    letterSpacing: '0.08em',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 15px rgba(124,58,237,0.35)',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                  }}
-                >
-                  <Mail size={14} />
-                  CORREO
-                </motion.button>
-              </Link>
-            )}
-
-            {/* Vertical Divider */}
-            <span style={{ 
-              height: '24px', 
-              width: '1px', 
-              background: 'rgba(255, 255, 255, 0.15)',
-              margin: '0 4px' 
-            }} />
-
-            {/* Auth capsule */}
-            {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <motion.div 
-                  whileHover={{ scale: 1.03 }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.15) 0%, rgba(210, 20, 20, 0.08) 100%)',
-                    border: '1px solid rgba(60, 180, 255, 0.3)',
-                    borderRadius: '30px',
-                    padding: '6px 18px 6px 6px',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 0 20px rgba(60, 180, 255, 0.15)'
-                  }}
-                >
-                  <div style={{
-                    width: '38px',
-                    height: '38px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '13px',
-                    fontWeight: 800,
-                    color: 'white',
-                    boxShadow: '0 0 10px rgba(60, 180, 255, 0.5)'
-                  }}>
-                    {user.avatar || 'AD'}
-                  </div>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{
-                      fontSize: '13.5px',
-                      fontWeight: 800,
-                      color: 'white',
-                      lineHeight: '1.2',
-                      letterSpacing: '0.02em'
-                    }}>
-                      {user.name}
-                    </span>
-                    <span style={{
-                      fontSize: '10px',
-                      fontWeight: 600,
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      lineHeight: '1',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em'
-                    }}>
-                      {user.role}
-                    </span>
-                  </div>
-                </motion.div>
-
-                <motion.button
-                  onClick={logout}
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.4)' }}
-                  whileTap={{ scale: 0.9 }}
-                  title="Cerrar Sesión"
-                  style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '50%',
-                    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                    border: '1px solid rgba(255, 255, 255, 0.08)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease',
-                    padding: 0
-                  }}
-                >
-                  <LogOut size={18} />
-                </motion.button>
-              </div>
-            ) : (
-              <Link to="/login" style={{ textDecoration: 'none' }}>
-                <motion.button
-                  whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.08)', boxShadow: '0 0 15px rgba(255,255,255,0.05)' }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.02)',
-                    color: 'white',
-                    padding: '12px 24px',
-                    borderRadius: '30px',
-                    border: '1.5px solid rgba(255, 255, 255, 0.12)',
-                    fontWeight: 750,
-                    fontSize: '12px',
-                    letterSpacing: '0.1em',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    transition: 'all 0.25s ease',
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  <UserIcon size={14} />
-                  <span>ACCESO ADMIN</span>
-                </motion.button>
-              </Link>
-            )}
-          </div>
-        )}
-
-        {/* MOBILE HAMBURGER BUTTON */}
         {isMobile && (
           <motion.button
             onClick={() => setIsOpen(!isOpen)}
@@ -461,11 +341,9 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* MOBILE DRAWER */}
       <AnimatePresence>
         {isMobile && isOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -483,7 +361,6 @@ const Navbar = () => {
               }}
             />
 
-            {/* Sidebar menu */}
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
@@ -499,6 +376,7 @@ const Navbar = () => {
                 height: '100vh',
                 background: 'rgba(5, 11, 20, 0.98)',
                 backdropFilter: 'blur(30px)',
+                WebkitBackdropFilter: 'blur(30px)',
                 borderLeft: '1px solid rgba(60, 180, 255, 0.2)',
                 boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.7)',
                 zIndex: 90,
@@ -509,11 +387,10 @@ const Navbar = () => {
                 justifyContent: 'space-between',
               }}
             >
-              {/* Menu Links */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '12px' 
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px'
               }}>
                 <span style={{
                   fontSize: '11px',
@@ -553,7 +430,6 @@ const Navbar = () => {
                 ))}
               </div>
 
-              {/* Actions Area */}
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -572,7 +448,7 @@ const Navbar = () => {
                 }}>
                   Área Administrativa
                 </span>
-                
+
                 <Link to="/cotizador" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -594,7 +470,7 @@ const Navbar = () => {
                     COTIZAR
                   </motion.button>
                 </Link>
-                
+
                 <Link to="/purchase-order" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -617,9 +493,8 @@ const Navbar = () => {
                   </motion.button>
                 </Link>
 
-                {/* Mobile email button */}
                 {user && (
-                  <Link to="/email" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
+                  <Link to="/correo" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -647,9 +522,9 @@ const Navbar = () => {
                 )}
 
                 {user ? (
-                  <div style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.1) 0%, rgba(210, 20, 20, 0.05) 100%)',
                     border: '1px solid rgba(60, 180, 255, 0.2)',

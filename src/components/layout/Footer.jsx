@@ -1,47 +1,241 @@
 import { motion } from 'framer-motion'
+import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Youtube, ArrowUp } from 'lucide-react'
+import logo from '../../assets/Logo Atento5.png'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  const socialLinks = [
+    { icon: <Facebook size={18} />, label: 'Facebook', href: '#' },
+    { icon: <Instagram size={18} />, label: 'Instagram', href: '#' },
+    { icon: <Linkedin size={18} />, label: 'LinkedIn', href: '#' },
+    { icon: <Youtube size={18} />, label: 'YouTube', href: '#' }
+  ]
+
+  const quickLinks = [
+    { label: 'Inicio', href: '#hero' },
+    { label: 'Nosotros', href: '#nosotros' },
+    { label: 'Misión y Visión', href: '#mision-vision' },
+    { label: 'Servicios', href: '#servicios' },
+    { label: 'Contacto', href: '#contacto' }
+  ]
+
+  const services = [
+    'Mantenimiento General',
+    'Pintura y Acabados',
+    'Construcción',
+    'Obras Civiles',
+    'Limpieza Industrial',
+    'Instalaciones Eléctricas'
+  ]
+
   return (
-    <footer className="bg-dark-900 py-12 border-t border-dark-700">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-           {/* Company Info */}
-           <div className="col-span-1 md:col-span-2">
-             <div className="flex items-center gap-2 mb-4">
-               <span className="text-faguade-light-blue text-xl font-bold">ATENTO5</span>
-             </div>
-            <p className="text-gray-400 mb-4">
-              Servicios Generales E.I.R.L. - Soluciones integrales con excelencia 
-              y compromiso para tu empresa.
-            </p>
-            <p className="text-gray-500 text-sm">
-              © {currentYear} ATENTO5. Todos los derechos reservados.
-            </p>
-          </div>
+    <footer style={{
+      background: 'linear-gradient(180deg, rgba(11, 18, 32, 0.95) 0%, rgba(5, 11, 20, 1) 100%)',
+      borderTop: '1px solid rgba(255,255,255,0.05)',
+      padding: '80px 0 30px'
+    }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Enlaces Rápidos</h4>
-            <ul className="space-y-2">
-              <li><a href="#hero" className="text-gray-400 hover:text-faguade-light-blue transition-colors">Inicio</a></li>
-              <li><a href="#about" className="text-gray-400 hover:text-faguade-light-blue transition-colors">Nosotros</a></li>
-              <li><a href="#services" className="text-gray-400 hover:text-faguade-light-blue transition-colors">Servicios</a></li>
-              <li><a href="#contact" className="text-gray-400 hover:text-faguade-light-blue transition-colors">Contacto</a></li>
-            </ul>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '48px' }}
+        >
+          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <motion.div
+              style={{ position: 'absolute', inset: '-20px', borderRadius: '50%', filter: 'blur(20px)' }}
+              animate={{
+                background: [
+                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(210, 20, 20,0.25) 0%, transparent 70%)',
+                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)'
+                ],
+                scale: [1, 1.2, 1],
+                opacity: [0.5, 0.8, 0.5]
+              }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.img
+              src={logo}
+              alt="ATENTO5"
+              style={{
+                height: '400px',
+                width: '400px',
+                objectFit: 'contain',
+                position: 'relative',
+                zIndex: 1,
+                filter: 'drop-shadow(0 0 30px rgba(60, 180, 255, 0.7))',
+              }}
+              animate={{ y: [-5, 5, -5] }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            />
           </div>
+          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'center' }}>
+            SERVICIOS GENERALES E.I.R.L.
+          </p>
+          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.4)', marginBottom: '20px', lineHeight: 1.6, textAlign: 'center', maxWidth: '480px' }}>
+            Comprometidos con la excelencia en cada proyecto. Soluciones integrales para tus necesidades de servicios generales.
+          </p>
 
-          {/* Services */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Servicios</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li>Mantenimiento General</li>
-              <li>Logística</li>
-              <li>Consultoría</li>
-              <li>Servicios Industriales</li>
-            </ul>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            {socialLinks.map((social, index) => (
+              <motion.a
+                key={index}
+                href={social.href}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '10px',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'rgba(229, 231, 235, 0.5)',
+                  textDecoration: 'none'
+                }}
+                whileHover={{ scale: 1.1, background: 'rgba(60, 180, 255, 0.1)', borderColor: 'rgba(60, 180, 255, 0.3)', color: '#3CB4FF' }}
+              >
+                {social.icon}
+              </motion.a>
+            ))}
           </div>
+        </motion.div>
+
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginBottom: '48px' }} />
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+          gap: '48px',
+          marginBottom: '48px'
+        }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '24px' }}>
+              Enlaces Rápidos
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {quickLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  style={{
+                    fontSize: '14px',
+                    color: 'rgba(229, 231, 235, 0.5)',
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = '#3CB4FF'}
+                  onMouseLeave={(e) => e.target.style.color = 'rgba(229, 231, 235, 0.5)'}
+                >
+                  <span style={{ color: 'rgba(60, 180, 255, 0.5)', fontSize: '10px' }}>▸</span>
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '24px' }}>
+              Nuestros Servicios
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {services.map((service) => (
+                <span
+                  key={service}
+                  style={{
+                    fontSize: '13px',
+                    color: 'rgba(229, 231, 235, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <span style={{ color: 'rgba(60, 180, 255, 0.5)', fontSize: '10px' }}>▸</span>
+                  {service}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+          >
+            <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '24px' }}>
+              Información de Contacto
+            </h4>
+            <div style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', lineHeight: 2.2 }}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Phone size={14} style={{ color: '#3CB4FF' }} />
+                +51 955 295 390
+              </p>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Mail size={14} style={{ color: '#3CB4FF' }} />
+                Juan.ampuero@atento5.com
+              </p>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <MapPin size={14} style={{ color: '#3CB4FF' }} />
+                Lima, Perú
+              </p>
+            </div>
+          </motion.div>
+        </div>
+
+        <div style={{
+          paddingTop: '30px',
+          borderTop: '1px solid rgba(255,255,255,0.05)',
+          display: 'flex',
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '16px'
+        }}>
+          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.3)' }}>
+            © {currentYear} ATENTO5 SERVICIOS GENERALES E.I.R.L. Todos los derechos reservados.
+          </p>
+
+          <motion.button
+            onClick={scrollToTop}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '13px',
+              color: 'rgba(229, 231, 235, 0.4)',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '10px',
+              padding: '10px 18px',
+              cursor: 'pointer'
+            }}
+            whileHover={{ y: -3, color: '#3CB4FF', borderColor: 'rgba(60, 180, 255, 0.3)' }}
+          >
+            <ArrowUp size={14} />
+            <span>Volver arriba</span>
+          </motion.button>
         </div>
       </div>
     </footer>

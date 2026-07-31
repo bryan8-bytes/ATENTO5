@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wrench, Paintbrush, Building2, Truck, Construction, ClipboardCheck, Sparkles, Zap, Trees, Lock, Lightbulb, FileCheck, Square, Droplets, Flame, Shield, ChevronDown, Plus, Minus } from 'lucide-react';
 
-// Service images - using placeholder gradient backgrounds with icons
 const getServiceImage = index => {
   return index % 2 === 0 ? 'linear-gradient(135deg, rgba(60, 180, 255,0.2), rgba(60, 180, 255,0.05))' : 'linear-gradient(135deg, rgba(210, 20, 20,0.2), rgba(210, 20, 20,0.05))';
 };
@@ -121,257 +120,36 @@ const services = [{
 }];
 const Services = () => {
   const [expandedIndex, setExpandedIndex] = useState(null);
-
-  const toggleExpand = (index) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
-  return <section id="servicios" style={{
-    padding: '120px 0',
-    position: 'relative'
-  }}>
-      <div style={{
-      maxWidth: '1400px',
-      margin: '0 auto',
-      padding: '0 24px'
-    }}>
-        {/* Section Header */}
-        <motion.div style={{
-        textAlign: 'center',
-        marginBottom: '70px'
-      }} initial={{
-        opacity: 0,
-        y: 30
-      }} whileInView={{
-        opacity: 1,
-        y: 0
-      }} viewport={{
-        once: true
-      }} transition={{
-        duration: 0.6
-      }}>
-          <div style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          padding: '10px 24px',
-          borderRadius: '30px',
-          fontSize: '12px',
-          fontWeight: 600,
-          background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.15), rgba(210, 20, 20, 0.15))',
-          color: '#3CB4FF',
-          border: '1px solid rgba(60, 180, 255, 0.3)',
-          marginBottom: '20px',
-          letterSpacing: '0.1em'
-        }}>
-            ¿QUÉ HACEMOS?
-          </div>
-          <h2 style={{
-          fontSize: 'clamp(2rem, 5vw, 3rem)',
-          fontWeight: 800,
-          marginBottom: '20px'
-        }}>
-            <span style={{
-            background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-              Nuestros Servicios
-            </span>
+  const toggleExpand = (index) => { setExpandedIndex(expandedIndex === index ? null : index); };
+  return <section id="servicios" style={{ padding: '140px 0', position: 'relative' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 70% 30%, rgba(210, 20, 20, 0.03) 0%, transparent 60%)' }} />
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px', position: 'relative', zIndex: 1 }}>
+        <motion.div style={{ textAlign: 'center', marginBottom: '80px' }} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', padding: '10px 24px', borderRadius: '30px', fontSize: '12px', fontWeight: 600, background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.15), rgba(210, 20, 20, 0.15))', color: '#3CB4FF', border: '1px solid rgba(60, 180, 255, 0.3)', marginBottom: '20px', letterSpacing: '0.1em' }}>¿QUÉ HACEMOS?</div>
+          <h2 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, marginBottom: '20px' }}>
+            <span style={{ background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Nuestros Servicios</span>
           </h2>
-          <p style={{
-          fontSize: 'clamp(1rem, 2vw, 1.15rem)',
-          color: 'rgba(229, 231, 235, 0.5)',
-          maxWidth: '700px',
-          margin: '0 auto',
-          lineHeight: 1.7
-        }}>
-            Soluciones integrales y especializadas para cada necesidad de tu empresa o proyecto. 
-            Contamos con expertos en cada área para garantizar resultados excepcionales.
-          </p>
+          <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: 'rgba(229, 231, 235, 0.5)', maxWidth: '700px', margin: '0 auto', lineHeight: 1.7 }}>Soluciones integrales y especializadas para cada necesidad de tu empresa o proyecto. Contamos con expertos en cada área para garantizar resultados excepcionales.</p>
         </motion.div>
 
-        {/* Services Grid - 3 columns on desktop */}
-        <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-        gap: '24px'
-      }}>
-          {services.map((service, index) => <motion.div key={index} style={{
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1px solid rgba(255, 255, 255, 0.06)',
-          borderRadius: '20px',
-          padding: '32px',
-          backdropFilter: 'blur(10px)',
-          cursor: 'pointer',
-          position: 'relative',
-          overflow: 'hidden'
-        }} initial={{
-          opacity: 0,
-          y: 30
-        }} whileInView={{
-          opacity: 1,
-          y: 0,
-          transition: {
-            duration: 0.5,
-            delay: index * 0.08
-          }
-        }} viewport={{
-          once: true
-        }} whileHover={{ transition: {
-            duration: 0.1,
-            delay: 0
-          },
-          scale: 1.05,
-          background: 'linear-gradient(135deg, rgba(60, 180, 255,0.1) 0%, rgba(210, 20, 20,0.1) 100%)',
-          borderColor: 'rgba(255, 255, 255, 0.1)',
-          boxShadow: '-10px 0px 30px rgba(60, 180, 255, 0.4), 10px 0px 30px rgba(210, 20, 20, 0.4)'
-        }}>
-              {/* Hover effect */}
-              <div style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '3px',
-            background: 'linear-gradient(90deg, #3CB4FF, #D21414)',
-            transform: 'scaleX(0)',
-            transformOrigin: 'left',
-            transition: 'transform 0.3s ease'
-          }} />
-              
-              <div style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            marginBottom: '20px'
-          }}>
-                {/* Image instead of icon */}
-                <div style={{
-              width: '56px',
-              height: '56px',
-              borderRadius: '14px',
-              background: getServiceImage(index),
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: index % 2 === 0 ? '#3CB4FF' : '#D21414'
-            }}>
-                  {service.icon}
-                </div>
-                <motion.div onClick={(e) => { e.stopPropagation(); toggleExpand(index); }} style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              background: expandedIndex === index ? 'linear-gradient(135deg, rgba(60, 180, 255,0.25), rgba(210, 20, 20,0.25))' : 'rgba(255,255,255,0.04)',
-              border: expandedIndex === index ? '1px solid rgba(60, 180, 255,0.5)' : '1px solid rgba(255,255,255,0.08)',
-              flexShrink: 0
-            }} whileHover={{
-              scale: 1.15,
-              background: 'linear-gradient(135deg, rgba(60, 180, 255,0.2), rgba(210, 20, 20,0.2))',
-              boxShadow: index % 2 === 0 ? '0 0 20px rgba(60, 180, 255,0.4), 0 0 40px rgba(60, 180, 255,0.15)' : '0 0 20px rgba(210, 20, 20,0.4), 0 0 40px rgba(210, 20, 20,0.15)',
-              borderColor: index % 2 === 0 ? 'rgba(60, 180, 255,0.6)' : 'rgba(210, 20, 20,0.6)'
-            }} whileTap={{
-              scale: 0.9
-            }} transition={{
-              duration: 0.2
-            }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px' }}>
+          {services.map((service, index) => <motion.div key={index} style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '20px', padding: '32px', backdropFilter: 'blur(10px)', cursor: 'pointer', position: 'relative', overflow: 'hidden' }} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0, transition: { duration: 0.5, delay: index * 0.08 } }} viewport={{ once: true }} whileHover={{ transition: { duration: 0.1, delay: 0 }, scale: 1.05, background: 'linear-gradient(135deg, rgba(60, 180, 255,0.1) 0%, rgba(210, 20, 20,0.1) 100%)', borderColor: 'rgba(255, 255, 255, 0.1)', boxShadow: '-10px 0px 30px rgba(60, 180, 255, 0.4), 10px 0px 30px rgba(210, 20, 20, 0.4)' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '3px', background: 'linear-gradient(90deg, #3CB4FF, #D21414)', transform: 'scaleX(0)', transformOrigin: 'left', transition: 'transform 0.3s ease' }} />
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px' }}>
+                <div style={{ width: '56px', height: '56px', borderRadius: '14px', background: getServiceImage(index), display: 'flex', alignItems: 'center', justifyContent: 'center', color: index % 2 === 0 ? '#3CB4FF' : '#D21414' }}>{service.icon}</div>
+                <motion.div onClick={(e) => { e.stopPropagation(); toggleExpand(index); }} style={{ width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', background: expandedIndex === index ? 'linear-gradient(135deg, rgba(60, 180, 255,0.25), rgba(210, 20, 20,0.25))' : 'rgba(255,255,255,0.04)', border: expandedIndex === index ? '1px solid rgba(60, 180, 255,0.5)' : '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }} whileHover={{ scale: 1.15, background: 'linear-gradient(135deg, rgba(60, 180, 255,0.2), rgba(210, 20, 20,0.2))', boxShadow: index % 2 === 0 ? '0 0 20px rgba(60, 180, 255,0.4), 0 0 40px rgba(60, 180, 255,0.15)' : '0 0 20px rgba(210, 20, 20,0.4), 0 0 40px rgba(210, 20, 20,0.15)', borderColor: index % 2 === 0 ? 'rgba(60, 180, 255,0.6)' : 'rgba(210, 20, 20,0.6)' }} whileTap={{ scale: 0.9 }} transition={{ duration: 0.2 }}>
                   <AnimatePresence mode="wait">
-                    {expandedIndex === index ? <motion.div key="minus" initial={{
-                  scale: 0,
-                  opacity: 0,
-                  rotate: -90
-                }} animate={{
-                  scale: 1,
-                  opacity: 1,
-                  rotate: 0
-                }} exit={{
-                  scale: 0,
-                  opacity: 0,
-                  rotate: 90
-                }} transition={{
-                  duration: 0.2
-                }}>
-                        <Minus size={20} color={index % 2 === 0 ? '#3CB4FF' : '#D21414'} strokeWidth={2.5} />
-                      </motion.div> : <motion.div key="plus" initial={{
-                  scale: 0,
-                  opacity: 0,
-                  rotate: 90
-                }} animate={{
-                  scale: 1,
-                  opacity: 1,
-                  rotate: 0
-                }} exit={{
-                  scale: 0,
-                  opacity: 0,
-                  rotate: -90
-                }} transition={{
-                  duration: 0.2
-                }}>
-                        <Plus size={20} color={index % 2 === 0 ? '#3CB4FF' : '#D21414'} strokeWidth={2.5} />
-                      </motion.div>}
+                    {expandedIndex === index ? <motion.div key="minus" initial={{ scale: 0, opacity: 0, rotate: -90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0, opacity: 0, rotate: 90 }} transition={{ duration: 0.2 }}><Minus size={20} color={index % 2 === 0 ? '#3CB4FF' : '#D21414'} strokeWidth={2.5} /></motion.div> : <motion.div key="plus" initial={{ scale: 0, opacity: 0, rotate: 90 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0, opacity: 0, rotate: -90 }} transition={{ duration: 0.2 }}><Plus size={20} color={index % 2 === 0 ? '#3CB4FF' : '#D21414'} strokeWidth={2.5} /></motion.div>}
                   </AnimatePresence>
                 </motion.div>
               </div>
-              
-              <h3 style={{
-            fontSize: '20px',
-            fontWeight: 700,
-            color: 'white',
-            marginBottom: '12px'
-          }}>
-                {service.title}
-              </h3>
-              <p style={{
-            fontSize: '14px',
-            color: 'rgba(229, 231, 235, 0.5)',
-            lineHeight: 1.6,
-            marginBottom: '16px'
-          }}>
-                {service.desc}
-              </p>
+              <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'white', marginBottom: '12px' }}>{service.title}</h3>
+              <p style={{ fontSize: '14px', color: 'rgba(229, 231, 235, 0.5)', lineHeight: 1.6, marginBottom: '16px' }}>{service.desc}</p>
               <AnimatePresence>
-                {expandedIndex === index && <motion.p initial={{
-              height: 0,
-              opacity: 0
-            }} animate={{
-              height: 'auto',
-              opacity: 1
-            }} exit={{
-              height: 0,
-              opacity: 0
-            }} transition={{
-              duration: 0.3
-            }} style={{
-              fontSize: '14px',
-              color: 'rgba(229, 231, 235, 0.45)',
-              lineHeight: 1.7,
-              marginBottom: '16px',
-              overflow: 'hidden'
-            }}>
-                    {service.content}
-                  </motion.p>}
+                {expandedIndex === index && <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} style={{ fontSize: '14px', color: 'rgba(229, 231, 235, 0.45)', lineHeight: 1.7, marginBottom: '16px', overflow: 'hidden' }}>{service.content}</motion.p>}
               </AnimatePresence>
-              
-              {/* Features list */}
-              <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '8px'
-          }}>
-                {service.features.map((feature, fIndex) => <span key={fIndex} style={{
-              padding: '4px 10px',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              borderRadius: '12px',
-              fontSize: '11px',
-              color: 'rgba(229, 231, 235, 0.5)'
-            }}>
-                    {feature}
-                  </span>)}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {service.features.map((feature, fIndex) => <span key={fIndex} style={{ padding: '4px 10px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.06)', borderRadius: '12px', fontSize: '11px', color: 'rgba(229, 231, 235, 0.5)' }}>{feature}</span>)}
               </div>
             </motion.div>)}
         </div>

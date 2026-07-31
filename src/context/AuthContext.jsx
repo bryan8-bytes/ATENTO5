@@ -2,43 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const AuthContext = createContext(null);
 
-const AUTHORIZED_USERS = [
-  {
-    email: 'Juan.ampuero@atento5.com',
-    password: '4B@}K?3DmgR!Nuq@',
-    name: 'Juan Ampuero',
-    role: 'Administrador General',
-    avatar: 'JA'
-  },
-  {
-    email: 'Corina.anorga@atento5.com',
-    password: '5VWwcTyp3iB8PY7',
-    name: 'Corina Anorga',
-    role: 'Finanzas',
-    avatar: 'CA'
-  },
-  {
-    email: 'Proyectos@atento5.com',
-    password: '7ZjFHR#HtwbW53(C',
-    name: 'Proyectos',
-    role: 'Gestión de Proyectos',
-    avatar: 'PR'
-  },
-  {
-    email: 'Ventas@atento5.com',
-    password: 'MV}FgL4xmGkt4cav',
-    name: 'Ventas',
-    role: 'Gestión Comercial',
-    avatar: 'VE'
-  },
-  {
-    email: 'Operaciones@atento5.com',
-    password: 'rHxl.dgL&!tNgSeT',
-    name: 'Operaciones',
-    role: 'Operaciones',
-    avatar: 'OP'
-  }
-];
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -46,52 +10,119 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user session is persisted in localStorage
-    const savedUser = localStorage.getItem('a5_admin_session');
-    if (savedUser) {
+    const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
+    
+    if (token && savedUser) {
       try {
         setUser(JSON.parse(savedUser));
+        // Verify token with backend
+        verifyToken(token);
       } catch (e) {
         console.error('Error parsing session data', e);
-        localStorage.removeItem('a5_admin_session');
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
       }
     }
     setLoading(false);
   }, []);
 
-  const login = (email, password) => {
-    return new Promise((resolve, reject) => {
-      // Simulate slight network latency for premium micro-animations
-      setTimeout(() => {
-        const foundUser = AUTHORIZED_USERS.find(
-          (u) => u.email.toLowerCase() === email.trim().toLowerCase()
-        );
-
-        if (!foundUser) {
-          reject(new Error('El correo electrónico no está registrado o no tiene acceso administrativo.'));
-          return;
+  const verifyToken = async (token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/verify`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
+      });
+      
+      if (!response.ok) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
+    }
+  };
 
-        if (foundUser.password !== password) {
-          reject(new Error('La contraseña ingresada es incorrecta.'));
-          return;
+  const login = async (email, password, imapPassword) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+
+      // If IMAP password provided, update user record
+      if (imapPassword) {
+        try {
+          await fetch(`${API_URL}/auth/update-imap`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${data.token}`
+            },
+            body: JSON.stringify({ imapPassword })
+          });
+        } catch (error) {
+          console.error('Failed to update IMAP password:', error);
         }
+      }
 
-        // Exclude the password before saving to state and localStorage
-        const { password: _, ...userSession } = foundUser;
-        setUser(userSession);
-        localStorage.setItem('a5_admin_session', JSON.stringify(userSession));
-        resolve(userSession);
-      }, 800);
-    });
+      return data.user;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const register = async (email, password, name, imapPassword, role = 'user') => {
+    try {
+      const response = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password, name, imapPassword, role })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+
+      return data.user;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('a5_admin_session');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

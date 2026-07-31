@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 export default function GradientText({ children, className = '' }) {
   return (
     <motion.span
-      className={`bg-gradient-to-r from-faguade-light-blue via-faguade-yellow to-faguade-light-blue bg-clip-text text-transparent ${className}`}
+      className={`bg-gradient-to-r from-[var(--color-electric)] via-[var(--color-celeste)] to-[var(--color-electric)] bg-clip-text text-transparent ${className}`}
       style={{
         backgroundSize: '200% 200%',
       }}

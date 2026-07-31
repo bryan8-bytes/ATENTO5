@@ -1,10 +1,18 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
 
 const Intro = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate('/home');
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   const handleEnter = (e) => {
     e.stopPropagation();
