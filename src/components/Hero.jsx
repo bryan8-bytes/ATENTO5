@@ -2,7 +2,8 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, ShieldCheck, Wrench, MessageCircle } from 'lucide-react'
 import GradientText from './ui/GradientText'
-import heroImg from '../assets/hero.png'
+import logo from '../assets/Logo Atento5.png'
+import heroBg from '../assets/hero-bg.png'
 
 const socialLinks = [
   { label: 'facebook', icon: 'f', href: '#' },
@@ -51,7 +52,7 @@ const Hero = () => {
       ref={heroRef}
       className="relative min-h-screen overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(180deg, rgba(5,11,20,0.95) 0%, rgba(5,11,20,0.65) 35%, rgba(5,11,20,0.95) 100%), url(${heroImg})`,
+        backgroundImage: `linear-gradient(180deg, rgba(5,11,20,0.95) 0%, rgba(5,11,20,0.65) 35%, rgba(5,11,20,0.95) 100%), url(${heroBg})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -59,6 +60,20 @@ const Hero = () => {
       <div className="absolute inset-0 bg-black/40" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(63,224,255,0.18)_0%,_transparent_25%),radial-gradient(circle_at_bottom_right,_rgba(210,20,20,0.16)_0%,_transparent_22%)] mix-blend-screen" />
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(5,11,20,0.95),rgba(5,11,20,0.25)_40%,transparent_60%)]" />
+
+      <div className="absolute top-6 left-6 z-20 flex flex-col gap-4">
+        <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/50 px-4 py-2 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.18)]">
+          <img src={logo} alt="ATENTO5 logo" className="h-10 w-10 object-contain" />
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-slate-300">ATENTO5</p>
+            <p className="text-sm font-semibold text-white">SERVICIOS GENERALES</p>
+          </div>
+        </div>
+
+        <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff9a3c] to-[#ff6a8a] px-4 py-2 text-xs font-semibold text-[#051124] shadow-xl shadow-[#ff6a8a]/20">
+          New Big Update
+        </span>
+      </div>
 
       <div
         ref={(el) => (orbRefs.current[0] = el)}
