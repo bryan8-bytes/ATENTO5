@@ -168,7 +168,7 @@ const Hero = () => {
           >
             <div className="absolute -inset-8 rounded-[42px] bg-white/5 shadow-[0_60px_120px_rgba(0,0,0,0.18)] blur-3xl" />
             <div className="relative overflow-hidden rounded-[42px] border border-white/10 bg-white/5 backdrop-blur-xl">
-              <img src={heroImg} alt="Imagen de hero" className="h-[520px] w-full object-cover" />
+              <img src={heroBg} alt="Imagen de hero" className="h-[520px] w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
               <div className="absolute left-6 bottom-6 rounded-[28px] border border-white/10 bg-black/40 p-5 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.35)]">
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-300">ATENTO5</p>
