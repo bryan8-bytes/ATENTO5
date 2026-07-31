@@ -49,7 +49,7 @@ const Hero = () => {
     <section
       id="hero"
       ref={heroRef}
-      className="relative min-h-screen overflow-hidden flex items-center justify-center py-20 lg:py-0"
+      className="relative min-h-screen overflow-hidden flex items-center justify-center py-24 lg:py-0"
       style={{
         backgroundImage: `linear-gradient(180deg, rgba(5,11,20,0.95) 0%, rgba(5,11,20,0.65) 35%, rgba(5,11,20,0.95) 100%), url(${heroBg})`,
         backgroundSize: 'cover',
@@ -89,54 +89,161 @@ const Hero = () => {
         ))}
       </div>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <div className="grid w-full gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
+      {/* Centered container aligned with Navbar (1440px max width) */}
+      <div 
+        className="relative z-10 flex w-full items-center"
+        style={{
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: '0 24px',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div className="grid w-full gap-12 lg:grid-cols-2 items-center">
           
           {/* Left column (Text & actions) */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="space-y-6 lg:space-y-8"
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              textAlign: 'left'
+            }}
           >
             {/* Badges container */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.32em] text-[#3CB4FF] shadow-[0_20px_50px_rgba(60,180,255,0.1)] backdrop-blur-sm">
+            <div 
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '24px'
+              }}
+            >
+              <div 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  borderRadius: '30px',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  padding: '10px 18px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.25em',
+                  color: '#3CB4FF',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: '0 10px 30px rgba(60, 180, 255, 0.05)'
+                }}
+              >
                 <ShieldCheck size={14} />
                 atento5 servicios generales e.i.r.l.
               </div>
-              <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff9a3c] to-[#ff6a8a] px-4 py-2 text-xs font-bold text-[#051124] shadow-lg shadow-[#ff6a8a]/20">
+              <span 
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  borderRadius: '30px',
+                  background: 'linear-gradient(135deg, #ff9a3c 0%, #ff6a8a 100%)',
+                  padding: '8px 16px',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  color: '#051124',
+                  boxShadow: '0 8px 20px rgba(255, 106, 138, 0.25)'
+                }}
+              >
                 New Big Update
               </span>
             </div>
 
             {/* Title block */}
-            <div className="space-y-4">
-              <p className="text-sm uppercase tracking-[0.36em] text-cyan-300/80 font-bold">Servicios generales de confianza</p>
-              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-tight text-white tracking-tight">
-                <span className="block">Soluciones Integrales</span>
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#3fe0ff] to-[#5b6cff]">para tu Empresa</span>
+            <div style={{ width: '100%', marginBottom: '24px' }}>
+              <p style={{
+                fontSize: '13px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.35em',
+                color: 'rgba(6, 182, 212, 0.8)',
+                fontWeight: '700',
+                margin: '0 0 12px 0'
+              }}>Servicios generales de confianza</p>
+              
+              <h1 style={{
+                fontSize: 'clamp(2.3rem, 4.8vw, 4.2rem)',
+                fontWeight: '900',
+                lineHeight: '1.15',
+                color: '#FFFFFF',
+                margin: 0,
+                letterSpacing: '-0.02em',
+                fontFamily: "system-ui, 'Segoe UI', Roboto, sans-serif"
+              }}>
+                Soluciones Integrales<br />
+                <span style={{
+                  background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}>para tu Empresa</span>
               </h1>
-              <div className="h-1.5 w-[200px] sm:w-[320px] overflow-hidden rounded-full bg-white/10">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 1.2, delay: 0.4, ease: 'easeOut' }}
-                  className="h-full rounded-full bg-gradient-to-r from-[#3fe0ff] to-[#5b6cff]"
-                />
-              </div>
+              
+              <div 
+                style={{
+                  height: '5px',
+                  width: '180px',
+                  marginTop: '20px',
+                  borderRadius: '10px',
+                  background: 'linear-gradient(90deg, #3CB4FF, #D21414)',
+                  opacity: 0.8
+                }}
+              />
             </div>
 
             {/* Description */}
-            <p className="max-w-2xl text-base sm:text-lg leading-relaxed text-slate-300">
+            <p style={{
+              maxWidth: '600px',
+              fontSize: 'clamp(0.95rem, 1.8vw, 1.15rem)',
+              lineHeight: '1.75',
+              color: 'rgba(229, 231, 235, 0.75)',
+              margin: '0 0 32px 0'
+            }}>
               Brindamos servicios confiables y personalizados para impulsar el crecimiento de tu negocio con una imagen moderna y atención experta en cada proyecto.
             </p>
 
-            {/* Buttons Row */}
-            <div className="flex flex-wrap gap-4 items-center pt-2">
+            {/* Buttons Row with flex wrap to prevent overlap */}
+            <div 
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '16px',
+                alignItems: 'center',
+                width: '100%'
+              }}
+            >
               <button
                 onClick={handleWhatsApp}
-                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#3CB4FF] to-[#D21414] px-8 py-4 text-base font-semibold text-white shadow-[0_18px_60px_rgba(60,180,255,0.22)] hover:shadow-[0_18px_60px_rgba(60,180,255,0.4)] transition-all duration-300 hover:brightness-110"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '16px 36px',
+                  borderRadius: '30px',
+                  background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
+                  color: 'white',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 12px 35px rgba(60, 180, 255, 0.25)',
+                  transition: 'all 0.3s ease',
+                }}
+                className="hover:brightness-110"
               >
                 Contáctanos
                 <ArrowRight size={18} />
@@ -144,7 +251,22 @@ const Hero = () => {
 
               <button
                 onClick={() => document.getElementById('servicios')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-4 text-base font-semibold text-white transition-all duration-300 hover:bg-white/10 hover:border-white/25"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '10px',
+                  padding: '16px 36px',
+                  borderRadius: '30px',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                className="hover:bg-white/10"
               >
                 Ver Servicios
                 <Wrench size={18} />
@@ -153,7 +275,20 @@ const Hero = () => {
               <button
                 onClick={handleWhatsApp}
                 aria-label="Contactar por WhatsApp"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white/10 border border-white/15 text-white transition-all duration-300 hover:scale-105 hover:bg-white/15 hover:text-[#25D366]"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '54px',
+                  height: '54px',
+                  borderRadius: '50%',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+                className="hover:bg-white/10 hover:text-[#25D366] hover:scale-105"
               >
                 <MessageCircle size={20} />
               </button>
@@ -165,15 +300,81 @@ const Hero = () => {
             initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.9, delay: 0.2 }}
-            className="relative mx-auto w-full max-w-lg lg:max-w-none"
+            style={{
+              position: 'relative',
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
           >
-            <div className="absolute -inset-4 sm:-inset-8 rounded-[42px] bg-white/5 shadow-[0_60px_120px_rgba(0,0,0,0.18)] blur-3xl pointer-events-none" />
-            <div className="relative overflow-hidden rounded-[32px] sm:rounded-[42px] border border-white/10 bg-white/5 backdrop-blur-xl">
-              <img src={heroBg} alt="ATENTO5 Mantenimiento" className="h-[400px] sm:h-[520px] w-full object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-              <div className="absolute left-4 bottom-4 right-4 sm:left-6 sm:bottom-6 sm:right-6 rounded-[24px] sm:rounded-[28px] border border-white/10 bg-black/50 p-4 sm:p-5 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.35)]">
-                <p className="text-xs uppercase tracking-[0.35em] text-[#3CB4FF] font-bold">ATENTO5</p>
-                <p className="mt-2 text-xs sm:text-sm text-slate-200 leading-relaxed">
+            {/* Ambient blur glow behind the card */}
+            <div style={{
+              position: 'absolute',
+              inset: '-20px',
+              borderRadius: '42px',
+              background: 'radial-gradient(circle, rgba(60, 180, 255, 0.15) 0%, transparent 70%)',
+              filter: 'blur(40px)',
+              pointerEvents: 'none'
+            }} />
+            
+            <div style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '480px',
+              borderRadius: '36px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: 'rgba(255, 255, 255, 0.03)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              overflow: 'hidden',
+              boxShadow: '0 30px 60px rgba(0, 0, 0, 0.4)'
+            }}>
+              <img 
+                src={heroBg} 
+                alt="ATENTO5 Mantenimiento" 
+                style={{
+                  width: '100%',
+                  height: 'clamp(320px, 45vh, 460px)',
+                  objectFit: 'cover',
+                  display: 'block'
+                }} 
+              />
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to top, rgba(5, 11, 20, 0.9) 0%, rgba(5, 11, 20, 0.1) 40%, transparent 100%)',
+                pointerEvents: 'none'
+              }} />
+              
+              <div style={{
+                position: 'absolute',
+                left: '20px',
+                bottom: '20px',
+                right: '20px',
+                borderRadius: '20px',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                background: 'rgba(5, 11, 20, 0.65)',
+                padding: '16px 20px',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                boxShadow: '0 15px 30px rgba(0, 0, 0, 0.3)'
+              }}>
+                <p style={{
+                  fontSize: '11px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.35em',
+                  color: '#3CB4FF',
+                  fontWeight: '700',
+                  margin: 0
+                }}>ATENTOS</p>
+                <p style={{
+                  marginTop: '8px',
+                  fontSize: '13px',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  lineHeight: '1.5',
+                  margin: '8px 0 0 0'
+                }}>
                   Soluciones confiables y profesionales en mantenimiento, infraestructura y servicios generales.
                 </p>
               </div>
