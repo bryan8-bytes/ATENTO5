@@ -88,13 +88,6 @@ const Hero = () => {
         className="absolute right-24 bottom-20 h-32 w-32 rounded-full bg-gradient-to-r from-[#3fe0ff] to-[#5b6cff] opacity-70 blur-3xl mix-blend-screen animate-float-delayed"
       />
 
-      <div className="absolute top-6 left-6 z-20">
-        <span className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#ff9a3c] to-[#ff6a8a] px-4 py-2 text-xs font-semibold text-[#051124] shadow-xl shadow-[#ff6a8a]/20">
-          <span className="h-2.5 w-2.5 rounded-full bg-white shadow-sm" />
-          New Big Update
-        </span>
-      </div>
-
       <div className="hidden lg:flex flex-col gap-3 absolute left-6 top-1/3 z-20 text-[#dbeafe]">
         {socialLinks.map((social) => (
           <a
