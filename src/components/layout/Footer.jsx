@@ -1,6 +1,7 @@
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Youtube, ArrowUp } from 'lucide-react'
 import logo from '../../assets/Logo Atento5.png'
+import './Footer.css'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -10,10 +11,19 @@ export default function Footer() {
   }
 
   const socialLinks = [
-    { icon: <Facebook size={18} />, label: 'Facebook', href: '#' },
-    { icon: <Instagram size={18} />, label: 'Instagram', href: '#' },
+    { icon: <Facebook size={18} />, label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61592431140405' },
+    { icon: <Instagram size={18} />, label: 'Instagram', href: 'https://www.instagram.com/atento5.solucionesgen/' },
     { icon: <Linkedin size={18} />, label: 'LinkedIn', href: '#' },
-    { icon: <Youtube size={18} />, label: 'YouTube', href: '#' }
+    { icon: <Youtube size={18} />, label: 'YouTube', href: 'https://youtube.com/@atento5solucionesgenerales' },
+    {
+      icon: (
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-[18px] h-[18px]">
+          <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
+        </svg>
+      ),
+      label: 'TikTok',
+      href: 'https://www.tiktok.com/@atento5.solucione',
+    },
   ]
 
   const quickLinks = [
@@ -34,74 +44,36 @@ export default function Footer() {
   ]
 
   return (
-    <footer style={{
-      background: 'linear-gradient(180deg, rgba(11, 18, 32, 0.95) 0%, rgba(5, 11, 20, 1) 100%)',
-      borderTop: '1px solid rgba(255,255,255,0.05)',
-      padding: '80px 0 30px'
-    }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-
+    <footer className="footer">
+      <div className="footer-inner">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '48px' }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="footer-brand"
         >
-          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <motion.div
-              style={{ position: 'absolute', inset: '-20px', borderRadius: '50%', filter: 'blur(20px)' }}
-              animate={{
-                background: [
-                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)',
-                  'radial-gradient(circle, rgba(210, 20, 20,0.25) 0%, transparent 70%)',
-                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)'
-                ],
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0.8, 0.5]
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <motion.img
-              src={logo}
-              alt="ATENTO5"
-              style={{
-                height: '400px',
-                width: '400px',
-                objectFit: 'contain',
-                position: 'relative',
-                zIndex: 1,
-                filter: 'drop-shadow(0 0 30px rgba(60, 180, 255, 0.7))',
-              }}
-              animate={{ y: [-5, 5, -5] }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            />
+          <div className="footer-logo-wrap">
+            <div className="footer-logo-glow" aria-hidden="true" />
+            <img src={logo} alt="ATENTO5" className="footer-logo" loading="lazy" />
           </div>
-          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', marginBottom: '8px', fontWeight: 600, letterSpacing: '0.05em', textAlign: 'center' }}>
+          <p className="footer-description">
             SERVICIOS GENERALES E.I.R.L.
           </p>
-          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.4)', marginBottom: '20px', lineHeight: 1.6, textAlign: 'center', maxWidth: '480px' }}>
+          <p className="footer-description" style={{ fontSize: '0.75rem', color: 'rgba(229, 231, 235, 0.35)', maxWidth: '26rem' }}>
             Comprometidos con la excelencia en cada proyecto. Soluciones integrales para tus necesidades de servicios generales.
           </p>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="footer-socials">
             {socialLinks.map((social, index) => (
               <motion.a
                 key={index}
                 href={social.href}
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '10px',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'rgba(229, 231, 235, 0.5)',
-                  textDecoration: 'none'
-                }}
-                whileHover={{ scale: 1.1, background: 'rgba(60, 180, 255, 0.1)', borderColor: 'rgba(60, 180, 255, 0.3)', color: '#3CB4FF' }}
+                className="footer-social-link"
+                aria-label={social.label}
+                target="_blank"
+                rel="noopener noreferrer"
+                whileHover={{ y: -2 }}
               >
                 {social.icon}
               </motion.a>
@@ -109,41 +81,20 @@ export default function Footer() {
           </div>
         </motion.div>
 
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginBottom: '48px' }} />
+        <div className="footer-divider" />
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-          gap: '48px',
-          marginBottom: '48px'
-        }}>
+        <div className="footer-grid">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.5, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '24px' }}>
-              Enlaces Rápidos
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h4 className="footer-column-title">Enlaces Rápidos</h4>
+            <div className="footer-links">
               {quickLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  style={{
-                    fontSize: '14px',
-                    color: 'rgba(229, 231, 235, 0.5)',
-                    textDecoration: 'none',
-                    transition: 'color 0.2s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                  onMouseEnter={(e) => e.target.style.color = '#3CB4FF'}
-                  onMouseLeave={(e) => e.target.style.color = 'rgba(229, 231, 235, 0.5)'}
-                >
-                  <span style={{ color: 'rgba(60, 180, 255, 0.5)', fontSize: '10px' }}>▸</span>
+                <a key={link.label} href={link.href} className="footer-link">
+                  <span className="footer-link-arrow">▸</span>
                   {link.label}
                 </a>
               ))}
@@ -154,24 +105,13 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '24px' }}>
-              Nuestros Servicios
-            </h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <h4 className="footer-column-title">Nuestros Servicios</h4>
+            <div className="footer-links">
               {services.map((service) => (
-                <span
-                  key={service}
-                  style={{
-                    fontSize: '13px',
-                    color: 'rgba(229, 231, 235, 0.5)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <span style={{ color: 'rgba(60, 180, 255, 0.5)', fontSize: '10px' }}>▸</span>
+                <span key={service} className="footer-link" style={{ cursor: 'default' }}>
+                  <span className="footer-link-arrow">▸</span>
                   {service}
                 </span>
               ))}
@@ -182,60 +122,34 @@ export default function Footer() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: 700, color: 'white', marginBottom: '24px' }}>
-              Información de Contacto
-            </h4>
-            <div style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', lineHeight: 2.2 }}>
-              <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Phone size={14} style={{ color: '#3CB4FF' }} />
+            <h4 className="footer-column-title">Información de Contacto</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <p className="footer-contact-item">
+                <Phone size={14} className="footer-contact-icon" />
                 +51 955 295 390
               </p>
-              <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <Mail size={14} style={{ color: '#3CB4FF' }} />
+              <p className="footer-contact-item">
+                <Mail size={14} className="footer-contact-icon" />
                 Juan.ampuero@atento5.com
               </p>
-              <p style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <MapPin size={14} style={{ color: '#3CB4FF' }} />
+              <p className="footer-contact-item">
+                <MapPin size={14} className="footer-contact-icon" />
                 Lima, Perú
               </p>
             </div>
           </motion.div>
         </div>
 
-        <div style={{
-          paddingTop: '30px',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: '16px'
-        }}>
-          <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.3)' }}>
+        <div className="footer-bottom">
+          <p className="footer-copyright">
             © {currentYear} ATENTO5 SERVICIOS GENERALES E.I.R.L. Todos los derechos reservados.
           </p>
-
-          <motion.button
-            onClick={scrollToTop}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '13px',
-              color: 'rgba(229, 231, 235, 0.4)',
-              background: 'rgba(255, 255, 255, 0.03)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              borderRadius: '10px',
-              padding: '10px 18px',
-              cursor: 'pointer'
-            }}
-            whileHover={{ y: -3, color: '#3CB4FF', borderColor: 'rgba(60, 180, 255, 0.3)' }}
-          >
+          <button onClick={scrollToTop} className="footer-back-to-top" aria-label="Volver arriba">
             <ArrowUp size={14} />
             <span>Volver arriba</span>
-          </motion.button>
+          </button>
         </div>
       </div>
     </footer>

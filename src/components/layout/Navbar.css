@@ -1,0 +1,318 @@
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(5, 11, 20, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid transparent;
+  transition: all 0.4s ease;
+}
+
+.navbar.scrolled {
+  background: rgba(5, 11, 20, 0.85);
+  border-bottom-color: rgba(60, 180, 255, 0.12);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(60, 180, 255, 0.08);
+}
+
+.navbar-inner {
+  width: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  height: 5rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  .navbar-inner {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.navbar-logo-img {
+  height: 3.5rem;
+  width: 3.5rem;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 0 20px rgba(60, 180, 255, 0.7));
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo:hover .navbar-logo-img {
+  transform: scale(1.05);
+}
+
+.navbar-logo-glow {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  filter: blur(20px);
+  background: radial-gradient(circle, rgba(60, 180, 255, 0.3) 0%, transparent 70%);
+  animation: navbarGlow 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes navbarGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.navbar-actions {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .navbar-actions {
+    display: flex;
+  }
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, rgba(60, 180, 255, 0.15) 0%, rgba(210, 20, 20, 0.08) 100%);
+  border: 1px solid rgba(60, 180, 255, 0.3);
+  border-radius: 9999px;
+  padding: 0.375rem 1rem 0.375rem 0.375rem;
+  backdrop-filter: blur(10px);
+}
+
+.navbar-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+.navbar-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.navbar-user-name {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: white;
+}
+
+.navbar-user-role {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.navbar-logout {
+  width: 2.625rem;
+  height: 2.625rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.navbar-logout:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.navbar-menu-toggle {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  z-index: 100;
+  transition: all 0.2s ease;
+}
+
+.navbar-menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (min-width: 640px) {
+  .navbar-menu-toggle {
+    display: none;
+  }
+}
+
+.navbar-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 12, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 85;
+}
+
+.navbar-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20rem;
+  max-width: 85vw;
+  height: 100vh;
+  background: rgba(5, 11, 20, 0.98);
+  backdrop-filter: blur(30px);
+  border-left: 1px solid rgba(60, 180, 255, 0.2);
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.7);
+  z-index: 90;
+  padding: 6.875rem 2rem 2.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.navbar-drawer-section-label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.navbar-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.navbar-drawer-link {
+  width: 100%;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.75);
+  text-align: left;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 0.625rem 0;
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.navbar-drawer-link:hover,
+.navbar-drawer-link.active {
+  color: #3CB4FF;
+  border-bottom-color: rgba(60, 180, 255, 0.2);
+}
+
+.navbar-drawer-divider {
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  padding-top: 1.25rem;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.navbar-drawer-admin-label {
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  display: block;
+  color: rgba(210, 20, 20, 0.6);
+}
+
+.navbar-drawer-user {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(60, 180, 255, 0.1) 0%, rgba(210, 20, 20, 0.05) 100%);
+  border: 1px solid rgba(60, 180, 255, 0.2);
+  border-radius: 0.75rem;
+  padding: 0.625rem 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.navbar-drawer-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.navbar-drawer-user-avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+.navbar-drawer-user-name {
+  font-size: 0.8125rem;
+  font-weight: 800;
+  color: white;
+}
+
+.navbar-drawer-user-role {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.navbar-drawer-logout {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.2s ease;
+}
+
+.navbar-drawer-logout:hover {
+  color: #ef4444;
+}

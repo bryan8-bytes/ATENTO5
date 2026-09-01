@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 
 const MailContext = createContext();
@@ -136,6 +136,11 @@ export const MailProvider = ({ children }) => {
     { id: 'others', label: 'Otros', icon: 'Bell' }
   ];
 
+  const activeAccountRef = useRef(activeAccount);
+  activeAccountRef.current = activeAccount;
+  const currentFolderRef = useRef(currentFolder);
+  currentFolderRef.current = currentFolder;
+
   // Email categorization logic based on content
   const categorizeEmail = (email) => {
     if (email.is_starred) {
@@ -167,12 +172,11 @@ export const MailProvider = ({ children }) => {
     return 'primary';
   };
 
-  // Fetch unread inbox emails separately for header notifications
-  const fetchUnreadInboxEmails = async () => {
+  const fetchUnreadInboxEmails = useCallback(async () => {
     try {
       const token = getToken();
-      if (!token || !activeAccount || activeAccount === 'all') return;
-      const response = await fetch(`${API_URL}/email/folder/INBOX?limit=50&account=${activeAccount}`, {
+      if (!token || !activeAccountRef.current || activeAccountRef.current === 'all') return;
+      const response = await fetch(`${API_URL}/email/folder/INBOX?limit=50&account=${activeAccountRef.current}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -185,11 +189,9 @@ export const MailProvider = ({ children }) => {
     } catch (err) {
       console.error('Error fetching unread inbox emails:', err);
     }
-  };
+  }, [API_URL]);
 
-  // Filter emails by origin, priority, category and date
-  const getFilteredEmails = () => {
-    // Augment emails with origin, priority and tags first
+  const getFilteredEmails = useCallback(() => {
     let augmented = (emails || []).map(augmentEmail);
     let filtered = augmented;
 
@@ -197,12 +199,10 @@ export const MailProvider = ({ children }) => {
       filtered = filtered.filter(email => categorizeEmail(email) === selectedCategory);
     }
 
-    // Filter by Origin
     if (selectedOrigin && selectedOrigin !== 'all') {
       filtered = filtered.filter(email => email.origen === selectedOrigin);
     }
 
-    // Filter by Priority
     if (selectedPriority && selectedPriority !== 'all') {
       filtered = filtered.filter(email => email.prioridad === selectedPriority);
     }
@@ -239,13 +239,13 @@ export const MailProvider = ({ children }) => {
     }
 
     return filtered;
-  };
+  }, [emails, selectedCategory, selectedOrigin, selectedPriority, dateFilter]);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const getToken = () => localStorage.getItem('token');
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     const corporateList = [
       { email: 'Juan.ampuero@atento5.com', isPrimary: true, name: 'Juan Ampuero', role: 'Gerente General' },
       { email: 'Corina.anorga@atento5.com', isPrimary: false, name: 'Corina Anorga', role: 'Finanzas' },
@@ -277,15 +277,14 @@ export const MailProvider = ({ children }) => {
       setAccounts(corporateList);
       return corporateList;
     }
-  };
+  }, [API_URL, user?.email]);
 
   // Helper local database store - NO usar datos simulados como respaldo
   const getLocalEmailsStore = () => {
     return [];
   };
 
-  // Fetch emails with seamless API + corporate offline fallback
-  const fetchAllEmailsPaginated = async (folder) => {
+  const fetchAllEmailsPaginated = useCallback(async (folder) => {
     const token = getToken();
     if (!token || window.isBackendOffline) return [];
 
@@ -295,7 +294,7 @@ export const MailProvider = ({ children }) => {
     let hasMore = true;
 
     while (hasMore) {
-      const response = await fetch(`${API_URL}/email/folder/${folder}?limit=${limit}&offset=${offset}&account=${activeAccount}`, {
+      const response = await fetch(`${API_URL}/email/folder/${folder}?limit=${limit}&offset=${offset}&account=${activeAccountRef.current}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -316,9 +315,9 @@ export const MailProvider = ({ children }) => {
     }
 
     return allEmails;
-  };
+  }, [API_URL]);
 
-  const fetchEmails = async (folder = currentFolder) => {
+  const fetchEmails = useCallback(async (folder = currentFolderRef.current) => {
     setLoading(true);
     setError(null);
     setCurrentFolder(folder);
@@ -342,20 +341,17 @@ export const MailProvider = ({ children }) => {
       console.warn('fetchEmails error:', err);
     }
 
-    // Corporate local storage fallback
     const allStore = getLocalEmailsStore();
     let folderEmails = allStore;
 
-    // Filter by folder
     if (folder === 'Starred') {
       folderEmails = allStore.filter(e => e.is_starred);
     } else {
       folderEmails = allStore.filter(e => e.folder.toLowerCase() === folder.toLowerCase());
     }
 
-    // Filter by account if activeAccount is specified
-    if (activeAccount && activeAccount !== 'all') {
-      const activeLower = activeAccount.toLowerCase();
+    if (activeAccountRef.current && activeAccountRef.current !== 'all') {
+      const activeLower = activeAccountRef.current.toLowerCase();
       const filteredByAccount = folderEmails.filter(e => 
         (e.to_email || '').toLowerCase() === activeLower || 
         (e.from_email || '').toLowerCase() === activeLower
@@ -365,14 +361,12 @@ export const MailProvider = ({ children }) => {
       }
     }
 
-    // Fallback if folderEmails is somehow empty
     if (folderEmails.length === 0 && folder === 'INBOX') {
       folderEmails = allStore;
     }
 
     setEmails(folderEmails);
 
-    // Calculate unread counts dynamically
     const counts = {
       INBOX: allStore.filter(e => e.folder === 'INBOX' && !e.is_read).length,
       Starred: allStore.filter(e => e.is_starred).length,
@@ -388,7 +382,7 @@ export const MailProvider = ({ children }) => {
     setUnreadInboxEmails(unreadInbox);
 
     setLoading(false);
-  };
+  }, [fetchAllEmailsPaginated]);
 
   // Fetch single email
   const fetchEmail = async (emailId) => {
@@ -531,8 +525,7 @@ export const MailProvider = ({ children }) => {
     setSelectedEmail(null);
   };
 
-  // Search emails
-  const searchEmails = async (query) => {
+  const searchEmails = useCallback(async (query) => {
     setLoading(true);
     setError(null);
     const q = (query || '').toLowerCase();
@@ -540,7 +533,7 @@ export const MailProvider = ({ children }) => {
     try {
       const token = getToken();
       if (token) {
-        const response = await fetch(`${API_URL}/email/search/${encodeURIComponent(query)}?account=${activeAccount}`, {
+        const response = await fetch(`${API_URL}/email/search/${encodeURIComponent(query)}?account=${activeAccountRef.current}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (response.ok) {
@@ -554,7 +547,6 @@ export const MailProvider = ({ children }) => {
       }
     } catch (err) {}
 
-    // Fallback local search
     const store = getLocalEmailsStore();
     const matches = store.filter(e => 
       (e.subject || '').toLowerCase().includes(q) ||
@@ -564,16 +556,15 @@ export const MailProvider = ({ children }) => {
     );
     setEmails(matches);
     setLoading(false);
-  };
+  }, [API_URL]);
 
-  // Sync folder with IMAP
-  const syncFolder = async (folder) => {
+  const syncFolder = useCallback(async (folder) => {
     setLoading(true);
     setError(null);
     try {
       const token = getToken();
       if (token) {
-        const response = await fetch(`${API_URL}/imap/sync/${folder}?account=${activeAccount}`, {
+        const response = await fetch(`${API_URL}/imap/sync/${folder}?account=${activeAccountRef.current}`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -585,10 +576,9 @@ export const MailProvider = ({ children }) => {
       }
     } catch (err) {}
 
-    // Reload local emails
     await fetchEmails(folder);
     setLoading(false);
-  };
+  }, [API_URL, fetchEmails]);
 
   // Send email
   const sendEmail = async (emailData) => {
@@ -762,7 +752,79 @@ export const MailProvider = ({ children }) => {
         setActiveAccount(user.email);
       }
     }
-  }, [user]);
+  }, [user, fetchAccounts]);
+
+  // WebSocket realtime notifications
+  useEffect(() => {
+    if (!user?.id) return;
+    const token = getToken();
+    if (!token) return;
+
+    const wsUrl = `${API_URL.replace(/^http/, 'ws')}/ws?userId=${user.id}`;
+    let ws = null;
+    let reconnectTimer = null;
+    let reconnectDelay = 1000;
+
+    const connect = () => {
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch (err) {
+        console.warn('WebSocket connect error:', err);
+        reconnectTimer = setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+        return;
+      }
+
+      ws.onopen = () => {
+        reconnectDelay = 1000;
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data || '{}');
+          if (msg?.type !== 'new_email' || !msg?.email) return;
+          const incoming = msg.email;
+          if (!activeAccountRef.current || incoming.account_email !== activeAccountRef.current) return;
+
+          setEmails(prev => {
+            if (prev.some(e => e.id === incoming.id || e.message_id === incoming.message_id)) return prev;
+            const folder = incoming.folder || currentFolderRef.current;
+            if (folder !== currentFolderRef.current) return prev;
+            return [incoming, ...prev];
+          });
+
+          setUnreadCount(prev => {
+            const folder = incoming.folder || currentFolderRef.current;
+            const count = (!incoming.is_read && folder === 'INBOX') ? (prev.INBOX || 0) + 1 : (prev[folder] || 0);
+            return { ...prev, [folder]: count };
+          });
+
+          if ((incoming.folder || currentFolderRef.current) === 'INBOX' && !incoming.is_read) {
+            setUnreadInboxEmails(prev => {
+              if (prev.some(e => e.id === incoming.id || e.message_id === incoming.message_id)) return prev;
+              return [incoming, ...prev];
+            });
+          }
+        } catch (_) {}
+      };
+
+      ws.onclose = () => {
+        reconnectTimer = setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+      };
+
+      ws.onerror = () => {
+        try { ws && ws.close(); } catch (_) {}
+      };
+    };
+
+    connect();
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      try { ws && ws.close(); } catch (_) {}
+    };
+  }, [user?.id]);
 
   // Reload emails when folder or active account changes
   useEffect(() => {
@@ -770,7 +832,7 @@ export const MailProvider = ({ children }) => {
     if (currentFolder !== 'INBOX') {
       fetchUnreadInboxEmails();
     }
-  }, [currentFolder, activeAccount]);
+  }, [currentFolder, activeAccount, fetchEmails, fetchUnreadInboxEmails]);
 
   const value = {
     unreadInboxEmails,

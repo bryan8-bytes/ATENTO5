@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import logo from '../../assets/Logo Atento5.png';
 import {
   Inbox,
   Star,
@@ -11,8 +10,25 @@ import {
   Search,
   Menu,
   AlertOctagon,
-  Archive,
 } from 'lucide-react';
+import './MailChrome.css';
+
+const getAvatarColor = (email = '') => {
+  const colors = [
+    'from-indigo-500 to-purple-600',
+    'from-blue-500 to-cyan-600',
+    'from-emerald-500 to-teal-600',
+    'from-violet-500 to-fuchsia-600',
+    'from-rose-500 to-pink-600',
+    'from-amber-500 to-orange-600',
+    'from-sky-500 to-blue-600',
+  ];
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) {
+    hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
 
 const MailChrome = ({
   user,
@@ -31,166 +47,153 @@ const MailChrome = ({
   children,
 }) => {
   const folders = [
-    { key: 'inbox', label: 'Bandeja', icon: Inbox },
+    { key: 'inbox', label: 'Bandeja de entrada', icon: Inbox },
     { key: 'starred', label: 'Importantes', icon: Star },
-    { key: 'sent', label: 'Enviados', icon: Send },
+    { key: 'sent', label: 'Elementos enviados', icon: Send },
     { key: 'drafts', label: 'Borradores', icon: FileText },
-    { key: 'spam', label: 'Spam', icon: AlertOctagon },
-    { key: 'trash', label: 'Papelera', icon: Trash2 },
+    { key: 'spam', label: 'Correo no deseado', icon: AlertOctagon },
+    { key: 'trash', label: 'Elementos eliminados', icon: Trash2 },
     { key: 'archive', label: 'Archivo', icon: Archive },
   ];
 
+  const renderFolderIcon = (icon, key) => {
+    const Icon = icon;
+    return (
+      <Icon size={20} className={activeFolder === key ? 'text-[#3CB4FF]' : 'text-slate-400'} />
+    );
+  };
+
   return (
-    <div
-      className="h-screen w-full flex text-slate-200 overflow-hidden"
-      style={{ backgroundColor: 'var(--color-primary)' }}
-    >
+    <div className="mail-chrome">
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="mail-chrome-overlay"
           onClick={onMobileMenuToggle}
         />
       )}
-
       <motion.aside
         initial={false}
         animate={{ x: mobileMenuOpen ? 0 : '-100%' }}
-        transition={{ type: 'spring', damping: 26, stiffness: 210 }}
-        className="fixed lg:relative z-50 h-full flex flex-col"
-        style={{
-          background: '#050B14',
-          borderRight: '1px solid rgba(255, 255, 255, 0.08)',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45)',
-          width: '48px',
-          padding: '18px 6px',
-        }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="mail-chrome-sidebar"
       >
-        <div className="flex flex-col items-center gap-3 mb-4">
-          {folders.map(({ key, label, icon: Icon }, index) => {
-            const isActive = activeFolder === key;
-            const color = index % 2 === 0 ? '#3CB4FF' : '#D21414';
-
-            return (
-              <div
-                key={key}
-                style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <motion.button
-                  onClick={() => onFolderChange(key)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.92 }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: isActive ? 30 : 16,
-                    height: isActive ? 30 : 16,
-                    borderRadius: '50%',
-                    background: isActive ? `linear-gradient(135deg, ${color}, ${index % 2 === 0 ? '#D21414' : '#3CB4FF'})` : 'rgba(255, 255, 255, 0.92)',
-                    border: 'none',
-                    cursor: 'pointer',
-                    boxShadow: isActive ? `0 0 22px ${color}, 0 0 40px ${color}45` : '0 0 6px rgba(255, 255, 255, 0.18)',
-                    transform: isActive ? 'scale(1.12)' : 'scale(1)',
-                    transition: 'all 0.25s ease',
-                  }}
-                  onMouseEnter={(e) => {
-                    const tooltip = e.currentTarget.nextElementSibling;
-                    if (tooltip) tooltip.style.opacity = '1';
-                  }}
-                  onMouseLeave={(e) => {
-                    const tooltip = e.currentTarget.nextElementSibling;
-                    if (tooltip) tooltip.style.opacity = '0';
-                  }}
-                >
-                  <Icon
-                    size={isActive ? 18 : 14}
-                    style={{
-                      color: isActive ? '#fff' : 'rgba(148, 163, 184, 0.85)',
-                      filter: isActive ? 'drop-shadow(0 0 4px currentColor)' : 'none',
-                    }}
-                  />
-                </motion.button>
-                <div
-                  style={{
-                    position: 'absolute',
-                    right: '42px',
-                    background: '#050B14',
-                    color: '#fff',
-                    padding: '6px 10px',
-                    borderRadius: '12px',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                    letterSpacing: '0.08em',
-                    whiteSpace: 'nowrap',
-                    border: `1px solid ${color}`,
-                    boxShadow: `0 0 12px ${color}45`,
-                    pointerEvents: 'none',
-                    opacity: 0,
-                    transition: 'opacity 0.18s ease',
-                    textTransform: 'uppercase',
-                  }}
-                >
-                  {label}
-                </div>
-              </div>
-            );
-          })}
+        <div className="mail-chrome-sidebar-header">
+          <img src="/logo-atento5.png" alt="Atento5" className="mail-chrome-sidebar-logo" />
+          <span className="mail-chrome-sidebar-brand">ATENTO5</span>
         </div>
 
-        <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        <div className="mail-chrome-compose">
+          <button
+            onClick={onOpenCompose}
+            className="mail-chrome-compose-button"
+          >
+            <span className="text-lg leading-none">+</span>
+            Redactar
+          </button>
+        </div>
+
+        <nav className="mail-chrome-nav">
+          <div className="mail-chrome-nav-list">
+            {folders.map(({ key, label, icon }) => (
+              <button
+                key={key}
+                onClick={() => onFolderChange(key)}
+                className={`mail-chrome-nav-button ${activeFolder === key ? 'mail-chrome-nav-button-active' : ''}`}
+              >
+                {renderFolderIcon(icon, key)}
+                <span className="flex-1 text-left">{label}</span>
+                {key === 'inbox' && unreadCounts.inbox > 0 && (
+                  <span className="mail-chrome-nav-badge">
+                    {unreadCounts.inbox}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </nav>
+
+        <div className="mail-chrome-accounts">
+          <p className="mail-chrome-accounts-title">Cuentas</p>
+          <div className="mail-chrome-account-list">
+            <button
+              onClick={() => onAccountChange('all')}
+              className={`mail-chrome-account-button ${activeAccount === 'all' ? 'mail-chrome-account-button-active' : ''}`}
+            >
+              <div className="mail-chrome-account-avatar bg-[#3CB4FF]/20 text-[#3CB4FF]">
+                ✉
+              </div>
+              <span className="mail-chrome-account-email">Todas las cuentas</span>
+            </button>
+            {accounts.map((acc) => (
+              <button
+                key={acc.email}
+                onClick={() => onAccountChange(acc.email)}
+                className={`mail-chrome-account-button ${activeAccount === acc.email ? 'mail-chrome-account-button-active' : ''}`}
+              >
+                <div
+                  className={`mail-chrome-account-avatar bg-gradient-to-br ${getAvatarColor(acc.email)}`}
+                >
+                  {acc.email.charAt(0).toUpperCase()}
+                </div>
+                <span className="mail-chrome-account-email" title={acc.email}>
+                  {acc.email}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mail-chrome-logout">
           <button
             onClick={onLogout}
-            className="p-2 rounded-full text-slate-200 hover:bg-white/10 hover:text-white transition-colors"
-            title="Cerrar Sesión"
+            className="mail-chrome-logout-button"
           >
-            <LogOut size={18} />
+            <LogOut size={20} />
+            <span>Cerrar Sesión</span>
           </button>
         </div>
       </motion.aside>
 
-      <div className="flex-1 flex flex-col min-w-0 h-full">
-        <header className="h-16 border-b flex items-center px-4 lg:px-6 gap-3 shrink-0" style={{ backgroundColor: '#050B14', borderColor: 'rgba(255, 255, 255, 0.08)' }}>
+      <div className="mail-chrome-main">
+        <header className="mail-chrome-header">
           <button
             onClick={onMobileMenuToggle}
-            className="lg:hidden p-2 -ml-2 hover:bg-white/10 rounded-lg text-slate-300 transition-colors"
+            className="mail-chrome-header-menu lg:hidden"
           >
             <Menu size={20} />
           </button>
-
-          <div className="flex items-center justify-center">
-            <img src={logo} alt="ATENTO5" className="h-9 w-auto object-contain drop-shadow-[0_0_10px_rgba(60,180,255,0.3)]" />
+          <div className="lg:hidden flex items-center gap-2 mr-2">
+            <img src="/logo-atento5.png" alt="Atento5" className="h-6 w-auto object-contain" />
           </div>
 
-          <div className="relative flex-1 max-w-2xl">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
+          <div className="mail-chrome-search">
+            <Search className="mail-chrome-search-icon" size={18} />
             <input
               type="text"
               placeholder="Buscar correo"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-black/20 border border-white/10 focus:border-white/20 rounded-full text-sm text-white placeholder-slate-500 outline-none transition-all"
+              className="mail-chrome-search-input"
             />
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="mail-chrome-header-actions">
             <button
               onClick={onOpenCompose}
-              className="flex items-center gap-1.5 px-3 py-2 text-white rounded-full text-sm font-semibold shadow-sm transition-colors active:scale-[0.98]"
-              style={{
-                background: 'linear-gradient(135deg, var(--color-electric), var(--color-celeste))',
-                boxShadow: '0 4px 15px rgba(210, 20, 20, 0.25)',
-              }}
+              className="mail-chrome-header-compose"
             >
               <span className="text-base leading-none">+</span>
-              <span className="hidden sm:inline">Redactar</span>
+              <span>Redactar</span>
             </button>
-            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
-              <img src={logo} alt="ATENTO5" className="h-8 w-auto object-contain" />
+            <div
+              className="mail-chrome-header-avatar"
+            >
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden" style={{ backgroundColor: '#050B14' }}>
+        <main className="mail-chrome-content">
           {children}
         </main>
       </div>

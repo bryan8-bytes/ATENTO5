@@ -1,70 +1,16 @@
 import { useState, useEffect, useRef } from 'react';
 import { useMail } from '../context/MailContext';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, RefreshCw, X, Plus, Menu, 
-  Paperclip, Download, FileSpreadsheet, FileImage, 
-  FileArchive, FileCode, FileText,
-  Bell, Reply, ReplyAll, Forward, Settings, HelpCircle,
-  Inbox, Send, AlertOctagon, Trash2,
-  Shield, LogOut, Sliders, Filter, Building2, User, Mail, LifeBuoy, ChevronDown
+import { Link } from 'react-router-dom';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
+import {
+  X, Bell, Settings, HelpCircle,
+  LogOut, Building2, User, Mail, LifeBuoy, ChevronDown, ChevronLeft
 } from 'lucide-react';
 import EmailList from '../components/mail/EmailList';
 import EmailDetail from '../components/mail/EmailDetail';
 import EmailComposer from '../components/mail/EmailComposer';
-
-
-// Helper for generating dynamic colors for user avatars
-const getAvatarColor = (email = '') => {
-  const colors = [
-    'from-indigo-500 to-purple-600 shadow-indigo-200 dark:shadow-none',
-    'from-blue-500 to-cyan-600 shadow-blue-200 dark:shadow-none',
-    'from-emerald-500 to-teal-600 shadow-emerald-200 dark:shadow-none',
-    'from-violet-500 to-fuchsia-600 shadow-violet-200 dark:shadow-none',
-    'from-rose-500 to-pink-600 shadow-rose-200 dark:shadow-none',
-    'from-amber-500 to-orange-600 shadow-amber-200 dark:shadow-none',
-    'from-sky-500 to-blue-600 shadow-sky-200 dark:shadow-none'
-  ];
-  let hash = 0;
-  for (let i = 0; i < email.length; i++) {
-    hash = email.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % colors.length;
-  return colors[index];
-};
-
-// Map file types to Lucide Icons
-const getFileIcon = (filename = '') => {
-  const ext = filename.split('.').pop().toLowerCase();
-  if (['xls', 'xlsx', 'csv'].includes(ext)) return FileSpreadsheet;
-  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) return FileImage;
-  if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) return FileArchive;
-  if (['html', 'css', 'js', 'json', 'py', 'sh', 'sql'].includes(ext)) return FileCode;
-  return FileText;
-};
-
-// Map file types to modern Tailwind badge styles
-const getFileStyle = (filename = '') => {
-  const ext = filename.split('.').pop().toLowerCase();
-  if (['xls', 'xlsx', 'csv'].includes(ext)) {
-    return 'text-emerald-600 dark:text-emerald-400 bg-emerald-50/70 border-emerald-200/50 dark:bg-emerald-950/20 dark:border-emerald-800/30';
-  }
-  if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
-    return 'text-purple-600 dark:text-purple-400 bg-purple-50/70 border-purple-200/50 dark:bg-purple-950/20 dark:border-purple-800/30';
-  }
-  if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) {
-    return 'text-amber-600 dark:text-amber-400 bg-amber-50/70 border-amber-200/50 dark:bg-amber-950/20 dark:border-amber-800/30';
-  }
-  if (ext === 'pdf') {
-    return 'text-rose-600 dark:text-rose-400 bg-rose-50/70 border-rose-200/50 dark:bg-rose-950/20 dark:border-rose-800/30';
-  }
-  if (['doc', 'docx'].includes(ext)) {
-    return 'text-blue-600 dark:text-blue-400 bg-blue-50/70 border-blue-200/50 dark:bg-blue-950/20 dark:border-blue-800/30';
-  }
-  return 'text-slate-655 bg-slate-50/70 border-slate-200/50 dark:bg-slate-800/20 dark:border-slate-700/30';
-};
+import logo from '../assets/Logo Atento5.png';
 
 // Sandboxed HTML Renderer to prevent CSS style leaks
 const EmailHtmlRenderer = ({ html }) => {
@@ -166,46 +112,19 @@ const EmailHtmlRenderer = ({ html }) => {
   );
 };
 
-// Helper for generating dynamic colors for accounts badges
-const getAccountBadgeStyle = (email = '') => {
-  const name = email.split('@')[0].toLowerCase();
-  switch (name) {
-    case 'juan.ampuero':
-      return 'bg-emerald-50/70 border-emerald-200/20 text-emerald-600 dark:text-emerald-400 dark:bg-emerald-950/20 dark:border-emerald-800/30';
-    case 'corina.anorga':
-      return 'bg-purple-50/70 border-purple-200/20 text-purple-600 dark:text-purple-400 dark:bg-purple-950/20 dark:border-purple-800/30';
-    case 'proyectos':
-      return 'bg-blue-50/70 border-blue-200/20 text-blue-600 dark:text-blue-400 dark:bg-blue-950/20 dark:border-blue-800/30';
-    case 'ventas':
-      return 'bg-amber-50/70 border-amber-200/20 text-amber-600 dark:text-amber-400 dark:bg-amber-950/20 dark:border-amber-800/30';
-    case 'operaciones':
-      return 'bg-rose-50/70 border-rose-200/20 text-rose-600 dark:text-rose-400 dark:bg-rose-950/20 dark:border-rose-800/30';
-    default:
-      return 'bg-slate-50/70 border-slate-200/50 text-slate-550 dark:text-slate-400 dark:bg-slate-800/20 dark:border-slate-700/30';
-  }
-};
-
 const getAccountLabel = (email = '') => {
   const name = email.split('@')[0];
   return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
 };
 
 const Correo = () => {
-  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const {
     emails,
     currentFolder,
     selectedEmail,
     loading,
-    error,
-    folders,
-    unreadCount,
-    accounts,
     activeAccount,
-    setActiveAccount,
-    selectedCategory,
-    setSelectedCategory,
     selectedOrigin,
     setSelectedOrigin,
     selectedPriority,
@@ -216,26 +135,20 @@ const Correo = () => {
     fetchEmails,
     fetchEmail,
     markAsRead,
-    toggleStar,
-    deleteEmail,
-    searchEmails,
     syncFolder,
     sendEmail,
     saveDraft,
     getAttachments,
-    downloadAttachment,
     augmentEmail
   } = useMail();
 
   const [showComposer, setShowComposer] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [attachments, setAttachments] = useState([]);
   const [composerMode, setComposerMode] = useState('new'); // 'new' | 'reply' | 'replyAll' | 'forward'
   const [composerEmail, setComposerEmail] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [toasts, setToasts] = useState([]);
-  const [activeTheme, setActiveTheme] = useState(localStorage.getItem('mail_theme') || 'glow');
 
   const addToast = (message, type = 'success') => {
     const id = Date.now();
@@ -264,43 +177,25 @@ const Correo = () => {
     }
   };
 
+  const handleEmailClickRef = useRef(handleEmailClick);
+  handleEmailClickRef.current = handleEmailClick;
+  const getFilteredEmailsRef = useRef(getFilteredEmails);
+  getFilteredEmailsRef.current = getFilteredEmails;
+
   // Auto-select first email on load if none selected
   useEffect(() => {
-    const filtered = getFilteredEmails();
+    const filtered = getFilteredEmailsRef.current();
     if (!selectedEmail && filtered && filtered.length > 0) {
-      handleEmailClick(filtered[0]);
+      handleEmailClickRef.current(filtered[0]);
     }
-  }, [emails, currentFolder, activeAccount]);
+  }, [emails, currentFolder, activeAccount, selectedEmail]);
 
   const handleRefresh = async () => {
     try {
       await syncFolder(currentFolder);
       addToast('Bandeja de correo actualizada con éxito', 'success');
-    } catch (err) {
+    } catch {
       addToast('Error al sincronizar el correo', 'error');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (selectedEmail) {
-      try {
-        await deleteEmail(selectedEmail.id);
-        addToast('Correo movido a Elementos eliminados', 'info');
-      } catch (err) {
-        addToast('Error al eliminar el correo', 'error');
-      }
-    }
-  };
-
-  const handleStar = async () => {
-    if (selectedEmail) {
-      try {
-        const isStarred = !selectedEmail.is_starred;
-        await toggleStar(selectedEmail.id, isStarred);
-        addToast(isStarred ? 'Marcado como importante' : 'Quitado de importantes', 'success');
-      } catch (err) {
-        addToast('Error al actualizar el correo', 'error');
-      }
     }
   };
 
@@ -322,25 +217,12 @@ const Correo = () => {
     setShowComposer(true);
   };
 
-  const getFolderIcon = (iconName) => {
-    const icons = { Inbox, Send, FileText, AlertOctagon, Trash2 };
-    const Icon = icons[iconName] || Inbox;
-    return <Icon size={18} />;
-  };
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 86400000) { // Less than 24h
-      return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-    } else if (diff < 604800000) { // Less than 7 days
-      return date.toLocaleDateString('es-ES', { weekday: 'short' });
-    } else {
-      return date.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' });
-    }
-  };
+  const handleReplyRef = useRef(handleReply);
+  handleReplyRef.current = handleReply;
+  const handleReplyAllRef = useRef(handleReplyAll);
+  handleReplyAllRef.current = handleReplyAll;
+  const handleForwardRef = useRef(handleForward);
+  handleForwardRef.current = handleForward;
 
   // Keyboard Shortcuts Listener
   useEffect(() => {
@@ -369,19 +251,24 @@ const Correo = () => {
         setShowComposer(true);
       } else if (key === 'r' && selectedEmail) {
         e.preventDefault();
-        handleReply(selectedEmail);
+        handleReplyRef.current(selectedEmail);
       } else if (key === 'a' && selectedEmail) {
         e.preventDefault();
-        handleReplyAll(selectedEmail);
+        handleReplyAllRef.current(selectedEmail);
       } else if (key === 'f' && selectedEmail) {
         e.preventDefault();
-        handleForward(selectedEmail);
+        handleForwardRef.current(selectedEmail);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedEmail]);
+  }, [selectedEmail, setSelectedEmail, setShowComposer, setShowSettings, setShowHelp, setComposerMode, setComposerEmail]);
+
+  const syncFolderRef = useRef(syncFolder);
+  syncFolderRef.current = syncFolder;
+  const addToastRef = useRef(addToast);
+  addToastRef.current = addToast;
 
   // Auto-sync interval
   useEffect(() => {
@@ -392,8 +279,8 @@ const Correo = () => {
     if (isNaN(minutes) || minutes <= 0) return;
 
     const interval = setInterval(() => {
-      syncFolder(currentFolder);
-      addToast('Correo sincronizado automáticamente', 'success');
+      syncFolderRef.current(currentFolder);
+      addToastRef.current('Correo sincronizado automáticamente', 'success');
     }, minutes * 60 * 1000);
 
     return () => clearInterval(interval);
@@ -422,18 +309,45 @@ const Correo = () => {
   }).length;
 
   return (
-    <div className="h-screen w-screen flex flex-row font-sans antialiased overflow-hidden relative select-none" style={{ backgroundColor: '#050B14', color: '#E5E7EB' }}>
+    <div className="h-screen w-screen flex flex-col font-sans antialiased overflow-hidden relative select-none" style={{ backgroundColor: '#050B14', color: '#E5E7EB' }}>
       
-      {/* ── COLUMNA 1: SIDEBAR INTRAPORTAL ── */}
-      <aside className="w-64 flex flex-col border-r shrink-0 h-full" style={{ backgroundColor: '#050B14', borderColor: 'rgba(255, 255, 255, 0.08)' }}>
-        {/* Logo Brand */}
-        <div className="p-6 pb-4 flex items-center gap-3 shrink-0">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-blue-100 shrink-0">
-            <Shield size={20} className="fill-white/10" />
+      {/* ── NAVBAR SUPERIOR ── */}
+      <nav className="h-16 shrink-0 flex items-center justify-between px-4 sm:px-6 border-b" style={{ backgroundColor: '#050B14', borderColor: 'rgba(255, 255, 255, 0.08)' }}>
+        <div className="flex items-center gap-3">
+          <Link to="/home" className="flex items-center gap-2 text-[#3CB4FF] hover:text-white transition-colors">
+            <div className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all backdrop-blur-sm cursor-pointer">
+              <ChevronLeft size={20} />
+            </div>
+          </Link>
+          <img src={logo} alt="Atento5" className="h-8 w-auto object-contain drop-shadow-lg" />
+          <div className="h-8 w-px bg-white/10 hidden sm:block"></div>
+          <div className="flex items-center gap-2">
+            <Mail size={18} className="text-[#3CB4FF]" />
+            <span className="font-extrabold text-xl tracking-tight text-white">Correo</span>
           </div>
-          <span className="font-extrabold text-slate-800 text-lg tracking-tight">IntraPortal</span>
+          <span className="font-extrabold text-xl tracking-tight hidden sm:block" style={{ background: 'linear-gradient(135deg, #3CB4FF, #D21414)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>ATENTO5</span>
         </div>
 
+        <div className="flex items-center gap-3 sm:gap-4">
+          <span className="text-xs font-bold text-slate-400 hidden md:block">{user?.email || 'usuario@atento5.com'}</span>
+          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-extrabold shadow-lg" style={{ background: 'linear-gradient(135deg, var(--color-electric), var(--color-celeste))' }}>
+            {(user?.name || "MG").charAt(0).toUpperCase()}
+          </div>
+          <button 
+            onClick={logout}
+            className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-all cursor-pointer border border-transparent hover:border-white/20"
+          >
+            <LogOut size={16} />
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* ── CONTENEDOR SIN RECUADRO ── */}
+      <div className="flex-1 min-h-0 flex overflow-hidden">
+        
+        {/* ── COLUMNA 1: SIDEBAR INTRAPORTAL ── */}
+        <aside className="w-64 flex flex-col border-r shrink-0 h-full" style={{ backgroundColor: '#050B14', borderColor: 'rgba(255, 255, 255, 0.08)' }}>
         {/* User profile block */}
         <div className="px-6 py-4 flex items-center gap-3 shrink-0" style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}>
           <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-extrabold shadow-lg shrink-0" style={{ background: 'linear-gradient(135deg, var(--color-electric), var(--color-celeste))' }}>
@@ -475,7 +389,7 @@ const Correo = () => {
               setSelectedOrigin('all');
               setSelectedPriority('all');
             }}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all
+            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-all
               ${currentFolder === 'INBOX' && selectedOrigin === 'all' && selectedPriority === 'all'
                 ? 'text-white'
                 : 'text-slate-300 hover:bg-white/10 hover:text-white'
@@ -487,62 +401,62 @@ const Correo = () => {
             }
           >
             <div className="flex items-center gap-3">
-              <Mail size={16} className={currentFolder === 'INBOX' ? 'text-blue-500' : 'text-slate-400'} />
+              <Mail size={18} className={currentFolder === 'INBOX' ? 'text-blue-500' : 'text-slate-400'} />
               <span>Bandeja de Mensajes</span>
             </div>
             {unreadTotal > 0 && (
-              <span className="text-[10px] font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full min-w-[20px] text-center">
+              <span className="text-xs font-extrabold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full min-w-[20px] text-center">
                 {unreadTotal}
               </span>
             )}
           </button>
 
           {/* Servicios y Contacto */}
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
-            <Building2 size={16} className="text-slate-500" />
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+            <Building2 size={18} className="text-slate-500" />
             <span>Servicios y Contacto</span>
           </button>
 
           {/* Notificaciones */}
-          <button className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+          <button className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
             <div className="flex items-center gap-3">
-              <Bell size={16} className="text-slate-500" />
+              <Bell size={18} className="text-slate-500" />
               <span>Notificaciones</span>
             </div>
-            <span className="text-[10px] font-extrabold text-white px-2 py-0.5 rounded-full min-w-[20px] text-center" style={{ background: 'rgba(210, 20, 20, 0.25)', border: '1px solid rgba(210, 20, 20, 0.35)' }}>
+            <span className="text-xs font-extrabold text-white px-2 py-0.5 rounded-full min-w-[20px] text-center" style={{ background: 'rgba(210, 20, 20, 0.25)', border: '1px solid rgba(210, 20, 20, 0.35)' }}>
               2
             </span>
           </button>
 
           {/* Documentos */}
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
-            <FileText size={16} className="text-slate-500" />
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+            <FileText size={18} className="text-slate-500" />
             <span>Documentos</span>
           </button>
 
           {/* Soporte */}
-          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
-            <LifeBuoy size={16} className="text-slate-500" />
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+            <LifeBuoy size={18} className="text-slate-500" />
             <span>Soporte</span>
           </button>
         </nav>
 
         {/* Bottom Options */}
         <div className="p-4 space-y-1 shrink-0" style={{ borderColor: 'rgba(255, 255, 255, 0.08)' }}>
-          <button 
-            onClick={() => setShowSettings(true)}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
-          >
-            <Settings size={16} className="text-slate-500" />
-            <span>Configuración</span>
-          </button>
-          <button 
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
-          >
-            <LogOut size={16} className="text-slate-500" />
-            <span>Cerrar Sesión</span>
-          </button>
+            <button 
+              onClick={() => setShowSettings(true)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
+            >
+              <Settings size={18} className="text-slate-500" />
+              <span>Configuración</span>
+            </button>
+            <button 
+              onClick={logout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
+            >
+              <LogOut size={18} className="text-slate-500" />
+              <span>Cerrar Sesión</span>
+            </button>
         </div>
       </aside>
 
@@ -551,43 +465,43 @@ const Correo = () => {
         <div className="flex flex-col">
           {/* Header */}
           <div className="p-6 pb-2 shrink-0">
-            <h2 className="font-extrabold text-slate-800 text-base tracking-tight">Bandeja de Entrada</h2>
-            <p className="text-[11px] font-bold text-slate-400 mt-0.5">{unreadTotal} sin leer</p>
+            <h2 className="font-extrabold text-slate-800 text-xl tracking-tight">Bandeja de Entrada</h2>
+            <p className="text-sm font-bold text-slate-400 mt-0.5">{unreadTotal} sin leer</p>
           </div>
 
           {/* Origen Group */}
           <div className="px-4 py-2">
-            <p className="text-[9px] font-extrabold text-slate-400 px-3 py-2 uppercase tracking-widest">
+            <p className="text-xs font-extrabold text-slate-400 px-3 py-2 uppercase tracking-widest">
               Origen
             </p>
             <div className="space-y-0.5">
               <button 
                 onClick={() => setSelectedOrigin('all')}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold transition-all
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold transition-all
                   ${selectedOrigin === 'all' ? 'text-blue-600 bg-blue-50/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}
               >
                 <span>Todos</span>
               </button>
               <button 
                 onClick={() => setSelectedOrigin('Interno')}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold transition-all
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold transition-all
                   ${selectedOrigin === 'Interno' ? 'text-blue-600 bg-blue-50/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}
               >
                 <span>Internos</span>
                 {unreadInternos > 0 && (
-                  <span className="text-[9px] font-extrabold bg-blue-600 text-white px-1.5 py-0.5 rounded-full min-w-[15px] text-center shadow-sm">
+                  <span className="text-[10px] font-extrabold bg-blue-600 text-white px-1.5 py-0.5 rounded-full min-w-[15px] text-center shadow-sm">
                     {unreadInternos}
                   </span>
                 )}
               </button>
               <button 
                 onClick={() => setSelectedOrigin('Gobierno')}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold transition-all
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-bold transition-all
                   ${selectedOrigin === 'Gobierno' ? 'text-purple-600 bg-purple-50/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}
               >
                 <span>Gobierno</span>
                 {unreadGobierno > 0 && (
-                  <span className="text-[9px] font-extrabold bg-purple-600 text-white px-1.5 py-0.5 rounded-full min-w-[15px] text-center shadow-sm">
+                  <span className="text-[10px] font-extrabold bg-purple-600 text-white px-1.5 py-0.5 rounded-full min-w-[15px] text-center shadow-sm">
                     {unreadGobierno}
                   </span>
                 )}
@@ -597,7 +511,7 @@ const Correo = () => {
 
           {/* Prioridad Group */}
           <div className="px-4 py-2">
-            <p className="text-[9px] font-extrabold text-slate-400 px-3 py-2 uppercase tracking-widest">
+            <p className="text-xs font-extrabold text-slate-400 px-3 py-2 uppercase tracking-widest">
               Prioridad
             </p>
             <div className="space-y-0.5">
@@ -611,7 +525,7 @@ const Correo = () => {
                 <button 
                   key={p.id}
                   onClick={() => setSelectedPriority(p.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[11px] font-bold transition-all
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold transition-all
                     ${selectedPriority === p.id ? 'text-blue-600 bg-blue-50/50 font-extrabold' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800'}`}
                 >
                   <span className={`w-2 h-2 rounded-full ${p.color} shrink-0 shadow-[0_0_6px]`}></span>
@@ -624,8 +538,8 @@ const Correo = () => {
 
         {/* Resumen Box */}
         <div className="p-4 shrink-0">
-          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-[11px] text-slate-600 font-bold">
-            <p className="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest border-b border-slate-200/60 pb-1.5 mb-2">
+          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5 text-base text-slate-600 font-bold">
+            <p className="text-sm font-extrabold text-slate-400 uppercase tracking-widest border-b border-slate-200/60 pb-1.5 mb-2">
               Resumen
             </p>
             <div className="flex items-center justify-between">
@@ -681,6 +595,7 @@ const Correo = () => {
           onForward={handleForward}
         />
       </div>
+      </div>
 
       {/* Composer Panel - Side sliding panel */}
       <ComposerPanel
@@ -698,7 +613,7 @@ const Correo = () => {
             setComposerEmail(null);
             addToast('Correo enviado con éxito', 'success');
             fetchEmails('Sent');
-          } catch (err) {
+          } catch {
             addToast('Error al enviar el correo', 'error');
           }
         }}
@@ -709,7 +624,7 @@ const Correo = () => {
             setComposerMode('new');
             setComposerEmail(null);
             addToast('Borrador guardado', 'success');
-          } catch (err) {
+          } catch {
             addToast('Error al guardar el borrador', 'error');
           }
         }}
@@ -722,7 +637,6 @@ const Correo = () => {
         show={showSettings}
         onClose={() => setShowSettings(false)}
         addToast={addToast}
-        onThemeChange={(newTheme) => setActiveTheme(newTheme)}
       />
 
       {/* Help Modal */}
@@ -735,7 +649,7 @@ const Correo = () => {
       <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-3 pointer-events-none max-w-sm w-full">
         <AnimatePresence>
           {toasts.map(toast => (
-            <motion.div
+            <Motion.div
               key={toast.id}
               initial={{ opacity: 0, y: 30, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -752,7 +666,7 @@ const Correo = () => {
                 ${toast.type === 'error' ? 'bg-rose-500 shadow-md shadow-rose-350' : toast.type === 'info' ? 'bg-blue-500 shadow-md shadow-blue-350' : 'bg-emerald-500 shadow-md shadow-emerald-350'}`}
               />
               <span className="text-xs font-bold">{toast.message}</span>
-            </motion.div>
+            </Motion.div>
           ))}
         </AnimatePresence>
       </div>
@@ -765,7 +679,7 @@ const ComposerPanel = ({ show, onClose, mode, originalEmail, onSend, onSaveDraft
   return (
     <AnimatePresence>
       {show && (
-        <motion.div
+        <Motion.div
           initial={{ x: '100%' }}
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
@@ -779,7 +693,7 @@ const ComposerPanel = ({ show, onClose, mode, originalEmail, onSend, onSaveDraft
             mode={mode}
             originalEmail={originalEmail}
           />
-        </motion.div>
+        </Motion.div>
       )}
     </AnimatePresence>
   );
@@ -808,7 +722,7 @@ const SettingsPanel = ({ show, onClose, addToast, onThemeChange }) => {
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={onClose} />
           
-          <motion.div
+          <Motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -919,7 +833,7 @@ const SettingsPanel = ({ show, onClose, addToast, onThemeChange }) => {
                 Guardar Cambios
               </button>
             </div>
-          </motion.div>
+          </Motion.div>
         </>
       )}
     </AnimatePresence>
@@ -936,7 +850,7 @@ const HelpModal = ({ show, onClose }) => {
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[80]" onClick={onClose} />
           
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -1065,7 +979,7 @@ const HelpModal = ({ show, onClose }) => {
                 Cerrar Guía
               </button>
             </div>
-          </motion.div>
+          </Motion.div>
         </>
       )}
     </AnimatePresence>

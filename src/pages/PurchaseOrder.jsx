@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
-import { Download, Plus, Trash2, Save, Building2, FileText, User, Package, ChevronLeft } from 'lucide-react';
+import { Download, Plus, Trash2, Building2, FileText, User, Package, ChevronLeft } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
 
 const ATENTO5 = {
@@ -42,27 +41,6 @@ const getFutureDate = (days) => {
 
 const PurchaseOrder = () => {
   const [scale, setScale] = useState(0.65);
-  const [isExporting, setIsExporting] = useState(false);
-
-  useEffect(() => {
-    const updateScale = () => {
-      const availableHeight = window.innerHeight - 220; // Adjusted for padding, header and title margins
-      const sheetHeight = 1122.5; // 297mm in pixels at 96dpi
-      let newScale = availableHeight / sheetHeight;
-      
-      const availableWidth = window.innerWidth * 0.60 - 40; // 60% width minus padding
-      const sheetWidth = 793.7; // 210mm in pixels at 96dpi
-      const widthScale = availableWidth / sheetWidth;
-      
-      newScale = Math.min(newScale, widthScale, 1.0);
-      setScale(newScale);
-    };
-    
-    updateScale();
-    window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
-  }, []);
-
   const [documento, setDocumento] = useState({
     numero: '',
     fecha: getTodayDate(),
@@ -118,59 +96,41 @@ const PurchaseOrder = () => {
 
   const formatCurrency = (val) => 'S/ ' + (val || 0).toFixed(2);
 
-  const guardarOrden = () => {
-    const ordenCompra = {
-      documentoInfo: documento,
-      supplier: proveedor,
-      items: items,
-      totals: { subtotal, igv, total },
-      observations: condiciones.observaciones,
-      signatures: firmas
-    };
-    console.log('Orden de compra guardada:', ordenCompra);
-    alert('Orden de Compra guardada correctamente');
-  };
-
   const exportarPDF = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      const originalElement = previewRef.current;
-      if (!originalElement) return;
+    const originalElement = previewRef.current;
+    if (!originalElement) return;
 
-      const clonedElement = originalElement.cloneNode(true);
-      
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '-9999px';
-      container.style.width = '210mm';
-      container.style.height = '297mm';
-      container.style.overflow = 'hidden';
-      container.style.background = 'white';
+    const clonedElement = originalElement.cloneNode(true);
+    
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.top = '-9999px';
+    container.style.width = '210mm';
+    container.style.height = '297mm';
+    container.style.overflow = 'hidden';
+    container.style.background = 'white';
 
-      container.appendChild(clonedElement);
-      document.body.appendChild(container);
+    container.appendChild(clonedElement);
+    document.body.appendChild(container);
 
-      html2pdf().set({
-        margin: 0,
-        filename: 'OrdenCompra_' + (documento.numero || '000') + '.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2.5, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css'] }
-      }).from(clonedElement).save()
-      .then(() => {
+    html2pdf().set({
+      margin: 0,
+      filename: 'OrdenCompra_' + (documento.numero || '000') + '.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2.5, useCORS: true, logging: false },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css'] }
+    }).from(clonedElement).save()
+    .then(() => {
+      document.body.removeChild(container);
+    })
+    .catch((err) => {
+      console.error('Error al exportar:', err);
+      if (document.body.contains(container)) {
         document.body.removeChild(container);
-        setIsExporting(false);
-      })
-      .catch((err) => {
-        console.error('Error al exportar:', err);
-        if (document.body.contains(container)) {
-          document.body.removeChild(container);
-        }
-        setIsExporting(false);
-      });
-    }, 100);
+      }
+    });
   };
 
   const inputStyle = {
@@ -205,7 +165,7 @@ const PurchaseOrder = () => {
           </Link>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, #3CB4FF, #D21414)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Orden de Compra</h1>
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={exportarPDF} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', background: 'linear-gradient(135deg, #3CB4FF, #8764B2)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>
+            <button onClick={exportarPDF} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 24px', background: 'linear-gradient(135deg, #3CB4FF, #8764B2)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>
               <Download size={18} />
               <span>Exportar PDF</span>
             </button>
@@ -214,12 +174,12 @@ const PurchaseOrder = () => {
       </div>
 
       <div style={{ display: 'flex', gap: '24px', flex: 1, minHeight: 0, maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
-        <div style={{ width: '40%', flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
+        <div style={{ width: '40%', flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: '30px', height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
             <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(60, 180, 255, 0.2)' }}>
               <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#3CB4FF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <FileText size={20} /> Datos del Documento
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <label style={labelStyle}>N° Orden de Compra</label>
                   <input type="text" placeholder="OC-001" value={documento.numero} onChange={(e) => setDocumento({...documento, numero: e.target.value})} style={inputStyle} />
@@ -262,7 +222,7 @@ const PurchaseOrder = () => {
               <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#a855f7', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Building2 size={20} /> Datos del Proveedor
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div style={{ gridColumn: 'span 2' }}>
                   <label style={labelStyle}>Nombre / Razón Social</label>
                   <input type="text" placeholder="Empresa proveedora" value={proveedor.nombre} onChange={(e) => setProveedor({...proveedor, nombre: e.target.value})} style={inputStyle} />
@@ -313,7 +273,7 @@ const PurchaseOrder = () => {
 
             <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
               <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#f97316', marginBottom: '16px' }}>Condiciones / Observaciones</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <label style={labelStyle}>Forma de Pago</label>
                   <input type="text" placeholder="50% anticipo" value={condiciones.formaPago} onChange={(e) => setCondiciones({...condiciones, formaPago: e.target.value})} style={inputStyle} />
@@ -341,7 +301,7 @@ const PurchaseOrder = () => {
               <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#3b82f6', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <User size={20} /> Firmas
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
                   <label style={labelStyle}>Responsable ATENTO5</label>
                   <input type="text" placeholder="Nombre del responsable" value={firmas.responsable} onChange={(e) => setFirmas({...firmas, responsable: e.target.value})} style={inputStyle} />
@@ -383,7 +343,7 @@ const PurchaseOrder = () => {
                 <div style={{ background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', height: '297mm' }}>
                   <div style={{ background: 'white', color: '#000', width: '210mm', height: '295mm', padding: '8mm 12mm 6mm 12mm', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} ref={previewRef}>
                 {/* CABECERA - 3 columnas estilo cotización */}
-                <div style={{ display: 'flex', width: '100%', height: '34mm', border: '2px solid #1e293b', borderRadius: '8px', overflow: 'hidden', boxSizing: 'border-box', marginBottom: '8px', flexShrink: 0, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                <div style={{ display: 'flex', width: '100%', height: '34mm', border: '2px solid #1e293b', borderRadius: '8px', overflow: 'hidden', boxSizing: 'border-box', marginBottom: '10mm', flexShrink: 0, boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                   {/* Columna Izquierda: Logo - ocupa la mitad del ancho */}
                   <div style={{ width: '50%', borderRight: '2px solid #1e293b', background: 'linear-gradient(135deg, #f8fafc 0%, #f0f4f8 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0', boxSizing: 'border-box', position: 'relative' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '5px', height: '100%', background: 'linear-gradient(180deg, #3CB4FF, #D21414)' }} />
@@ -415,7 +375,7 @@ const PurchaseOrder = () => {
 
 
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '8mm' }}>
                   <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e2e8f0', borderLeft: '4px solid #3CB4FF', boxShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
                     <h3 style={{ fontSize: '12px', fontWeight: 'bold', color: '#3CB4FF', textTransform: 'uppercase', margin: '0 0 5px 0', letterSpacing: '0.3px' }}>Emisor (Comprador)</h3>
                     <p style={{ fontSize: '13.5px', fontWeight: 'bold', color: '#111', margin: '0 0 3px 0' }}>{ATENTO5.nombre}</p>
@@ -432,7 +392,7 @@ const PurchaseOrder = () => {
                   </div>
                 </div>
 
-                <div style={{ flex: 1, minHeight: '150px', marginBottom: '8px', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
+                <div style={{ flex: 1, minHeight: '150px', marginBottom: '8mm', borderRadius: '8px', overflow: 'hidden', border: '1.5px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
                   <table style={{ width: '100%', fontSize: '13px', borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ background: 'linear-gradient(to right, #1e293b, #334155)', color: 'white' }}>
@@ -466,7 +426,7 @@ const PurchaseOrder = () => {
                   </table>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8mm' }}>
                   <div style={{ width: '260px', border: '1.5px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 4px rgba(0,0,0,0.06)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 14px', fontSize: '13px', borderBottom: '1px solid #e2e8f0', color: '#475569', background: '#f8fafc' }}>
                       <span>Subtotal</span>
@@ -483,7 +443,7 @@ const PurchaseOrder = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px', marginBottom: '10px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px', marginBottom: '8mm' }}>
                   <div style={{ background: '#f8fafc', padding: '10px 14px', borderRadius: '8px', border: '1.5px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.04)' }}>
                     <p style={{ fontSize: '12px', fontWeight: 'bold', color: '#1e293b', textTransform: 'uppercase', margin: '0 0 5px 0', letterSpacing: '0.3px' }}>Condiciones y Términos Comerciales</p>
                     <p style={{ fontSize: '12.5px', color: '#475569', margin: '3px 0' }}><span style={{ fontWeight: '600' }}>Lugar de Entrega:</span> {condiciones.lugarEntrega || ATENTO5.direccion}</p>
@@ -497,13 +457,13 @@ const PurchaseOrder = () => {
                 </div>
 
                 {condiciones.observaciones && (
-                  <div style={{ background: '#fefce8', padding: '6px 10px', borderRadius: '6px', border: '1px solid #fde047', marginBottom: '8px' }}>
+                  <div style={{ background: '#fefce8', padding: '6px 10px', borderRadius: '6px', border: '1px solid #fde047', marginBottom: '6mm' }}>
                     <p style={{ fontSize: '11px', fontWeight: 'bold', color: '#854d0e', textTransform: 'uppercase', margin: '0 0 2px 0' }}>Observaciones</p>
                     <p style={{ fontSize: '12px', color: '#713f12', margin: 0 }}>{condiciones.observaciones}</p>
                   </div>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', marginTop: 'auto', paddingTop: '10px', borderTop: '2.5px solid #1e293b' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', marginTop: 'auto', paddingTop: '6mm', borderTop: '2.5px solid #1e293b' }}>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ height: '32px', borderBottom: '1.5px solid #64748b', marginBottom: '7px' }}></div>
                     <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#1e293b', margin: '0 0 2px 0' }}>{firmas.responsable}</p>
@@ -516,7 +476,7 @@ const PurchaseOrder = () => {
                   </div>
                 </div>
 
-                <div style={{ marginTop: '6px', paddingTop: '4px', borderTop: '1px solid #e2e8f0', textAlign: 'center', fontSize: '10px', color: '#64748b' }}>
+                <div style={{ marginTop: '4mm', paddingTop: '4mm', borderTop: '1px solid #e2e8f0', textAlign: 'center', fontSize: '10px', color: '#64748b' }}>
                   <p style={{ margin: 0 }}>{ATENTO5.direccion} | Tel: {ATENTO5.telefono} | Email: {ATENTO5.correo}</p>
                 </div>
               </div>

@@ -1,12 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
 import { Download, Plus, Trash2, Building2, User, FileText, Palette, ChevronLeft, Check, Calculator } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
-
-GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 const EditableField = ({ value, onChange, placeholder, style, prefix = '' }) => {
   const divRef = useRef(null);
@@ -129,8 +125,12 @@ const QuotationGenerator = () => {
     
     if (file.type === 'application/pdf') {
       try {
+        const pdfjsLib = await import('pdfjs-dist');
+        const pdfjsWorker = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default;
+        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
+        
         const arrayBuffer = await file.arrayBuffer();
-        const loadingTask = getDocument({ data: arrayBuffer }).promise;
+        const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         const pdf = await loadingTask;
         const page = await pdf.getPage(1);
         const scale = 5.0; // Ultra high resolution rendering for signature import
@@ -288,39 +288,50 @@ const QuotationGenerator = () => {
   };
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', fontFamily: "'Outfit', sans-serif" }}>
-       <EditorPanel 
-         header={header} setHeader={setHeader}
-         cliente={cliente} setCliente={setCliente}
-         intro={intro} setIntro={setIntro}
-         items={items} addItem={addItem} removeItem={removeItem} handleItemChange={handleItemChange}
-         condiciones={condiciones} addCondicion={addCondicion} removeCondicion={removeCondicion} handleCondicionChange={handleCondicionChange}
-         cierre={cierre} setCierre={setCierre}
-         emisor={emisor} setEmisor={setEmisor}
-         handleExportPDF={handleExportPDF}
-         showCalculations={showCalculations} setShowCalculations={setShowCalculations}
-         descuento={descuento} setDescuento={setDescuento}
-         handleSignatureUpload={handleSignatureUpload}
-         subtotal={subtotal} igv={igv} total={total} formatCurrency={formatCurrency}
-       />
-       <PreviewPanel 
-         previewRef={previewRef}
-         header={header}
-         cliente={cliente}
-         intro={intro}
-         items={items}
-         condiciones={condiciones}
-         cierre={cierre}
-         emisor={emisor}
-         subtotal={subtotal}
-         descuentoValue={descuentoValue}
-         igv={igv}
-         total={total}
-         formatCurrency={formatCurrency}
-         showCalculations={showCalculations}
-         handleSignatureUpload={handleSignatureUpload}
-         isExporting={isExporting}
-       />
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', fontFamily: "'Outfit', sans-serif", backgroundColor: '#050B14' }}>
+      <div style={{
+        width: '95vw',
+        height: '90vh',
+        borderRadius: '24px',
+        border: '4px solid #3CB4FF',
+        boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px rgba(60, 180, 255, 0.25)',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#1e293b',
+        backgroundImage: 'linear-gradient(rgba(60, 180, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 180, 255, 0.15) 1px, transparent 1px)',
+        backgroundSize: '24px 24px'
+      }}>
+        <nav style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 20px', borderBottom: '1px solid rgba(60, 180, 255, 0.35)', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)', flexShrink: 0 }}>
+          <Link to="/home" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', textDecoration: 'none', fontSize: '14px', fontWeight: '700', transition: 'color 0.2s' }}
+                onMouseEnter={(e) => e.target.style.color = '#fff'} onMouseLeave={(e) => e.target.style.color = '#3CB4FF'}>
+            <ChevronLeft size={20} />
+            <span>Regresar al Inicio</span>
+          </Link>
+          <div style={{ marginLeft: 'auto', fontSize: '18px', fontWeight: '900', color: 'white', letterSpacing: '1px' }}>GENERADOR DE COTIZACIÓN</div>
+        </nav>
+
+        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+          <PreviewPanel 
+            previewRef={previewRef}
+            header={header}
+            cliente={cliente}
+            intro={intro}
+            items={items}
+            condiciones={condiciones}
+            cierre={cierre}
+            emisor={emisor}
+            subtotal={subtotal}
+            descuentoValue={descuentoValue}
+            igv={igv}
+            total={total}
+            formatCurrency={formatCurrency}
+            showCalculations={showCalculations}
+            handleSignatureUpload={handleSignatureUpload}
+            isExporting={isExporting}
+          />
+        </div>
+      </div>
     </div>
   );
 };
@@ -328,304 +339,6 @@ const QuotationGenerator = () => {
 // ==========================================
 // PANEL DE EDICIÓN (Izquierda)
 // ==========================================
-const EditorPanel = ({
-  header, setHeader,
-  cliente, setCliente,
-  intro, setIntro,
-  items, addItem, removeItem, handleItemChange,
-  condiciones, addCondicion, removeCondicion, handleCondicionChange,
-  cierre, setCierre,
-  emisor, setEmisor,
-  handleExportPDF,
-  showCalculations, setShowCalculations,
-  descuento, setDescuento,
-  handleSignatureUpload,
-  subtotal, igv, total, formatCurrency
-}) => {
-  return (
-    <div style={{ width: '40%', height: '100vh', overflowY: 'auto', backgroundColor: '#060b13', borderRight: '2px solid #3CB4FF', padding: '24px', boxSizing: 'border-box' }}>
-      <Link to="/home" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', marginBottom: '20px', textDecoration: 'none', fontSize: '14px', fontWeight: '600', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.target.style.color = '#fff'} onMouseLeave={(e) => e.target.style.color = '#3CB4FF'}>
-        <ChevronLeft size={20} />
-        <span>Regresar al Inicio</span>
-      </Link>
-      
-      <div style={{ marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: '800', color: '#fff', margin: '0 0 6px 0', background: 'linear-gradient(135deg, #3CB4FF, #D21414)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>GENERADOR DE COTIZACIÓN</h2>
-        <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Edita los campos y mira la vista previa estilo original</p>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', paddingBottom: '30px' }}>
-        
-        {/* 1. CABECERA DOCUMENTAL */}
-        <SectionCard num="1" title="CABECERA DOCUMENTAL" icon={<FileText size={18}/>} color="#3CB4FF">
-          <FieldBox label="Título Principal del Presupuesto" value={header.titulo} onChange={(v) => setHeader({...header, titulo: v})} placeholder="PRESUPUESTO DE SERVICIO..." />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '12px' }}>
-            <FieldBox label="Código de Doc." value={header.codigo} onChange={(v) => setHeader({...header, codigo: v})} placeholder="TYLROV-014-01" />
-            <FieldBox label="N° Cotización (Editable)" value={header.numero} onChange={(v) => setHeader({...header, numero: v})} placeholder="26-05-21-001" />
-          </div>
-          <FieldBox label="Revisión" value={header.revision} onChange={(v) => setHeader({...header, revision: v})} placeholder="02" />
-        </SectionCard>
-
-        {/* 2. CLIENTE (SEÑORES) */}
-        <SectionCard num="2" title="DATOS DEL CLIENTE" icon={<User size={18}/>} color="#eab308">
-          <FieldBox label="Texto Señores" value={cliente.senores} onChange={(v) => setCliente({...cliente, senores: v})} placeholder="Señores:" />
-          <FieldBox label="Razón Social/Nombre" value={cliente.nombre} onChange={(v) => setCliente({...cliente, nombre: v})} placeholder="ATENTO5 SERVICIOS GENERALES E.I.R.L." />
-          <FieldBox label="Atención (Contacto/Representante)" value={cliente.atencion} onChange={(v) => setCliente({...cliente, atencion: v})} placeholder="Corina Añorga" />
-        </SectionCard>
-
-        {/* 3. TEXTOS DE INTRODUCCIÓN */}
-        <SectionCard num="3" title="TEXTOS DE INTRODUCCIÓN" icon={<Building2 size={18}/>} color="#a855f7">
-          <FieldBox label="Saludo" value={intro.saludo} onChange={(v) => setIntro({...intro, saludo: v})} placeholder="Estimados Señores:" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Texto descriptivo</label>
-            <textarea value={intro.descripcion} onChange={(e) => setIntro({...intro, descripcion: e.target.value})} style={{ width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '60px', resize: 'vertical', fontFamily: 'inherit' }} placeholder="De acuerdo con su solicitud..." />
-          </div>
-        </SectionCard>
-
-        {/* 4. DETALLE DE RUTA / SERVICIOS */}
-        <SectionCard num="4" title="SERVICIOS (DETALLE DE RUTA)" icon={<Palette size={18}/>} color="#ec4899">
-           {items.map((item, index) => (
-             <div key={item.id} style={{ background: 'linear-gradient(135deg, #0d1525 0%, #091020 100%)', borderRadius: '14px', padding: '16px', border: '1px solid rgba(60, 180, 255, 0.15)', marginBottom: '12px' }}>
-               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                 <span style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', color: 'white', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '6px' }}>Item {index + 1}</span>
-                 {items.length > 1 && (
-                   <button onClick={() => removeItem(item.id)} style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'none', padding: '6px', borderRadius: '8px', cursor: 'pointer', transition: 'background 0.2s' }}
-                           onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.3)'} onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.15)'}>
-                     <Trash2 size={14} />
-                   </button>
-                 )}
-               </div>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                 <FieldBox label="Tipo de Unidad" value={item.tipoUnidad} onChange={(v) => handleItemChange(item.id, 'tipoUnidad', v)} placeholder="Remolcador / Plataforma hasta 32 TM" />
-                 <FieldBox label="Ruta" value={item.ruta} onChange={(v) => handleItemChange(item.id, 'ruta', v)} placeholder="Lurin a Trujillo" />
-                 <FieldBox label="Descripción Contenido" value={item.descripcion} onChange={(v) => handleItemChange(item.id, 'descripcion', v)} placeholder="Estructuras" />
-                 <FieldBox label="Total por Unidad (Soles)" value={item.total} onChange={(v) => handleItemChange(item.id, 'total', v)} placeholder="3,600.00" />
-               </div>
-             </div>
-           ))}
-          <button onClick={addItem} style={{ width: '100%', padding: '14px', border: '2px dashed rgba(60, 180, 255, 0.3)', borderRadius: '12px', background: 'transparent', color: '#3CB4FF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
-                  onMouseEnter={(e) => { e.target.style.borderColor = '#3CB4FF'; e.target.style.background = 'rgba(60, 180, 255, 0.05)'; }} onMouseLeave={(e) => { e.target.style.borderColor = 'rgba(60, 180, 255, 0.3)'; e.target.style.background = 'transparent'; }}>
-            <Plus size={18} />
-            <span>Agregar Item / Servicio</span>
-          </button>
-        </SectionCard>
-
-        {/* 5. CÁLCULOS Y TOTALES AUTOMÁTICOS */}
-        <SectionCard num="5" title="CÁLCULOS Y TOTALES AUTOMÁTICOS" icon={<Calculator size={18}/>} color="#3CB4FF">
-          <FieldBox label="Descuento (Soles)" value={descuento} onChange={setDescuento} placeholder="0.00" />
-          <div style={{ background: '#0a0e17', borderRadius: '12px', padding: '14px', border: '1px solid rgba(60, 180, 255, 0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-              <span style={{ color: '#94a3b8' }}>Subtotal:</span>
-              <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatCurrency(subtotal)}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
-              <span style={{ color: '#94a3b8' }}>I.G.V. (18%):</span>
-              <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatCurrency(igv)}</span>
-            </div>
-            <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.08)', margin: '4px 0' }} />
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-              <span style={{ color: '#3CB4FF', fontWeight: 'bold' }}>Total General:</span>
-              <span style={{ color: '#3CB4FF', fontWeight: 'bold' }}>{formatCurrency(total)}</span>
-            </div>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
-            <input 
-              type="checkbox" 
-              id="showCalculations" 
-              checked={showCalculations} 
-              onChange={(e) => setShowCalculations(e.target.checked)} 
-              style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#3CB4FF' }} 
-            />
-            <label htmlFor="showCalculations" style={{ fontSize: '12px', color: '#fff', fontWeight: '500', cursor: 'pointer' }}>
-              Mostrar cuadro de cálculos en el PDF/Vista Previa
-            </label>
-          </div>
-        </SectionCard>
-
-        {/* 6. TÉRMINOS Y CONDICIONES (VIÑETAS) */}
-        <SectionCard num="6" title="TÉRMINOS Y CONDICIONES" icon={<FileText size={18}/>} color="#22c55e">
-          <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 10px 0' }}>Agrega o edita las viñetas que aparecen abajo de la tabla</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {condiciones.map((cond, idx) => (
-              <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#3CB4FF', fontWeight: 'bold' }}>•</span>
-                <input type="text" value={cond} onChange={(e) => handleCondicionChange(idx, e.target.value)} style={{ flex: 1, background: 'linear-gradient(135deg, #0a0f18 0%, #0d1422 100%)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: '#fff', outline: 'none' }} />
-                <button onClick={() => removeCondicion(idx)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
-                        onMouseEnter={(e) => e.target.style.color = '#ef4444'} onMouseLeave={(e) => e.target.style.color = '#64748b'}>
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            ))}
-            <button onClick={addCondicion} style={{ padding: '10px', border: '1px dashed rgba(34, 197, 94, 0.4)', borderRadius: '8px', background: 'transparent', color: '#22c55e', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '4px' }}>
-              <Plus size={14} />
-              <span>Agregar viñeta de condición</span>
-            </button>
-          </div>
-        </SectionCard>
-
-        {/* 7. CIERRE, FIRMA Y PIE DE PÁGINA */}
-        <SectionCard num="7" title="CIERRE Y FIRMA" icon={<Check size={18}/>} color="#f43f5e">
-          <FieldBox label="Forma de Pago" value={cierre.formaPago} onChange={(v) => setCierre({...cierre, formaPago: v})} placeholder="contado" />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Texto de Despedida</label>
-            <textarea value={cierre.despedidaTexto} onChange={(e) => setCierre({...cierre, despedidaTexto: e.target.value})} style={{ width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '50px', resize: 'vertical', fontFamily: 'inherit' }} placeholder="Sin más por el momento..." />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <FieldBox label="Firma: Nombre" value={cierre.firmaNombre} onChange={(v) => setCierre({...cierre, firmaNombre: v})} placeholder="Juan Ampuero" />
-            <FieldBox label="Firma: Cargo" value={cierre.firmaCargo} onChange={(v) => setCierre({...cierre, firmaCargo: v})} placeholder="Gerente General" />
-          </div>
-          <FieldBox label="Firma: Razón Social" value={cierre.firmaEmpresa} onChange={(v) => setCierre({...cierre, firmaEmpresa: v})} placeholder="ATENTO5 SERVICIOS GENERALES E.I.R.L." />
-          
-           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
-             <input type="checkbox" id="showStamp" checked={cierre.mostrarSello} onChange={(e) => setCierre({...cierre, mostrarSello: e.target.checked})} style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#3CB4FF' }} />
-             <label htmlFor="showStamp" style={{ fontSize: '12px', color: '#fff', fontWeight: '500', cursor: 'pointer' }}>Mostrar sello de firma digital</label>
-           </div>
-           <div style={{ marginTop: '12px' }}>
-             <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
-               Subir imagen de firma (PNG, JPG) o PDF escaneado
-             </label>
-             <input 
-               type="file"
-               accept="image/*,application/pdf"
-               onChange={handleSignatureUpload}
-               style={{ 
-                 width: '100%', 
-                 padding: '10px', 
-                 background: 'linear-gradient(135deg, #0a0e17 0%, #0c121e 100%)', 
-                 border: '1px solid rgba(255, 255, 255, 0.08)', 
-                 borderRadius: '10px', 
-                 color: '#fff', 
-                 fontSize: '13px'
-               }} 
-             />
-             {cierre.firmaImagen && (
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '12px', padding: '14px', background: '#0a0e17', borderRadius: '12px', border: '1px solid rgba(60, 180, 255, 0.15)' }}>
-                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                   <span style={{ fontSize: '11px', color: '#22c55e', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                     <Check size={14} /> FIRMA CARGADA
-                   </span>
-                   <div style={{ display: 'flex', gap: '6px' }}>
-                     <button 
-                       onClick={() => setCierre(prev => ({ ...prev, firmaZoom: 1, firmaX: 0, firmaY: 0, firmaAncho: 55, firmaAlto: 35 }))}
-                       style={{ background: 'rgba(255, 255, 255, 0.08)', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600', transition: 'background 0.2s' }}
-                       onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.15)'}
-                       onMouseLeave={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.08)'}
-                     >
-                       Reset
-                     </button>
-                     <button 
-                       onClick={() => setCierre(prev => ({ ...prev, firmaImagen: '', firmaZoom: 1, firmaX: 0, firmaY: 0, firmaAncho: 55, firmaAlto: 35 }))}
-                       style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'none', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '600', transition: 'background 0.2s' }}
-                       onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.25)'}
-                       onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.15)'}
-                     >
-                       Quitar
-                     </button>
-                   </div>
-                 </div>
-                 
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
-                     <span>ANCHO DEL RECUADRO</span>
-                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaAncho || 45}mm</span>
-                   </div>
-                   <input 
-                     type="range" 
-                     min="20" 
-                     max="100" 
-                     step="1" 
-                     value={cierre.firmaAncho || 45} 
-                     onChange={(e) => setCierre(prev => ({ ...prev, firmaAncho: parseInt(e.target.value, 10) }))} 
-                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
-                   />
-                 </div>
-
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
-                     <span>ALTO DEL RECUADRO</span>
-                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaAlto || 45}mm</span>
-                   </div>
-                   <input 
-                     type="range" 
-                     min="20" 
-                     max="100" 
-                     step="1" 
-                     value={cierre.firmaAlto || 45} 
-                     onChange={(e) => setCierre(prev => ({ ...prev, firmaAlto: parseInt(e.target.value, 10) }))} 
-                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
-                   />
-                 </div>
-
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
-                     <span>ZOOM DE FIRMA</span>
-                     <span style={{ color: '#3CB4FF' }}>{(cierre.firmaZoom || 1).toFixed(2)}x</span>
-                   </div>
-                   <input 
-                     type="range" 
-                     min="0.5" 
-                     max="15" 
-                     step="0.05" 
-                     value={cierre.firmaZoom || 1} 
-                     onChange={(e) => setCierre(prev => ({ ...prev, firmaZoom: parseFloat(e.target.value) }))} 
-                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
-                   />
-                 </div>
-
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
-                     <span>DESPLAZAMIENTO HORIZONTAL (X)</span>
-                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaX || 0}px</span>
-                   </div>
-                   <input 
-                     type="range" 
-                     min="-600" 
-                     max="600" 
-                     step="1" 
-                     value={cierre.firmaX || 0} 
-                     onChange={(e) => setCierre(prev => ({ ...prev, firmaX: parseInt(e.target.value, 10) }))} 
-                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
-                   />
-                 </div>
-
-                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: '#94a3b8', fontWeight: '600' }}>
-                     <span>DESPLAZAMIENTO VERTICAL (Y)</span>
-                     <span style={{ color: '#3CB4FF' }}>{cierre.firmaY || 0}px</span>
-                   </div>
-                   <input 
-                     type="range" 
-                     min="-600" 
-                     max="600" 
-                     step="1" 
-                     value={cierre.firmaY || 0} 
-                     onChange={(e) => setCierre(prev => ({ ...prev, firmaY: parseInt(e.target.value, 10) }))} 
-                     style={{ width: '100%', height: '6px', borderRadius: '3px', background: '#1e293b', outline: 'none', accentColor: '#3CB4FF', cursor: 'pointer' }}
-                   />
-                 </div>
-               </div>
-             )}
-           </div>
-
-          <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '10px 0' }} />
-          <h3 style={{ fontSize: '11px', fontWeight: 'bold', color: '#f43f5e', textTransform: 'uppercase', margin: '0 0 6px 0' }}>DATOS EMISOR (PIE DE PÁGINA)</h3>
-          <FieldBox label="Dirección Fiscal Emisor" value={emisor.direccion} onChange={(v) => setEmisor({...emisor, direccion: v})} placeholder="Dirección..." />
-          <FieldBox label="Bases / Contacto Secundario" value={emisor.base} onChange={(v) => setEmisor({...emisor, base: v})} placeholder="Bases..." />
-        </SectionCard>
-
-      </div>
-
-      <button onClick={handleExportPDF} style={{ width: '100%', padding: '16px', border: 'none', borderRadius: '14px', background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)', color: 'white', fontSize: '15px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '10px', boxShadow: '0 4px 15px rgba(60, 180, 255, 0.3)', transition: 'transform 0.2s, box-shadow 0.2s' }}
-              onMouseEnter={(e) => { e.target.style.transform = 'translateY(-2px)'; e.target.style.boxShadow = '0 6px 20px rgba(60, 180, 255, 0.4)'; }} onMouseLeave={(e) => { e.target.style.transform = 'translateY(0)'; e.target.style.boxShadow = '0 4px 15px rgba(60, 180, 255, 0.3)'; }}>
-        <Download size={22} />
-        <span>DESCARGAR PDF</span>
-      </button>
-    </div>
-  );
-};
-
 // ==========================================
 // VISTA PREVIA (Derecha)
 // ==========================================
@@ -670,7 +383,7 @@ const PreviewPanel = ({
   }, []);
 
   return (
-    <div style={{ width: '60%', height: '100vh', overflow: 'hidden', backgroundColor: '#0a0e17', padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden', backgroundColor: '#0a0e17', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
       <div style={{ textAlign: 'center', marginBottom: '12px', flexShrink: 0 }}>
         <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'white', margin: 0, letterSpacing: '1px' }}>VISTA PREVIA DEL PRESUPUESTO</h2>
         <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>Se ajusta automáticamente a una sola página A4</p>
@@ -681,7 +394,7 @@ const PreviewPanel = ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        height: 'calc(100vh - 110px)',
+        height: 'calc(100% - 110px)',
         overflow: 'hidden',
         flexShrink: 0
       }}>

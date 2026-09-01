@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Menu, X, Mail, User, LogOut } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Menu, X, Mail, User, LogOut, FileText, ShoppingCart } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
+import Button from '../ui/Button'
 import logo from '../../assets/Logo Atento5.png'
+import './Navbar.css'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
@@ -16,6 +19,8 @@ export default function Navbar() {
     { name: 'NOSOTROS', id: 'nosotros' },
     { name: 'MISIÓN', id: 'mision-vision' },
     { name: 'SERVICIOS', id: 'servicios' },
+    { name: 'COTIZADOR', href: '/cotizador' },
+    { name: 'ORDEN DE COMPRA', href: '/purchase-order' },
     { name: 'UBICACIÓN', id: 'ubicacion' },
     { name: 'CONTACTO', id: 'contacto' },
   ]
@@ -60,38 +65,13 @@ export default function Navbar() {
 
   return (
     <motion.nav
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 50,
-        background: isScrolled ? 'rgba(5, 11, 20, 0.85)' : 'rgba(5, 11, 20, 0.6)',
-        backdropFilter: 'blur(24px)',
-        WebkitBackdropFilter: 'blur(24px)',
-        borderBottom: isScrolled ? '1px solid rgba(60, 180, 255, 0.12)' : '1px solid transparent',
-        transition: 'all 0.4s ease',
-        boxShadow: isScrolled ? '0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(60, 180, 255, 0.08)' : 'none',
-      }}
+      className={`navbar ${isScrolled ? 'scrolled' : ''}`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
+      transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
     >
-      <div style={{
-        width: '100%',
-        maxWidth: '1440px',
-        margin: '0 auto',
-        padding: '0 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '32px',
-        height: '80px',
-        boxSizing: 'border-box',
-        position: 'relative',
-        overflow: 'visible'
-      }}>
-        <a href="#hero" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', gap: '16px', flexShrink: 0 }}>
+      <div className="navbar-inner">
+        <Link href="#hero" className="navbar-logo" aria-label="ATENTO5 Inicio">
           <motion.div
             animate={{ y: [-5, 5, -5] }}
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -110,378 +90,131 @@ export default function Navbar() {
               }}
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             />
-            <motion.img
-              src={logo}
-              alt="ATENTO5"
-              style={{
-                height: '180px',
-                width: '180px',
-                objectFit: 'contain',
-                display: 'block',
-                filter: 'drop-shadow(0 0 25px rgba(60, 180, 255, 0.85))',
-              }}
-              whileHover={{ scale: 1.05 }}
-            />
+            <img src={logo} alt="ATENTO5" className="navbar-logo-img" />
           </motion.div>
-        </a>
+        </Link>
 
-        <div className="hidden sm:flex items-center gap-1">
+        <div className="navbar-actions">
           {user && (
-            <a href="/correo" style={{ textDecoration: 'none' }}>
-              <motion.button
-                whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(167,139,250,0.5)' }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
-                  color: 'white',
-                  padding: '10px 22px',
-                  borderRadius: '30px',
-                  border: 'none',
-                  fontWeight: 800,
-                  fontSize: '12.5px',
-                  letterSpacing: '0.08em',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 15px rgba(124,58,237,0.35)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '7px',
-                }}
-              >
-                <Mail size={14} />
-                CORREO
-              </motion.button>
-            </a>
+            <>
+              <Link to="/cotizador">
+                <Button variant="primary" size="sm" icon={<FileText size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}>
+                  COTIZACIÓN
+                </Button>
+              </Link>
+              <Link to="/purchase-order">
+                <Button variant="danger" size="sm" icon={<ShoppingCart size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}>
+                  ORDEN DE COMPRA
+                </Button>
+              </Link>
+              <Link to="/correo">
+                <Button variant="secondary" size="sm" icon={<Mail size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }} style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)', border: 'none', boxShadow: '0 4px 15px rgba(124,58,237,0.35)' }}>
+                  CORREO
+                </Button>
+              </Link>
+            </>
           )}
 
           {user ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <motion.div
-                whileHover={{ scale: 1.03 }}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.15) 0%, rgba(210, 20, 20, 0.08) 100%)',
-                  border: '1px solid rgba(60, 180, 255, 0.3)',
-                  borderRadius: '30px',
-                  padding: '6px 18px 6px 6px',
-                  backdropFilter: 'blur(10px)',
-                }}
-              >
-                <div style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '13px',
-                  fontWeight: 800,
-                  color: 'white',
-                }}>
-                  {user.avatar || 'AD'}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div className="navbar-user">
+                <div className="navbar-avatar">{user.avatar || 'AD'}</div>
+                <div className="navbar-user-info">
+                  <span className="navbar-user-name">{user.name}</span>
+                  <span className="navbar-user-role">{user.role}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '13.5px', fontWeight: 800, color: 'white', lineHeight: '1.2' }}>
-                    {user.name}
-                  </span>
-                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: '1', textTransform: 'uppercase' }}>
-                    {user.role}
-                  </span>
-                </div>
-              </motion.div>
-
-              <motion.button
-                onClick={logout}
-                whileHover={{ scale: 1.1, color: '#ef4444' }}
-                whileTap={{ scale: 0.9 }}
-                title="Cerrar Sesión"
-                style={{
-                  width: '42px',
-                  height: '42px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'rgba(255,255,255,0.6)',
-                  cursor: 'pointer',
-                  padding: 0
-                }}
-              >
+              </div>
+              <button className="navbar-logout" onClick={logout} title="Cerrar Sesión" aria-label="Cerrar Sesión">
                 <LogOut size={18} />
-              </motion.button>
+              </button>
             </div>
           ) : (
-            <a href="/login" style={{ textDecoration: 'none' }}>
-              <motion.button
-                whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.4)', background: 'rgba(255,255,255,0.08)' }}
-                whileTap={{ scale: 0.95 }}
-                style={{
-                  background: 'rgba(255,255,255,0.02)',
-                  color: 'white',
-                  padding: '12px 24px',
-                  borderRadius: '30px',
-                  border: '1.5px solid rgba(255,255,255,0.12)',
-                  fontWeight: 750,
-                  fontSize: '12px',
-                  letterSpacing: '0.1em',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  textTransform: 'uppercase'
-                }}
-              >
-                <User size={14} />
-                <span>ACCESO ADMIN</span>
-              </motion.button>
-            </a>
+            <Link to="/login">
+              <Button variant="ghost" size="sm" icon={<User size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }} style={{ border: '1.5px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}>
+                ACCESO ADMIN
+              </Button>
+            </Link>
           )}
         </div>
 
-        <motion.button
-          onClick={() => setIsOpen(!isOpen)}
-          whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.08)' }}
-          whileTap={{ scale: 0.95 }}
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            width: '46px',
-            height: '46px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            color: '#fff',
-            zIndex: 100,
-          }}
-        >
+        <button className="navbar-menu-toggle" onClick={() => setIsOpen(!isOpen)} aria-label="Abrir menú">
           {isOpen ? <X size={20} /> : <Menu size={20} />}
-        </motion.button>
+        </button>
       </div>
 
       <AnimatePresence>
         {isOpen && (
           <>
             <motion.div
+              className="navbar-drawer-overlay"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(5, 7, 12, 0.75)',
-                backdropFilter: 'blur(8px)',
-                zIndex: 85,
-              }}
             />
-
             <motion.div
+              className="navbar-drawer"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              style={{
-                position: 'fixed',
-                top: 0,
-                right: 0,
-                bottom: 0,
-                width: '320px',
-                maxWidth: '85vw',
-                height: '100vh',
-                background: 'rgba(5, 11, 20, 0.98)',
-                backdropFilter: 'blur(30px)',
-                borderLeft: '1px solid rgba(60, 180, 255, 0.2)',
-                boxShadow: '-10px 0 40px rgba(0, 0, 0, 0.7)',
-                zIndex: 90,
-                padding: '110px 32px 40px 32px',
-                boxSizing: 'border-box',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(60, 180, 255, 0.6)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>
-                  Navegación
-                </span>
+              <div className="navbar-drawer-nav">
+                <span className="navbar-drawer-section-label">Navegación</span>
                 {navLinks.map((link) => (
-                  <motion.button
+                  <button
                     key={link.name}
                     onClick={() => handleNavClick(link.id)}
-                    whileHover={{ x: 6, color: '#3CB4FF' }}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: activeLink === link.id ? '#3CB4FF' : 'rgba(255, 255, 255, 0.75)',
-                      textAlign: 'left',
-                      fontSize: '15px',
-                      fontWeight: 750,
-                      letterSpacing: '0.08em',
-                      cursor: 'pointer',
-                      padding: '8px 0',
-                      borderBottom: activeLink === link.id ? '1px solid rgba(60, 180, 255, 0.2)' : '1px solid transparent',
-                    }}
+                    className={`navbar-drawer-link ${activeLink === link.id ? 'active' : ''}`}
                   >
                     {link.name}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
 
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '14px',
-                borderTop: '1px dashed rgba(255, 255, 255, 0.15)',
-                paddingTop: '24px',
-              }}>
-                <span style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(210, 20, 20, 0.6)', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '4px', display: 'block' }}>
-                  Área Administrativa
-                </span>
-
-                <a href="/cotizador" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      width: '100%',
-                      background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
-                      color: 'white',
-                      padding: '12px',
-                      borderRadius: '12px',
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: '12px',
-                      letterSpacing: '0.08em',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    COTIZAR
-                  </motion.button>
-                </a>
-
-                <a href="/purchase-order" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    style={{
-                      width: '100%',
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      color: 'white',
-                      padding: '12px',
-                      borderRadius: '12px',
-                      border: 'none',
-                      fontWeight: 800,
-                      fontSize: '12px',
-                      letterSpacing: '0.04em',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    ORDEN DE COMPRA
-                  </motion.button>
-                </a>
-
+              <div className="navbar-drawer-divider">
+                <span className="navbar-drawer-admin-label">Área Administrativa</span>
                 {user && (
-                  <a href="/correo" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{
-                        width: '100%',
-                        background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
-                        color: 'white',
-                        padding: '12px',
-                        borderRadius: '12px',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: '12px',
-                        letterSpacing: '0.08em',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                      }}
-                    >
+                  <Link to="/cotizador" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                    <Button variant="primary" size="md" block style={{ marginBottom: '0.75rem' }}>
+                      COTIZAR
+                    </Button>
+                  </Link>
+                )}
+                {user && (
+                  <Link to="/purchase-order" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                    <Button variant="secondary" size="md" block style={{ marginBottom: '0.75rem', border: '1px solid rgba(255,255,255,0.12)' }}>
+                      ORDEN DE COMPRA
+                    </Button>
+                  </Link>
+                )}
+                {user && (
+                  <Link to="/correo" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                    <Button variant="secondary" size="md" block style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)', border: 'none' }}>
                       <Mail size={14} /> MI CORREO
-                    </motion.button>
-                  </a>
+                    </Button>
+                  </Link>
                 )}
 
                 {user ? (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    background: 'linear-gradient(135deg, rgba(60, 180, 255, 0.1) 0%, rgba(210, 20, 20, 0.05) 100%)',
-                    border: '1px solid rgba(60, 180, 255, 0.2)',
-                    borderRadius: '12px',
-                    padding: '10px 14px',
-                    marginTop: '8px'
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '12px',
-                        fontWeight: 800,
-                        color: 'white',
-                      }}>
-                        {user.avatar || 'AD'}
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: 'white' }}>{user.name}</span>
-                        <span style={{ fontSize: '9px', fontWeight: 600, color: 'rgba(255,255,255,0.45)' }}>{user.role}</span>
+                  <div className="navbar-drawer-user">
+                    <div className="navbar-drawer-user-info">
+                      <div className="navbar-drawer-user-avatar">{user.avatar || 'AD'}</div>
+                      <div>
+                        <div className="navbar-drawer-user-name">{user.name}</div>
+                        <div className="navbar-drawer-user-role">{user.role}</div>
                       </div>
                     </div>
-                    <motion.button
-                      onClick={() => { logout(); setIsOpen(false); }}
-                      whileHover={{ scale: 1.1, color: '#ef4444' }}
-                      whileTap={{ scale: 0.9 }}
-                      style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', padding: 0 }}
-                    >
+                    <button className="navbar-drawer-logout" onClick={() => { logout(); setIsOpen(false); }} aria-label="Cerrar Sesión">
                       <LogOut size={18} />
-                    </motion.button>
+                    </button>
                   </div>
                 ) : (
-                  <a href="/login" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                    <motion.button
-                      whileHover={{ scale: 1.02, background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.3)' }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{
-                        width: '100%',
-                        background: 'rgba(255,255,255,0.02)',
-                        color: 'white',
-                        padding: '12px',
-                        borderRadius: '12px',
-                        border: '1.5px solid rgba(255,255,255,0.1)',
-                        fontWeight: 700,
-                        fontSize: '12px',
-                        letterSpacing: '0.08em',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                      }}
-                    >
-                      <User size={14} />
-                      <span>ACCESO ADMIN</span>
-                    </motion.button>
-                  </a>
+                  <Link to="/login" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                    <Button variant="ghost" size="md" block style={{ border: '1.5px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+                      <User size={14} /> ACCESO ADMIN
+                    </Button>
+                  </Link>
                 )}
               </div>
             </motion.div>

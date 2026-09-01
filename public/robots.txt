@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /gerente-general
+Disallow: /cotizador
+Disallow: /purchase-order
+Disallow: /correo
+
+Sitemap: https://atento5.com/sitemap.xml

@@ -4,6 +4,7 @@ import {
   Building2, User, Search, MailPlus, Filter
 } from 'lucide-react';
 import { useMail } from '../../context/MailContext';
+import './EmailList.css';
 
 const formatEmailDate = (dateString) => {
   if (!dateString) return '';
@@ -19,6 +20,26 @@ const formatEmailDate = (dateString) => {
 };
 
 const PAGE_SIZE = 50;
+
+const formatEmailDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const now = new Date();
+  const diff = now - date;
+
+  if (diff < 86400000 && date.toDateString() === now.toDateString()) {
+    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
+  } else {
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+};
+
+const getEmailPreview = (body) => {
+  if (!body) return 'Sin contenido adicional';
+  const div = document.createElement('div');
+  div.innerHTML = body;
+  return div.textContent || div.innerText || 'Sin contenido adicional';
+};
 
 const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, onRefresh, loading }) => {
   const { currentFolder } = useMail();
@@ -73,15 +94,15 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
   };
 
   return (
-    <div className="flex-1 min-h-0 w-full flex flex-col bg-white">
-      <div className="px-5 py-4 flex items-center justify-between shrink-0 bg-white border-b border-slate-100">
-        <span className="text-base font-bold text-slate-800 tracking-tight">
+    <div className="email-list">
+      <div className="email-list-header">
+        <span className="email-list-count">
           {filtered.length} {filtered.length === 1 ? 'mensaje' : 'mensajes'}
         </span>
-        <div className="flex items-center gap-1.5">
+        <div className="email-list-actions">
           <button
             onClick={onCompose}
-            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer flex items-center justify-center border border-transparent hover:border-slate-150"
+            className="email-list-action-button"
             title="Redactar correo"
           >
             <MailPlus size={16} />
@@ -89,13 +110,13 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all disabled:opacity-50 cursor-pointer flex items-center justify-center border border-transparent hover:border-slate-150"
+            className="email-list-action-button"
             title="Actualizar bandeja"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
           </button>
           <button
-            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer flex items-center justify-center border border-transparent hover:border-slate-150"
+            className="email-list-action-button"
             title="Filtrar mensajes"
           >
             <Filter size={14} />
@@ -103,25 +124,25 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
         </div>
       </div>
 
-      <div className="px-4 py-3 shrink-0 bg-white border-b border-slate-100">
+      <div className="email-list-search">
         <div className="relative flex items-center">
-          <Search size={15} className="absolute left-3.5 text-slate-400 pointer-events-none" />
+          <Search size={15} className="email-list-search-icon" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar mensajes..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 focus:border-blue-400 focus:bg-white focus:outline-none rounded-xl text-xs text-slate-750 placeholder-slate-400 transition-all font-medium shadow-inner"
+            className="email-list-search-input"
           />
         </div>
       </div>
 
-      <div ref={listRef} className="flex-1 overflow-y-auto divide-y divide-slate-100 bg-white" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 #ffffff' }}>
+      <div ref={listRef} className="email-list-scroll">
         {displayEmails.length === 0 ? (
-          <div className="p-10 text-center flex flex-col items-center justify-center h-full text-slate-400">
-            <Inbox size={36} className="stroke-[1.5] mb-2 text-slate-300" />
-            <p className="font-bold text-xs text-slate-500">No hay mensajes</p>
-            <p className="text-[10px] text-slate-400 mt-0.5">Intenta otra búsqueda o filtro.</p>
+          <div className="email-list-empty">
+            <Inbox size={36} className="email-list-empty-icon" />
+            <p className="email-list-empty-title">No hay mensajes</p>
+            <p className="email-list-empty-hint">Intenta otra búsqueda o filtro.</p>
           </div>
         ) : (
           <div>
@@ -130,81 +151,74 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
               const isUnread = !email.is_read;
               const isGov = email.origen === 'Gobierno';
               const avatarBg = isGov
-                ? 'bg-purple-50 text-purple-600 border border-purple-100/60'
-                : 'bg-emerald-50 text-emerald-600 border border-emerald-100/60';
+                ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
               const AvatarIcon = isGov ? Building2 : User;
 
-              let priorityDotColor = 'bg-slate-300';
+              let priorityDotColor = 'bg-slate-500';
               if (email.prioridad === 'Urgente') {
-                priorityDotColor = 'bg-red-500 shadow-sm shadow-red-200';
+                priorityDotColor = 'bg-red-500 shadow-sm shadow-red-500/30';
               } else if (email.prioridad === 'Alta') {
-                priorityDotColor = 'bg-orange-500 shadow-sm shadow-orange-200';
+                priorityDotColor = 'bg-orange-500 shadow-sm shadow-orange-500/30';
               } else if (email.prioridad === 'Normal') {
-                priorityDotColor = 'bg-blue-500 shadow-sm shadow-blue-200';
+                priorityDotColor = 'bg-blue-500 shadow-sm shadow-blue-500/30';
               } else if (email.prioridad === 'Informativa') {
-                priorityDotColor = 'bg-slate-400 shadow-sm shadow-slate-200';
+                priorityDotColor = 'bg-slate-400 shadow-sm shadow-slate-400/30';
               }
 
               const getTagClass = (tag) => {
-                if (tag === 'Gobierno') return 'bg-purple-55 text-purple-650 border border-purple-150';
-                if (tag === 'Interno') return 'bg-emerald-55 text-emerald-650 border border-emerald-150';
-                if (tag === 'Urgente') return 'bg-red-55 text-red-650 border border-red-150';
-                if (tag === 'Alta') return 'bg-amber-55 text-amber-650 border border-amber-150';
-                return 'bg-slate-50 text-slate-500 border border-slate-200';
+                if (tag === 'Gobierno') return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
+                if (tag === 'Interno') return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                if (tag === 'Urgente') return 'bg-red-500/10 text-red-400 border border-red-500/20';
+                if (tag === 'Alta') return 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
               };
 
               return (
                 <div
                   key={email.id}
                   onClick={() => handleEmailClick(email)}
-                  className={`group relative cursor-pointer transition-all duration-200 px-5 py-4 flex gap-3.5 items-start border-l-4 border-b border-slate-100/80
-                    ${isSelected
-                      ? 'bg-blue-50/40 border-l-blue-600'
-                      : isUnread
-                        ? 'bg-slate-50/40 border-l-transparent hover:bg-slate-50/70'
-                        : 'bg-white border-l-transparent hover:bg-slate-50/70'
-                    }
-                  `}
+                  className={`email-list-item ${isSelected ? 'email-list-item-selected' : ''} ${isUnread ? 'email-list-item-unread' : ''}`}
                 >
-                  <div className={`w-9 h-9 rounded-full ${avatarBg} flex items-center justify-center shrink-0`}>
+                  <div className={`email-list-avatar ${avatarBg}`}>
                     <AvatarIcon size={16} />
                   </div>
 
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className={`text-[11px] truncate uppercase tracking-wider ${isUnread ? 'font-black text-slate-800' : 'font-bold text-slate-500'}`}>
+                  <div className="email-list-content">
+                    <div className="email-list-row">
+                      <span className={`email-list-sender ${isUnread ? 'email-list-sender-unread' : ''}`}>
                         {email.from_name || email.from_email?.split('@')[0]}
                       </span>
-                      <span className="text-[10px] font-bold text-slate-400 shrink-0">
+                      <span className="email-list-date">
                         {formatEmailDate(email.date)}
                       </span>
                     </div>
 
-                    <h4 className={`text-xs truncate leading-snug ${isUnread ? 'font-extrabold text-slate-800' : 'font-semibold text-slate-655'}`}>
+                    <h4 className={`email-list-subject ${isUnread ? 'email-list-subject-unread' : ''}`}>
                       {email.subject || '(Sin asunto)'}
                     </h4>
 
-                    <p className="text-[11px] text-slate-400 font-medium truncate leading-normal">
-                      {email.body ? email.body.replace(/<[^>]*>/g, '').replace(/\n/g, ' ') : 'Sin contenido adicional'}
+                    <p className="email-list-preview">
+                      {getEmailPreview(email.body)}
                     </p>
 
-                    <div className="flex items-center justify-between pt-1.5">
-                      <div className="flex items-center gap-1 flex-wrap">
+                    <div className="email-list-meta">
+                      <div className="email-list-tags">
                         {(email.tags || []).map((tag, idx) => (
                           <span
                             key={idx}
-                            className={`px-1.5 py-0.5 rounded-md text-[9px] font-extrabold tracking-wide uppercase ${getTagClass(tag)}`}
+                            className={`email-list-tag ${getTagClass(tag)}`}
                           >
                             {tag}
                           </span>
                         ))}
                       </div>
 
-                      <div className="flex items-center gap-2.5 shrink-0">
+                      <div className="email-list-indicators">
                         {email.has_attachments && (
-                          <Paperclip size={12} className="text-slate-400" />
+                          <Paperclip size={12} className="email-list-indicator" />
                         )}
-                        <span className={`w-2.5 h-2.5 rounded-full ${priorityDotColor}`} />
+                        <span className={`email-list-priority ${priorityDotColor}`} />
                       </div>
                     </div>
                   </div>
@@ -212,7 +226,7 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
               );
             })}
             {hasMore && (
-              <div ref={sentinelRef} className="px-5 py-4 text-center text-xs font-semibold text-slate-400">
+              <div ref={sentinelRef} className="email-list-more">
                 Cargando más mensajes...
               </div>
             )}

@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
+/* eslint-disable-next-line no-unused-vars */
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
-import About from '../components/About';
-import MissionVision from '../components/MissionVision';
-import Services from '../components/Services';
-import Contact from '../components/Contact';
-import Location from '../components/Location';
-import BrochureDownloadField from '../components/brochure/BrochureDownloadField';
+import './Home.css';
+
+const About = lazy(() => import('../components/About'));
+const MissionVision = lazy(() => import('../components/MissionVision'));
+const Services = lazy(() => import('../components/Services'));
+const Contact = lazy(() => import('../components/Contact'));
+const Location = lazy(() => import('../components/Location'));
+const BrochureDownloadField = lazy(() => import('../components/brochure/BrochureDownloadField'));
 
 const sections = [
   { id: 'hero', title: 'INICIO' },
@@ -22,10 +25,8 @@ const sections = [
 const SidebarScroll = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [hoveredSection, setHoveredSection] = useState(null);
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
     const handleScroll = () => {
       const scrollPos = window.scrollY + window.innerHeight / 3;
       for (const section of sections) {
@@ -53,34 +54,12 @@ const SidebarScroll = () => {
     }
   };
 
-  if (!isClient) return null;
-
   return (
     <>
       <div
-        style={{
-          position: 'fixed',
-          right: '18px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          zIndex: 999999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '18px',
-          background: 'rgba(5, 11, 20, 0.85)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1px solid rgba(60, 180, 255, 0.12)',
-          borderRadius: '28px',
-          padding: '18px 10px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.45), 0 0 30px rgba(60, 180, 255, 0.05)',
-          maxHeight: '72vh',
-          overflowY: 'auto',
-          overflowX: 'hidden',
-          scrollBehavior: 'smooth',
-          width: '48px',
-        }}
+        className="sidebar-scroll"
+        role="navigation"
+        aria-label="Navegación lateral"
       >
         {sections.map((section, index) => {
           const isActive = activeSection === section.id;
@@ -90,12 +69,7 @@ const SidebarScroll = () => {
           return (
             <div
               key={section.id}
-              style={{
-                position: 'relative',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
+              className="sidebar-scroll-item"
               onMouseEnter={() => setHoveredSection(section.id)}
               onMouseLeave={() => setHoveredSection(null)}
             >
@@ -104,22 +78,10 @@ const SidebarScroll = () => {
                   initial={{ opacity: 0, x: 8, scale: 0.96 }}
                   animate={{ opacity: 1, x: 0, scale: 1 }}
                   transition={{ duration: 0.18, ease: 'easeOut' }}
+                  className="sidebar-scroll-label"
                   style={{
-                    position: 'absolute',
-                    right: '58px',
-                    background: 'rgba(5, 11, 20, 0.92)',
-                    color: '#fff',
-                    padding: '7px 12px',
-                    borderRadius: '14px',
-                    fontSize: '11px',
-                    fontWeight: 800,
-                    letterSpacing: '0.1em',
-                    whiteSpace: 'nowrap',
-                    border: `1px solid ${color}`,
+                    borderColor: `${color}80`,
                     boxShadow: `0 0 12px ${color}45`,
-                    pointerEvents: 'none',
-                    textTransform: 'uppercase',
-                    backdropFilter: 'blur(10px)',
                   }}
                 >
                   {section.title}
@@ -132,23 +94,14 @@ const SidebarScroll = () => {
                 title={section.title}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.92 }}
+                className={`sidebar-scroll-dot ${isActive ? 'sidebar-scroll-dot-active' : ''}`}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: isActive ? 30 : 16,
-                  height: isActive ? 30 : 16,
-                  borderRadius: '50%',
                   background: isActive
                     ? `linear-gradient(135deg, ${color}, ${index % 2 === 0 ? '#D21414' : '#3CB4FF'})`
                     : 'rgba(255, 255, 255, 0.92)',
-                  border: 'none',
-                  cursor: 'pointer',
                   boxShadow: isActive
                     ? `0 0 22px ${color}, 0 0 40px ${color}45`
                     : '0 0 6px rgba(255, 255, 255, 0.18)',
-                  transform: isActive ? 'scale(1.12)' : 'scale(1)',
-                  transition: 'all 0.25s ease',
                 }}
               />
             </div>
@@ -161,62 +114,23 @@ const SidebarScroll = () => {
 };
 
 const PageBackground = () => (
-  <div style={{
-    position: 'fixed',
-    inset: 0,
-    zIndex: 0,
-    pointerEvents: 'none',
-    overflow: 'hidden',
-  }}>
-    <div style={{
-      position: 'absolute',
-      top: '-20%',
-      left: '-10%',
-      width: '600px',
-      height: '600px',
-      borderRadius: '50%',
-      background: 'radial-gradient(circle, rgba(60, 180, 255, 0.06) 0%, transparent 60%)',
-      filter: 'blur(80px)',
-    }}>
+  <div className="page-background" aria-hidden="true">
+    <div className="page-background-orb page-background-orb-1">
       <motion.div
         animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         style={{ width: '100%', height: '100%' }}
       />
     </div>
-    <div style={{
-      position: 'absolute',
-      bottom: '-20%',
-      right: '-10%',
-      width: '600px',
-      height: '600px',
-      borderRadius: '50%',
-      background: 'radial-gradient(circle, rgba(210, 20, 20, 0.04) 0%, transparent 60%)',
-      filter: 'blur(80px)',
-    }}>
+    <div className="page-background-orb page-background-orb-2">
       <motion.div
         animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         style={{ width: '100%', height: '100%' }}
       />
     </div>
-    <div style={{
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '800px',
-      height: '800px',
-      borderRadius: '50%',
-      background: 'radial-gradient(circle, rgba(60, 180, 255, 0.03) 0%, transparent 60%)',
-      filter: 'blur(100px)',
-    }} />
-    <div style={{
-      position: 'absolute',
-      inset: 0,
-      backgroundImage: `radial-gradient(rgba(60, 180, 255, 0.03) 1px, transparent 1px)`,
-      backgroundSize: '60px 60px',
-    }} />
+    <div className="page-background-orb page-background-orb-3" />
+    <div className="page-background-grid" />
   </div>
 );
 
@@ -226,58 +140,46 @@ const SectionDivider = ({ color = '#3CB4FF' }) => (
     whileInView={{ scaleX: 1 }}
     viewport={{ once: true }}
     transition={{ duration: 0.8, ease: 'easeInOut' }}
+    className="section-divider"
     style={{
-      width: '100%',
-      height: '1px',
       background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
-      opacity: 0.3,
-      transformOrigin: 'center',
     }}
   />
 );
 
 const Home = () => {
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#050B14',
-      display: 'flex',
-      flexDirection: 'column',
-      overflowX: 'hidden',
-      position: 'relative',
-    }}>
+    <div className="home-root">
       <PageBackground />
       <Navbar />
       <SidebarScroll />
 
-      <main style={{ flex: 1, position: 'relative', zIndex: 1 }}>
-        <div id="hero">
-          <Hero />
-        </div>
+      <main id="main" className="home-main">
+        <Hero />
         <SectionDivider />
-        <div id="brochure-download">
+        <Suspense fallback={<div className="section-suspense" />}>
           <BrochureDownloadField />
-        </div>
+        </Suspense>
         <SectionDivider />
-        <div id="nosotros">
+        <Suspense fallback={<div className="section-suspense" />}>
           <About />
-        </div>
+        </Suspense>
         <SectionDivider color="#D21414" />
-        <div id="mision-vision">
+        <Suspense fallback={<div className="section-suspense" />}>
           <MissionVision />
-        </div>
+        </Suspense>
         <SectionDivider />
-        <div id="servicios">
+        <Suspense fallback={<div className="section-suspense" />}>
           <Services />
-        </div>
+        </Suspense>
         <SectionDivider color="#D21414" />
-        <div id="ubicacion">
+        <Suspense fallback={<div className="section-suspense" />}>
           <Location />
-        </div>
+        </Suspense>
         <SectionDivider />
-        <div id="contacto">
+        <Suspense fallback={<div className="section-suspense" />}>
           <Contact />
-        </div>
+        </Suspense>
       </main>
     </div>
   );
