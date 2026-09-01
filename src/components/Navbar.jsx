@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut, User as UserIcon, Menu, X, Mail } from 'lucide-react';
+import { LogOut, User as UserIcon, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/Logo Atento5.png';
 
@@ -288,35 +288,6 @@ const Navbar = () => {
                 ORDEN DE COMPRA
               </motion.button>
             </Link>
-
-            {/* Email button — only visible when logged in */}
-            {user && (
-              <Link to="/email" style={{ textDecoration: 'none' }}>
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: '0 0 20px rgba(167,139,250,0.5)' }}
-                  whileTap={{ scale: 0.95 }}
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
-                    color: 'white',
-                    padding: '10px 22px',
-                    borderRadius: '30px',
-                    border: 'none',
-                    fontWeight: 800,
-                    fontSize: '12.5px',
-                    letterSpacing: '0.08em',
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 15px rgba(124,58,237,0.35)',
-                    transition: 'all 0.3s ease',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                  }}
-                >
-                  <Mail size={14} />
-                  CORREO
-                </motion.button>
-              </Link>
-            )}
 
             {/* Vertical Divider */}
             <span style={{ 
@@ -616,35 +587,6 @@ const Navbar = () => {
                     ORDEN DE COMPRA
                   </motion.button>
                 </Link>
-
-                {/* Mobile email button */}
-                {user && (
-                  <Link to="/email" style={{ textDecoration: 'none' }} onClick={() => setIsOpen(false)}>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{
-                        width: '100%',
-                        background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
-                        color: 'white',
-                        padding: '12px',
-                        borderRadius: '12px',
-                        border: 'none',
-                        fontWeight: 800,
-                        fontSize: '12px',
-                        letterSpacing: '0.08em',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 15px rgba(124,58,237,0.25)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '8px',
-                      }}
-                    >
-                      <Mail size={14} /> MI CORREO
-                    </motion.button>
-                  </Link>
-                )}
 
                 {user ? (
                   <div style={{ 
