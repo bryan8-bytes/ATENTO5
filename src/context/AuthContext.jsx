@@ -4,6 +4,44 @@ const AuthContext = createContext(null);
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
+const AUTHORIZED_USERS = [
+  {
+    email: 'Juan.ampuero@atento5.com',
+    password: '4B@}K?3DmgR!Nuq@',
+    name: 'Juan Ampuero',
+    role: 'Administrador General',
+    avatar: 'JA'
+  },
+  {
+    email: 'Corina.anorga@atento5.com',
+    password: '5VWwcTyp3iB8PY7',
+    name: 'Corina Anorga',
+    role: 'Finanzas',
+    avatar: 'CA'
+  },
+  {
+    email: 'Proyectos@atento5.com',
+    password: '7ZjFHR#HtwbW53(C',
+    name: 'Proyectos',
+    role: 'Gestión de Proyectos',
+    avatar: 'PR'
+  },
+  {
+    email: 'Ventas@atento5.com',
+    password: 'MV}FgL4xmGkt4cav',
+    name: 'Ventas',
+    role: 'Gestión Comercial',
+    avatar: 'VE'
+  },
+  {
+    email: 'Operaciones@atento5.com',
+    password: 'rHxl.dgL&!tNgSeT',
+    name: 'Operaciones',
+    role: 'Operaciones',
+    avatar: 'OP'
+  }
+];
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -15,9 +53,12 @@ export const AuthProvider = ({ children }) => {
     
     if (token && savedUser) {
       try {
-        setUser(JSON.parse(savedUser));
-        // Verify token with backend
-        verifyToken(token);
+        const parsedUser = JSON.parse(savedUser);
+        setUser(parsedUser);
+        // Verify token with backend only if not a local fallback session
+        if (token && !token.startsWith('local_')) {
+          verifyToken(token);
+        }
       } catch (e) {
         console.error('Error parsing session data', e);
         localStorage.removeItem('token');
@@ -41,7 +82,8 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (error) {
-      console.error('Token verification failed:', error);
+      // If network fails (e.g. on Vercel without local backend), maintain session
+      console.warn('Backend unavailable, maintaining local session:', error.message);
     }
   };
 
@@ -84,6 +126,32 @@ export const AuthProvider = ({ children }) => {
 
       return data.user;
     } catch (error) {
+      // Fallback for Vercel / server offline (avoids "Failed to fetch" breaking login)
+      const isNetworkError = error.name === 'TypeError' ||
+                             (error.message && error.message.includes('Failed to fetch')) ||
+                             (error.message && error.message.includes('NetworkError')) ||
+                             (error.message && error.message.includes('network'));
+
+      if (isNetworkError) {
+        const found = AUTHORIZED_USERS.find(
+          u => u.email.toLowerCase() === email.trim().toLowerCase()
+        );
+        if (found) {
+          if (found.password === password) {
+            const { password: _, ...userProfile } = found;
+            const fallbackToken = `local_${Date.now()}`;
+            localStorage.setItem('token', fallbackToken);
+            localStorage.setItem('user', JSON.stringify(userProfile));
+            setUser(userProfile);
+            return userProfile;
+          } else {
+            throw new Error('La contraseña ingresada es incorrecta.');
+          }
+        } else {
+          throw new Error('El correo electrónico no está registrado o no tiene acceso administrativo.');
+        }
+      }
+
       throw error;
     }
   };

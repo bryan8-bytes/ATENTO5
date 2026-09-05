@@ -142,10 +142,10 @@ const childVariants = {
 }
 
 const HERO_BUTTON_BASE =
-  'relative group inline-flex items-center justify-center gap-3 text-center font-extrabold rounded-full text-base sm:text-lg md:text-xl py-4 sm:py-4.5 md:py-5 px-8 sm:px-10 md:px-12 min-h-[58px] md:min-h-[64px] min-w-[220px] sm:min-w-[260px] transition-all duration-300 tracking-wide shadow-lg'
+  'group inline-flex items-center justify-center gap-3 font-bold rounded-full text-lg md:text-xl min-h-[56px] px-8 md:px-10 transition-all duration-300'
 
 const HERO_BUTTONS_CONTAINER_CLASSES =
-  'flex flex-col sm:flex-row gap-4 md:gap-5 w-full justify-start items-stretch sm:items-center'
+  'flex flex-col sm:flex-row gap-4 md:gap-5 mt-24 md:mt-28 w-full justify-start items-stretch sm:items-center'
 
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0)
@@ -216,12 +216,12 @@ const HeroSlider = () => {
         />
       </div>
 
-      <div className="hidden lg:flex absolute left-6 top-[42%] -translate-y-1/2 z-20">
+      <div className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-20">
         <Motion.button
           onClick={goPrev}
           className="flex items-center justify-center w-14 h-14 rounded-full border border-white/15 bg-white/5 text-white/80 hover:text-white hover:border-white/30 hover:bg-white/10 backdrop-blur-md"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
           aria-label="Slide anterior"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -230,12 +230,12 @@ const HeroSlider = () => {
         </Motion.button>
       </div>
 
-      <div className="hidden lg:flex absolute right-6 top-[42%] -translate-y-1/2 z-20">
+      <div className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-20">
         <Motion.button
           onClick={goNext}
           className="flex items-center justify-center w-14 h-14 rounded-full border border-white/15 bg-white/5 text-white/80 hover:text-white hover:border-white/30 hover:bg-white/10 backdrop-blur-md"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
           aria-label="Siguiente slide"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -366,7 +366,7 @@ const HeroSlider = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className={`${HERO_BUTTONS_CONTAINER_CLASSES} ${slide.showSocials ? 'mt-10 sm:mt-14 md:mt-20 lg:mt-28' : 'mt-20 sm:mt-28 md:mt-36 lg:mt-48 xl:mt-56'}`}
+                  className={HERO_BUTTONS_CONTAINER_CLASSES}
                 >
                   {slide.id === 'inicio' && (
                     <>
@@ -580,23 +580,36 @@ const HeroSlider = () => {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-30">
         {slides.map((s, index) => (
           <Motion.button
             key={s.id}
             onClick={() => goTo(index)}
-            className="rounded-full"
+            className="relative h-1.5 rounded-full overflow-hidden"
             style={{
-              width: '10px',
-              height: '10px',
-              backgroundColor: current === index ? s.accent : 'rgba(255, 255, 255, 0.25)',
-              border: current === index ? `1px solid ${s.accent}` : '1px solid rgba(255, 255, 255, 0.1)',
-              transition: 'background-color 0.3s ease, border-color 0.3s ease',
+              width: current === index ? '72px' : '12px',
+              backgroundColor: current === index ? `${s.accent}20` : 'rgba(255, 255, 255, 0.15)',
+              border: current === index ? `1px solid ${s.accent}40` : '1px solid rgba(255, 255, 255, 0.05)',
+              transition: 'width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.6s ease, border-color 0.6s ease',
             }}
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
             aria-label={`Ir a slide ${index + 1}`}
-          />
+          >
+            {current === index && (
+              <Motion.div
+                className="absolute inset-y-0 left-0 rounded-full"
+                style={{
+                  background: `linear-gradient(90deg, ${s.accent}, ${s.accentSecondary})`,
+                  boxShadow: `0 0 16px ${s.accent}50`,
+                  transformOrigin: '0% 50%',
+                }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: progress / 100 }}
+                transition={{ duration: 0.05, ease: 'linear' }}
+              />
+            )}
+          </Motion.button>
         ))}
       </div>
     </section>
