@@ -144,7 +144,7 @@ const MailSidebar = ({ onCompose, mobileOpen, onMobileClose, onShowSettings }) =
                   }`}
               >
                 <div className="relative">
-                  <div className="w-6.5 h-6.5 rounded-lg bg-gradient-to-br from-[#D21414] to-[#3CB4FF] text-white flex items-center justify-center text-[10px] font-bold shadow-md">
+                  <div className="w-6.5 h-6.5 rounded-lg bg-linear-to-br from-[#D21414] to-[#3CB4FF] text-white flex items-center justify-center text-[10px] font-bold shadow-md">
                     ✉
                   </div>
                   {activeAccount === 'all' && (
@@ -195,7 +195,7 @@ const MailSidebar = ({ onCompose, mobileOpen, onMobileClose, onShowSettings }) =
                       }`}
                   >
                     <div className="relative">
-                      <div className={`w-6.5 h-6.5 rounded-lg flex items-center justify-center text-[10px] font-bold text-white bg-gradient-to-br ${gradient} shadow-sm`}>
+                      <div className={`w-6.5 h-6.5 rounded-lg flex items-center justify-center text-[10px] font-bold text-white bg-linear-to-br ${gradient} shadow-sm`}>
                         {acc.email.charAt(0).toUpperCase()}
                       </div>
                       {isActive && (

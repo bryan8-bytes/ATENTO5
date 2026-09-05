@@ -15,36 +15,36 @@ const { Pool, Client } = pg;
 const AUTHORIZED_USERS = [
   {
     email: 'Juan.ampuero@atento5.com',
-    password: '4B@}K?3DmgR!Nuq@',
-    imapPassword: '4B@}K?3DmgR!Nuq@',
+    password: process.env.USER_PASSWORD_JUAN,
+    imapPassword: process.env.USER_IMAP_PASSWORD_JUAN,
     name: 'Juan Ampuero',
     role: 'admin'
   },
   {
     email: 'Corina.anorga@atento5.com',
-    password: '5VWwcTyp3iB8PY7',
-    imapPassword: '5VWwcTyp3iB8PY7',
+    password: process.env.USER_PASSWORD_CORINA,
+    imapPassword: process.env.USER_IMAP_PASSWORD_CORINA,
     name: 'Corina Anorga',
     role: 'user'
   },
   {
     email: 'Proyectos@atento5.com',
-    password: '7ZjFHR#HtwbW53(C',
-    imapPassword: '7ZjFHR#HtwbW53(C',
+    password: process.env.USER_PASSWORD_PROYECTOS,
+    imapPassword: process.env.USER_IMAP_PASSWORD_PROYECTOS,
     name: 'Proyectos',
     role: 'user'
   },
   {
     email: 'Ventas@atento5.com',
-    password: 'MV}FgL4xmGkt4cav',
-    imapPassword: 'MV}FgL4xmGkt4cav',
+    password: process.env.USER_PASSWORD_VENTAS,
+    imapPassword: process.env.USER_IMAP_PASSWORD_VENTAS,
     name: 'Ventas',
     role: 'user'
   },
   {
     email: 'Operaciones@atento5.com',
-    password: 'rHxl.dgL&!tNgSeT',
-    imapPassword: 'rHxl.dgL&!tNgSeT',
+    password: process.env.USER_PASSWORD_OPERACIONES,
+    imapPassword: process.env.USER_IMAP_PASSWORD_OPERACIONES,
     name: 'Operaciones',
     role: 'user'
   }
@@ -75,7 +75,7 @@ export async function verifyAndMigrate() {
   } catch (error) {
     console.error('❌ [DB] Connection to PostgreSQL server failed!');
     if (error.code === '28P01') {
-      console.error(`👉 Error 28P01: Password authentication failed for user "${dbUser}". Please check that DB_PASSWORD is correct in your .env file (current value is "${dbPassword}").`);
+      console.error(`👉 Error 28P01: Password authentication failed for user "${dbUser}". Please check that DB_PASSWORD is correct in your .env file.`);
     } else if (error.code === 'ECONNREFUSED') {
       console.error(`👉 Error ECONNREFUSED: Could not connect to PostgreSQL on ${dbHost}:${dbPort}. Please ensure PostgreSQL is running.`);
     } else {
@@ -169,6 +169,12 @@ export async function verifyAndMigrate() {
     await targetPool.query('ALTER TABLE email_cache ADD COLUMN IF NOT EXISTS uid INTEGER');
     await targetPool.query('CREATE INDEX IF NOT EXISTS idx_email_cache_uid ON email_cache(uid)');
     console.log('✅ [DB] Verified/added column "uid" and index "idx_email_cache_uid" in table "email_cache"');
+
+    // Composite indexes to optimize the most common email_cache query patterns
+    // (folder listing by user/account and full-text search by user/account)
+    await targetPool.query('CREATE INDEX IF NOT EXISTS idx_email_cache_user_acct_folder_date ON email_cache(user_id, account_email, folder, date DESC)');
+    await targetPool.query('CREATE INDEX IF NOT EXISTS idx_email_cache_acct_folder ON email_cache(account_email, folder)');
+    console.log('✅ [DB] Verified/added composite indexes on "email_cache" for user/account queries');
 
     // Run extended email schema migration
     console.log('🔄 [DB] Running extended email schema migration...');

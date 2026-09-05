@@ -1,5 +1,5 @@
-import { useEffect, useLayoutEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useLayoutEffect } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Target, Lightbulb, Award, Handshake } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
@@ -22,15 +22,15 @@ const ManagerProfile = () => {
       padding: '40px 24px',
       fontFamily: '"Inter", system-ui, sans-serif'
     }}>
-      <motion.div
+      <Motion.div
         style={{ maxWidth: '900px', margin: '0 auto' }}
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
         {/* Navigation Header */}
-        <header style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '40px' }}>
-          <motion.div
+        <header style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', marginBottom: '32px' }}>
+          <Motion.div
             whileHover={{ transition: { duration: 0.1, delay: 0 }, scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -54,13 +54,13 @@ const ManagerProfile = () => {
               e.currentTarget.style.borderColor = 'rgba(210, 20, 20, 0.3)';
             }}
             >
-              <motion.div
+              <Motion.div
                 animate={{ x: [0, -5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                 style={{ display: 'flex', alignItems: 'center' }}
               >
                 <ArrowLeft size={20} color="#3CB4FF" />
-              </motion.div>
+              </Motion.div>
               <span style={{
                 background: 'linear-gradient(90deg, #3CB4FF 0%, #D21414 100%)',
                 WebkitBackgroundClip: 'text',
@@ -71,7 +71,7 @@ const ManagerProfile = () => {
                 Volver Atrás
               </span>
             </div>
-          </motion.div>
+          </Motion.div>
         </header>
 
         {/* Corporate Letter Document Container */}
@@ -79,28 +79,28 @@ const ManagerProfile = () => {
           background: 'rgba(11, 18, 30, 0.95)',
           border: '1px solid rgba(60, 180, 255, 0.15)',
           borderRadius: '24px',
-          padding: 'clamp(30px, 6vw, 80px)',
+          padding: 'clamp(24px, 4vw, 48px)',
           boxShadow: '0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
           position: 'relative',
           overflow: 'hidden'
         }}>
           {/* Subtle Background Glow */}
           <div style={{
-            position: 'absolute', top: 0, left: 0, width: '100%', height: '5px',
+            position: 'absolute', top: 0, left: 0, width: '100%', height: '4px',
             background: 'linear-gradient(90deg, #3CB4FF, #D21414)'
           }} />
 
           {/* Letterhead */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '30px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '30px', marginBottom: '40px' }}>
-            <img src={logo} alt="ATENTO5 Logo" style={{ height: '70px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(60, 180, 255, 0.3))' }} />
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '24px', marginBottom: '32px' }}>
+            <img src={logo} alt="ATENTO5 Logo" style={{ height: '56px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(60, 180, 255, 0.3))' }} />
             <div style={{ textAlign: 'right' }}>
-              <h1 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.9)', margin: '0 0 4px 0', letterSpacing: '4px' }}>
+              <h1 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.9)', margin: '0 0 4px 0', letterSpacing: '3px' }}>
                 CARTA DE PRESENTACIÓN
               </h1>
               <h2 style={{
-                fontSize: '1rem',
+                fontSize: '0.95rem',
                 fontWeight: 800,
-                margin: '0 0 8px 0',
+                margin: '0 0 6px 0',
                 letterSpacing: '1px',
                 background: 'linear-gradient(90deg, #3CB4FF 0%, #D21414 100%)',
                 WebkitBackgroundClip: 'text',
@@ -109,7 +109,7 @@ const ManagerProfile = () => {
               }}>
                 ATENTO5 SERVICIOS GENERALES E.I.R.L.
               </h2>
-              <p style={{ fontSize: '14px', color: 'rgba(229, 231, 235, 0.5)', margin: 0 }}>
+              <p style={{ fontSize: '13px', color: 'rgba(229, 231, 235, 0.5)', margin: 0 }}>
                 Lima, Perú &bull; 2026
               </p>
             </div>
@@ -137,7 +137,7 @@ const ManagerProfile = () => {
             textAlign: 'justify',
             display: 'flex',
             flexDirection: 'column',
-            gap: '24px'
+            gap: '20px'
           }}>
             <p>
               Es un verdadero honor dirigirme a ustedes en representación de <strong style={{
@@ -250,7 +250,7 @@ const ManagerProfile = () => {
             </div>
           ))}
         </div>
-      </motion.div>
+      </Motion.div>
     </div>
   );
 };

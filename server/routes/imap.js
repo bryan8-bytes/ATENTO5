@@ -1,14 +1,15 @@
 import express from 'express';
-import { connectToIMAP, getFolderList, syncFolder, syncSingleAccountFolder, classifyEmailsForUser } from '../services/imapService.js';
+import { connectToIMAP, getFolderList, syncFolder, syncSingleAccountFolder, classifyEmailsForUser, closeClient } from '../services/imapService.js';
 import pool from '../config/database.js';
 
 const router = express.Router();
 
 router.post('/connect', async (req, res) => {
+  let client;
   try {
     const { email, password } = req.body;
 
-    const _connection = await connectToIMAP(email, password);
+    client = await connectToIMAP(email, password);
 
     res.json({ 
       message: 'IMAP connection successful',
@@ -20,6 +21,8 @@ router.post('/connect', async (req, res) => {
       error: 'Failed to connect to IMAP server',
       details: error.message 
     });
+  } finally {
+    if (client) await closeClient(client);
   }
 });
 
@@ -143,7 +146,7 @@ router.get('/folders', async (req, res) => {
 
     const syncStatus = await Promise.all(syncStatusPromises);
 
-    await client.logout();
+    await closeClient(client);
 
     res.json({ folders: syncStatus });
   } catch (error) {
@@ -187,8 +190,8 @@ router.post('/sync-all', async (req, res) => {
     for (const account of accounts) {
       try {
         const client = await connectToIMAP(account.email, account.password);
-        const folders = await getFolderList(client);
-        await client.logout();
+         const folders = await getFolderList(client);
+        await closeClient(client);
 
         const accountResults = {};
         for (const folderInfo of folders) {

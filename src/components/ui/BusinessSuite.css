@@ -1,0 +1,551 @@
+/* ============================================================
+   ATENTO5 — Business Suite (Cotizador + Orden de Compra)
+   Layout ERP/SaaS: viewport controlado, scroll interno,
+   preview A4 contenido, scrollbar premium.
+   ============================================================ */
+
+.business-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh; /* fallback */
+  height: 100dvh;
+  overflow: hidden;
+  background-color: #050B14;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+}
+
+/* Contenedor de workspace (Cotizador) */
+.business-container {
+  flex: 1;
+  min-height: 0;
+  width: min(100%, 1500px);
+  margin: 0 auto;
+  padding: 1rem 1.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  border-radius: 16px;
+  border: 1px solid rgba(60, 180, 255, 0.22);
+  background: linear-gradient(135deg, rgba(60, 180, 255, 0.08) 0%, rgba(11, 18, 32, 0.75) 45%, rgba(210, 20, 20, 0.08) 100%);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ---------- Toolbar / Header (Cotizador) ---------- */
+.business-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 0 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(60, 180, 255, 0.18);
+  flex-shrink: 0;
+}
+
+.business-nav-title {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.business-nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3CB4FF;
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 700;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.6rem;
+  transition: color 0.2s ease, background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.business-nav-back:hover {
+  color: white;
+  background: rgba(60, 180, 255, 0.08);
+}
+
+/* ---------- Toolbar / Header (Orden de Compra) ---------- */
+.business-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(60, 180, 255, 0.18);
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 1500px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.business-header-title {
+  flex: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---------- Workspace grid (editor + preview) ---------- */
+.business-body-container {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(420px, 560px) minmax(0, 1fr);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: stretch;
+  max-width: 1500px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ---------- Editor panel (scroll interno) ---------- */
+.business-editor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 8px;
+  /* Firefox */
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
+  -ms-overflow-style: none;
+}
+
+/* Scrollbar premium (WebKit) — completamente oculto */
+.business-editor-panel::-webkit-scrollbar,
+.business-editor-panel::-webkit-scrollbar-track,
+.business-editor-panel::-webkit-scrollbar-thumb,
+.business-editor-panel::-webkit-scrollbar-button,
+.business-editor-panel::-webkit-scrollbar-corner {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  visibility: hidden !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+}
+
+.a4-scroll-area {
+  scrollbar-width: none !important;
+  scrollbar-color: transparent transparent !important;
+  -ms-overflow-style: none !important;
+}
+
+.a4-scroll-area::-webkit-scrollbar,
+.a4-scroll-area::-webkit-scrollbar-track,
+.a4-scroll-area::-webkit-scrollbar-thumb {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  visibility: hidden !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+}
+
+/* ---------- Preview panel (A4 contenido) ---------- */
+.preview-panel {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 0.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(60, 180, 255, 0.06) 0%, rgba(11, 18, 32, 0.55) 50%, rgba(210, 20, 20, 0.06) 100%);
+  border: 1px solid rgba(60, 180, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  scrollbar-width: none;
+  scrollbar-color: transparent transparent;
+}
+
+.preview-panel,
+.preview-panel *,
+.custom-scrollbar {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.preview-panel::-webkit-scrollbar,
+.preview-panel *::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+.preview-panel::-webkit-scrollbar-track,
+.preview-panel *::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track,
+.preview-panel::-webkit-scrollbar-thumb,
+.preview-panel *::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+  visibility: hidden !important;
+  -webkit-appearance: none !important;
+  background: transparent !important;
+}
+
+/* ---------- Cards del editor ---------- */
+.editor-card {
+  background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(60, 180, 255, 0.14);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.editor-card:hover {
+  border-color: rgba(60, 180, 255, 0.3);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4), 0 0 18px rgba(60, 180, 255, 0.08);
+  transform: translateY(-2px);
+}
+
+.editor-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #e2e8f0;
+}
+
+/* ---------- Labels e inputs ---------- */
+.editor-label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.45rem;
+}
+
+.editor-input {
+  width: 100%;
+  min-height: 42px;
+  background: linear-gradient(135deg, #0a0e17 0%, #0c121e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.625rem;
+  padding: 0.65rem 0.875rem;
+  font-size: 0.875rem;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  box-sizing: border-box;
+  line-height: 1.4;
+}
+
+.editor-input:focus {
+  border-color: #3CB4FF;
+  box-shadow: 0 0 0 3px rgba(60, 180, 255, 0.15), 0 0 20px rgba(60, 180, 255, 0.18);
+  background: linear-gradient(135deg, #0c101c 0%, #0f1628 100%);
+}
+
+.editor-input::placeholder {
+  color: rgba(229, 231, 235, 0.28);
+}
+
+.editor-input:focus-visible,
+.editor-btn:focus-visible {
+  outline: 2px solid #3CB4FF;
+  outline-offset: 2px;
+}
+
+/* ---------- Botones ---------- */
+.editor-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  min-height: 42px;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.2s ease, background 0.2s ease, filter 0.2s ease;
+}
+
+.editor-btn-primary {
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  color: white;
+  box-shadow: 0 4px 14px rgba(60, 180, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.editor-btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(60, 180, 255, 0.5), 0 0 35px rgba(60, 180, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  filter: brightness(1.1);
+}
+
+.editor-btn-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.editor-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 22px rgba(60, 180, 255, 0.12);
+  transform: translateY(-2px);
+}
+
+.editor-btn-danger {
+  background: #dc2626;
+  color: white;
+  border: none;
+}
+
+.editor-btn-danger:hover:not(:disabled) {
+  background: #ef4444;
+  transform: translateY(-1px);
+}
+
+.editor-btn-ghost {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px dashed rgba(60, 180, 255, 0.4);
+}
+
+.editor-btn-ghost:hover:not(:disabled) {
+  color: #3CB4FF;
+  border-color: rgba(60, 180, 255, 0.7);
+  background: rgba(60, 180, 255, 0.05);
+}
+
+/* ---------- Grid de campos ---------- */
+.editor-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.editor-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.editor-item-row {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+}
+
+.editor-item-num {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #3CB4FF;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000;
+  flex-shrink: 0;
+}
+
+.editor-item-flex {
+  flex: 1;
+  min-width: 0;
+}
+
+.editor-item-center {
+  width: 4rem;
+  text-align: center;
+}
+
+.editor-item-right {
+  width: 5rem;
+  text-align: right;
+}
+
+.editor-item-total {
+  width: 5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #334155;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.editor-btn-icon {
+  padding: 0.625rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- Preview header ---------- */
+.preview-header {
+  text-align: center;
+  margin-bottom: 0.25rem;
+  flex-shrink: 0;
+}
+
+.preview-header h2 {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.preview-header-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: white;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.preview-header-sub {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin: 0.1rem 0 0;
+}
+
+.preview-header p {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin: 0.25rem 0 0;
+}
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (min-width: 768px) {
+  .business-nav {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .business-nav-title {
+    font-size: 1.3rem;
+  }
+
+  .editor-card {
+    padding: 1.4rem;
+  }
+
+  .editor-input {
+    padding: 0.7rem 1rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Tablet: reduce proporciones pero mantiene dos columnas */
+@media (max-width: 1100px) {
+  .business-body-container {
+    grid-template-columns: minmax(360px, 1fr) minmax(0, 1fr);
+    gap: 1.75rem;
+  }
+
+  .business-container {
+    padding: 0.875rem 1.25rem 1rem;
+  }
+}
+
+/* Mobile / tablet pequeño: una sola columna, scroll de página */
+@media (max-width: 900px) {
+  .business-shell {
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .business-container {
+    flex: none;
+    min-height: auto;
+  }
+
+  .business-body-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    flex: none;
+    min-height: auto;
+  }
+
+  .business-editor-panel {
+    overflow: visible;
+    min-height: auto;
+    padding-right: 0;
+  }
+
+  .preview-panel {
+    position: static;
+    height: auto;
+    min-height: 70vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .business-container {
+    padding: 0.75rem 1rem 1rem;
+    border-radius: 14px;
+  }
+
+  .business-nav {
+    gap: 0.5rem;
+  }
+
+  .business-nav-title {
+    font-size: 1.05rem;
+    text-align: left;
+    flex: 1;
+  }
+
+  .editor-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+  }
+
+  .editor-card {
+    padding: 1.1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

@@ -62,17 +62,44 @@ body {
   background-color: #050B14;
   color: #E5E7EB;
   min-height: 100vh;
-  min-width: 100vw;
+  min-width: 100%;
   height: auto;
   width: 100%;
-  overflow-y: auto;
   overflow-x: hidden;
+  overflow-y: auto;
   line-height: 1.5;
+}
+
+/* Custom Styled Vertical Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050B14;
+  border-left: 1px solid rgba(60, 180, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3CB4FF 0%, #D21414 100%);
+  border-radius: 9999px;
+  border: 2px solid #050B14;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #60C5FF 0%, #FF3B3B 100%);
+  box-shadow: 0 0 12px rgba(60, 180, 255, 0.6);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #3CB4FF #050B14;
 }
 
 #root {
   min-height: 100vh;
-  min-width: 100vw;
+  min-width: 100%;
   height: auto;
   width: 100%;
   overflow-x: hidden;
@@ -308,6 +335,17 @@ img {
   }
 }
 
+.location-map-card {
+  height: 450px;
+  border-radius: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .location-map-card {
+    height: 500px;
+  }
+}
+
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -330,5 +368,14 @@ img {
   border-radius: 0.5rem;
   z-index: 999999;
   text-decoration: none;
+}
+
+@keyframes logoFlowRight {
+  0% {
+    background-position: 0px 0;
+  }
+  100% {
+    background-position: 200px 0;
+  }
 }
 

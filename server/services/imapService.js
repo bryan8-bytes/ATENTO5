@@ -4,32 +4,210 @@ import { simpleParser } from 'mailparser';
 
 const IMAP_HOST = process.env.IMAP_HOST || 'mail.atento5.com';
 const IMAP_PORT = process.env.IMAP_PORT || 993;
+const IMAP_MAX_RETRIES = parseInt(process.env.IMAP_MAX_RETRIES || '3', 10);
+const IMAP_BASE_DELAY_MS = parseInt(process.env.IMAP_BASE_DELAY_MS || '2000', 10);
+// Max simultaneous IMAP connections across all accounts
+const IMAP_MAX_CONCURRENT = parseInt(process.env.IMAP_MAX_CONCURRENT || '5', 10);
+// Per-account concurrent connection cap
+const IMAP_MAX_PER_ACCOUNT = parseInt(process.env.IMAP_MAX_PER_ACCOUNT || '2', 10);
 
-export async function connectToIMAP(email, password) {
-  const client = new ImapFlow({
-    host: IMAP_HOST,
-    port: IMAP_PORT,
-    secure: true,
-    auth: { user: email, pass: password },
-    logger: false,
-    tls: { rejectUnauthorized: false }
-  });
+// ---------------------------------------------------------------------------
+// Logging helper
+// ---------------------------------------------------------------------------
+const log = (level, email, msg, ...args) => {
+  const ts = new Date().toISOString();
+  const tag = `[IMAP][${ts}]${(email ? '(' + email + ') ' : ' ')}`;
+  if (level === 'error') console.error(tag + msg, ...args);
+  else if (level === 'warn') console.warn(tag + msg, ...args);
+  else console.log(tag + msg, ...args);
+};
 
-  await client.connect();
-  return client;
+// ---------------------------------------------------------------------------
+// Connection registry + concurrency control
+// ---------------------------------------------------------------------------
+// Active connections keyed by internal connection id -> { client, email }
+const activeConnections = new Map();
+const connectionsByAccount = new Map(); // email -> count
+
+let activeCount = 0;
+const waiters = [];
+
+function releaseSlot() {
+  activeCount = Math.max(0, activeCount - 1);
+  if (waiters.length > 0) {
+    const next = waiters.shift();
+    next();
+  }
+}
+
+function acquireSlot() {
+  if (activeCount < IMAP_MAX_CONCURRENT) {
+    activeCount++;
+    return Promise.resolve();
+  }
+  return new Promise((resolve) => waiters.push(resolve));
+}
+
+function acquireAccountSlot(email) {
+  const current = connectionsByAccount.get(email) || 0;
+  if (current < IMAP_MAX_PER_ACCOUNT) {
+    connectionsByAccount.set(email, current + 1);
+    return true;
+  }
+  return false;
+}
+
+function releaseAccountSlot(email) {
+  const current = connectionsByAccount.get(email) || 0;
+  if (current > 0) connectionsByAccount.set(email, current - 1);
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function logConnectionStats(email) {
+  log('log', email, `active connections=${activeCount}/${IMAP_MAX_CONCURRENT}, account=${email}:${connectionsByAccount.get(email) || 0}/${IMAP_MAX_PER_ACCOUNT}`);
+}
+
+// ---------------------------------------------------------------------------
+// Safe connection teardown (never throws)
+// ---------------------------------------------------------------------------
+export async function closeClient(client) {
+  if (!client) return;
+  const email = client._email || 'unknown';
+  try {
+    if (!client._closed) {
+      await client.logout();
+    }
+  } catch (err) {
+    log('warn', email, `logout error: ${err.message}`);
+  } finally {
+    if (typeof client._release === 'function') client._release();
+    if (client._connId) activeConnections.delete(client._connId);
+    if (client._email) releaseAccountSlot(client._email);
+    client._closed = true;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Connection factory with per-account isolation, retries and backoff
+// ---------------------------------------------------------------------------
+export async function connectToIMAP(email, password, options = {}) {
+  const maxRetries = options.maxRetries ?? IMAP_MAX_RETRIES;
+  const baseDelay = options.baseDelay ?? IMAP_BASE_DELAY_MS;
+
+  // Global concurrency limit (released on close)
+  await acquireSlot();
+  if (!acquireAccountSlot(email)) {
+    releaseSlot();
+    throw new Error(`Concurrent IMAP connection limit reached for ${email}`);
+  }
+
+  let lastErr;
+  let authFailed = false;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const client = new ImapFlow({
+      host: IMAP_HOST,
+      port: IMAP_PORT,
+      secure: true,
+      auth: { user: email, pass: password },
+      logger: false,
+      tls: { rejectUnauthorized: false }
+    });
+
+    const connId = `${email}#${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    client._email = email;
+    client._connId = connId;
+    client._closed = false;
+
+    // idempotent slot release wrapper
+    let slotReleased = false;
+    client._release = () => {
+      if (!slotReleased) {
+        slotReleased = true;
+        releaseSlot();
+      }
+    };
+
+    // Named handlers so we can reason about lifecycle and avoid leaks
+    const onError = (err) => {
+      log('error', email, `connection error: ${err && err.message ? err.message : err}`);
+    };
+    const onClose = () => {
+      log('log', email, `connection closed (${connId})`);
+      client._closed = true;
+      activeConnections.delete(connId);
+      if (client._release) client._release();
+      releaseAccountSlot(email);
+    };
+    const onEnd = () => {
+      log('log', email, `connection ended (${connId})`);
+      client._closed = true;
+      if (client._release) client._release();
+      releaseAccountSlot(email);
+    };
+    const onAuthFailed = (info) => {
+      authFailed = true;
+      log('error', email, `authentication failed: ${info && info.message ? info.message : 'invalid credentials'}`);
+    };
+
+    client.on('error', onError);
+    client.on('close', onClose);
+    client.on('end', onEnd);
+    client.on('authenticationFailed', onAuthFailed);
+
+    activeConnections.set(connId, { client, email });
+    logConnectionStats(email);
+
+    try {
+      await client.connect();
+      log('log', email, `connected successfully (attempt ${attempt + 1}/${maxRetries + 1})`);
+      return client;
+    } catch (err) {
+      lastErr = err;
+      // Clean up this failed attempt
+      try {
+        if (!client._closed) await client.logout();
+      } catch (_) { /* ignore */ }
+      activeConnections.delete(connId);
+      releaseAccountSlot(email);
+
+      // Authentication failures will not succeed on retry
+      if (authFailed || (err && (err.authenticationFailed || /authentication/i.test(err.message || '')))) {
+        if (client._release) client._release();
+        throw err;
+      }
+
+      if (attempt < maxRetries) {
+        const delay = baseDelay * Math.pow(2, attempt);
+        log('warn', email, `connect attempt ${attempt + 1} failed, retrying in ${delay}ms: ${err.message}`);
+        await sleep(delay);
+      }
+    }
+  }
+
+  // All retries exhausted
+  throw lastErr || new Error(`Unable to connect to IMAP for ${email}`);
+}
+
+export function getActiveConnectionCount() {
+  return activeCount;
 }
 
 export async function getFolderList(client) {
-  const folders = [];
-  for await (const entry of client.folders) {
-    folders.push(entry);
+  let folders = [];
+  try {
+    folders = await client.list();
+  } catch (err) {
+    log('error', '', `getFolderList list error: ${err.message}`);
   }
 
-  const filtered = folders.filter(name => {
-    const upper = name.toUpperCase();
+  const filtered = folders.filter(folder => {
+    const upper = (folder.path || folder.name || '').toUpperCase();
     return !upper.includes('NOSE') &&
            !upper.includes('NO SELECT') &&
-           !['TRASH', 'JUNK'].every(part => !upper.includes(part));
+           !upper.includes('TRASH') &&
+           !upper.includes('JUNK');
   });
 
   const aliases = {
@@ -40,9 +218,9 @@ export async function getFolderList(client) {
     '[GMAIL]/TRASH': 'Trash'
   };
 
-  return filtered.map(name => ({
-    originalName: name,
-    displayName: aliases[name.toUpperCase()] || name
+  return filtered.map(folder => ({
+    originalName: folder.path || folder.name,
+    displayName: aliases[(folder.path || folder.name || '').toUpperCase()] || (folder.path || folder.name)
   }));
 }
 
@@ -77,12 +255,12 @@ function extractAddresses(prop) {
 export async function syncSingleAccountFolder(userId, email, imapPassword, folderMeta) {
   if (!imapPassword) return { added: 0, updated: 0, folder: folderMeta.originalName };
 
-  console.log(`[IMAP] Syncing ${folderMeta.originalName} for ${email}...`);
+  log('log', email, `Syncing ${folderMeta.originalName}...`);
   let client;
   try {
     client = await connectToIMAP(email, imapPassword);
   } catch (err) {
-    console.error(`[IMAP] Connection failed for ${email}:`, err.message);
+    log('error', email, `Connection failed: ${err.message}`);
     return { added: 0, updated: 0, folder: folderMeta.originalName };
   }
 
@@ -100,8 +278,6 @@ export async function syncSingleAccountFolder(userId, email, imapPassword, folde
     const cachedMessageIds = new Map(cachedResult.rows.filter(r => r.message_id !== null).map(r => [r.message_id, r.id]));
     const missingUids = allUids.filter(uid => !cachedUidsSet.has(uid));
 
-    console.log(`[IMAP] ${folderMeta.originalName}: ${allUids.length} on server, ${cachedUidsSet.size} cached, ${missingUids.length} missing.`);
-
     const sortedMissing = missingUids.sort((a, b) => b - a);
     const BATCH_SIZE = 50;
     let added = 0;
@@ -109,7 +285,6 @@ export async function syncSingleAccountFolder(userId, email, imapPassword, folde
 
     for (let i = 0; i < sortedMissing.length; i += BATCH_SIZE) {
       const batch = sortedMissing.slice(i, i + BATCH_SIZE);
-      console.log(`[IMAP] ${folderMeta.originalName}: batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(sortedMissing.length / BATCH_SIZE)} for ${email}...`);
 
       for await (const message of client.fetch(batch, { envelope: true, source: true, bodyStructure: true })) {
         try {
@@ -167,6 +342,27 @@ export async function syncSingleAccountFolder(userId, email, imapPassword, folde
               );
               emailCacheId = insertRes.rows[0].id;
               added++;
+              if (typeof global !== 'undefined' && global.notifyUser) {
+                global.notifyUser(userId, {
+                  type: 'new_email',
+                  email: {
+                    id: emailCacheId,
+                    uid: message.uid,
+                    message_id: messageId,
+                    subject: envelope.subject || '(No Subject)',
+                    from_email: from.email,
+                    from_name: from.name,
+                    to_email: to.email,
+                    to_name: to.name,
+                    folder: folderMeta.displayName,
+                    date: envelope.date || new Date(),
+                    account_email: email,
+                    has_attachments: (parsed.attachments && parsed.attachments.length > 0),
+                    priority,
+                    size: message.size || 0
+                  }
+                });
+              }
             } else {
               emailCacheId = existing.rows[0].id;
               await pool.query(
@@ -205,7 +401,7 @@ export async function syncSingleAccountFolder(userId, email, imapPassword, folde
             }
           }
         } catch (messageErr) {
-          console.error(`[IMAP] Error parsing message ${message.uid} in ${email}/${folderMeta.originalName}:`, messageErr.message);
+          log('error', email, `Error parsing message ${message.uid} in ${folderMeta.originalName}: ${messageErr.message}`);
         }
       }
     }
@@ -220,11 +416,7 @@ export async function syncSingleAccountFolder(userId, email, imapPassword, folde
 
     return { added, updated, folder: folderMeta.displayName };
   } finally {
-    try {
-      await client.logout();
-    } catch (logoutErr) {
-      console.error(`[IMAP] Logout error for ${email}/${folderMeta.originalName}:`, logoutErr.message);
-    }
+    await closeClient(client);
   }
 }
 
@@ -246,39 +438,54 @@ export async function syncFolder(userId, folder, accountEmail = null) {
         account = accountResult.rows[0];
       }
 
-      const client = await connectToIMAP(account.email, account.imap_password);
-      const folders = await getFolderList(client);
-      syncedFolders = folder
-        ? folders.filter(f => f.displayName.toLowerCase() === folder.toLowerCase())
-        : folders;
-      syncedFolders = syncedFolders.map(f => ({ ...f, accountEmail: account.email, imapPassword: account.imap_password }));
-      await client.logout();
+      let client;
+      try {
+        client = await connectToIMAP(account.email, account.imap_password);
+        const folders = await getFolderList(client);
+        syncedFolders = folder
+          ? folders.filter(f => f.displayName.toLowerCase() === folder.toLowerCase())
+          : folders;
+        syncedFolders = syncedFolders.map(f => ({ ...f, accountEmail: account.email, imapPassword: account.imap_password }));
+      } catch (err) {
+        log('error', account.email, `Failed to list folders: ${err.message}`);
+        return { added: 0, updated: 0 };
+      } finally {
+        if (client) await closeClient(client);
+      }
     } else {
       const userResult = await pool.query('SELECT email, imap_password FROM users WHERE id = $1', [userId]);
       let primaryFolders = [];
       let secondaryFolders = [];
 
       if (userResult.rows.length > 0 && userResult.rows[0].imap_password) {
-        const client = await connectToIMAP(userResult.rows[0].email, userResult.rows[0].imap_password);
-        primaryFolders = folder
-          ? [createDefault(folder)]
-          : await getFolderList(client);
-        primaryFolders = primaryFolders.map(f => ({ ...f, accountEmail: userResult.rows[0].email, imapPassword: userResult.rows[0].imap_password }));
-        await client.logout();
+        let client;
+        try {
+          client = await connectToIMAP(userResult.rows[0].email, userResult.rows[0].imap_password);
+          primaryFolders = folder
+            ? [createDefault(folder)]
+            : await getFolderList(client);
+          primaryFolders = primaryFolders.map(f => ({ ...f, accountEmail: userResult.rows[0].email, imapPassword: userResult.rows[0].imap_password }));
+        } catch (err) {
+          log('error', userResult.rows[0].email, `Failed to list primary folders: ${err.message}`);
+        } finally {
+          if (client) await closeClient(client);
+        }
       }
 
       const accountsResult = await pool.query('SELECT email, imap_password FROM email_accounts WHERE user_id = $1', [userId]);
       for (const account of accountsResult.rows) {
         if (userResult.rows.length > 0 && account.email === userResult.rows[0].email) continue;
+        let client;
         try {
-          const client = await connectToIMAP(account.email, account.imap_password);
+          client = await connectToIMAP(account.email, account.imap_password);
           const secFolders = folder
             ? [createDefault(folder)]
             : await getFolderList(client);
           secondaryFolders.push({ account, folders: secFolders.map(f => ({ ...f, accountEmail: account.email, imapPassword: account.imap_password })) });
-          await client.logout();
         } catch (err) {
-          console.error(`Failed to list folders for ${account.email}:`, err);
+          log('error', account.email, `Failed to list folders: ${err.message}`);
+        } finally {
+          if (client) await closeClient(client);
         }
       }
 
@@ -297,13 +504,13 @@ export async function syncFolder(userId, folder, accountEmail = null) {
         added += res.added;
         updated += res.updated;
       } catch (err) {
-        console.error(`Failed to sync folder ${folderMeta.displayName} for ${folderMeta.accountEmail}:`, err);
+        log('error', folderMeta.accountEmail, `Failed to sync folder ${folderMeta.displayName}: ${err.message}`);
       }
     }
 
     return { added, updated };
   } catch (error) {
-    console.error(`Error syncing folder ${folder}:`, error);
+    log('error', '', `Error syncing folder ${folder}: ${error.message}`);
     throw error;
   }
 }
@@ -314,7 +521,7 @@ export async function getEmailBody(userId, emailId) {
     if (result.rows.length === 0) throw new Error('Email not found');
     return result.rows[0].body;
   } catch (error) {
-    console.error('Error getting email body:', error);
+    log('error', '', `Error getting email body: ${error.message}`);
     throw error;
   }
 }
@@ -326,30 +533,32 @@ export async function autoSyncAllUsers() {
     for (const user of usersResult.rows) {
       try {
         let allFolders = [];
+        let client;
         try {
-          const client = await connectToIMAP(user.email, user.imap_password);
+          client = await connectToIMAP(user.email, user.imap_password);
           allFolders = await getFolderList(client);
-          await client.logout();
         } catch (err) {
-          console.error(`[autoSync] Failed to list folders for ${user.email}:`, err.message);
+          log('error', user.email, `[autoSync] Failed to list folders: ${err.message}`);
           continue;
+        } finally {
+          if (client) await closeClient(client);
         }
 
         for (const folder of allFolders) {
           try {
             await syncSingleAccountFolder(user.id, user.email, user.imap_password, folder);
           } catch (folderErr) {
-            console.error(`[autoSync] Failed syncing ${folder.displayName} for ${user.email}:`, folderErr.message);
+            log('error', user.email, `[autoSync] Failed syncing ${folder.displayName}: ${folderErr.message}`);
           }
         }
 
-        console.log(`Auto-sync completed for user ${user.email}`);
+        log('log', user.email, `Auto-sync completed`);
       } catch (error) {
-        console.error(`Auto-sync failed for user ${user.email}:`, error);
+        log('error', user.email, `Auto-sync failed: ${error.message}`);
       }
     }
   } catch (error) {
-    console.error('Auto-sync error:', error);
+    log('error', '', `Auto-sync error: ${error.message}`);
   }
 }
 

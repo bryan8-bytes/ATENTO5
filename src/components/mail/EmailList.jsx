@@ -21,19 +21,6 @@ const formatEmailDate = (dateString) => {
 
 const PAGE_SIZE = 50;
 
-const formatEmailDate = (dateString) => {
-  if (!dateString) return '';
-  const date = new Date(dateString);
-  const now = new Date();
-  const diff = now - date;
-
-  if (diff < 86400000 && date.toDateString() === now.toDateString()) {
-    return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', hour12: false });
-  } else {
-    return date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  }
-};
-
 const getEmailPreview = (body) => {
   if (!body) return 'Sin contenido adicional';
   const div = document.createElement('div');
@@ -41,10 +28,10 @@ const getEmailPreview = (body) => {
   return div.textContent || div.innerText || 'Sin contenido adicional';
 };
 
-const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, onRefresh, loading }) => {
+const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, onRefresh, loading, error, searchQuery }) => {
   const { currentFolder } = useMail();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
   const [renderedCount, setRenderedCount] = useState(PAGE_SIZE);
   const listRef = useRef(null);
   const sentinelRef = useRef(null);
@@ -52,7 +39,7 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
   const sourceEmails = filteredEmails || [];
 
   const filtered = sourceEmails.filter(email => {
-    const query = searchQuery.toLowerCase();
+    const query = localSearchQuery.toLowerCase();
     const fromName = (email.from_name || '').toLowerCase();
     const fromEmail = (email.from_email || '').toLowerCase();
     const subject = (email.subject || '').toLowerCase();
@@ -129,8 +116,8 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
           <Search size={15} className="email-list-search-icon" />
           <input
             type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            value={localSearchQuery}
+            onChange={(e) => setLocalSearchQuery(e.target.value)}
             placeholder="Buscar mensajes..."
             className="email-list-search-input"
           />
@@ -138,11 +125,37 @@ const EmailList = ({ selectedEmailId, onSelectEmail, filteredEmails, onCompose, 
       </div>
 
       <div ref={listRef} className="email-list-scroll">
-        {displayEmails.length === 0 ? (
-          <div className="email-list-empty">
-            <Inbox size={36} className="email-list-empty-icon" />
-            <p className="email-list-empty-title">No hay mensajes</p>
-            <p className="email-list-empty-hint">Intenta otra búsqueda o filtro.</p>
+        {loading && displayEmails.length === 0 ? (
+          <div className="email-list-empty-state">
+            <RefreshCw size={28} className="email-list-empty-spinner" />
+            <p className="email-list-empty-title">Sincronizando</p>
+            <p className="email-list-empty-hint">Actualizando bandeja...</p>
+          </div>
+        ) : error ? (
+          <div className="email-list-empty-state">
+            <AlertOctagon size={28} className="email-list-empty-error" />
+            <p className="email-list-empty-title">Error de sincronización</p>
+            <p className="email-list-empty-hint">{error}</p>
+            <button onClick={onRefresh} className="email-list-retry">
+              <RefreshCw size={14} />
+              <span>Reintentar</span>
+            </button>
+          </div>
+        ) : displayEmails.length === 0 ? (
+          <div className="email-list-empty-state">
+            {localSearchQuery ? (
+              <Search size={28} className="email-list-empty-icon" />
+            ) : (
+              <Inbox size={28} className="email-list-empty-icon" />
+            )}
+            <p className="email-list-empty-title">
+              {localSearchQuery ? 'Sin resultados' : 'No hay mensajes'}
+            </p>
+            <p className="email-list-empty-hint">
+              {localSearchQuery
+                ? 'Prueba con otros términos de búsqueda'
+                : 'Esta carpeta está vacía por ahora'}
+            </p>
           </div>
         ) : (
           <div>

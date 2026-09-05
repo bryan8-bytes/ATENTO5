@@ -50,7 +50,7 @@ const CorreoLogin = () => {
       {/* Background gradients and glowing orbs */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_40%,rgba(60,180,255,0.05)_0%,rgba(5,11,20,0.98)_80%)] pointer-events-none z-0" />
       <motion.div
-        className="absolute top-[-10%] left-[25%] w-[450px] h-[450px] rounded-full bg-gradient-to-br from-[#3CB4FF]/12 to-transparent blur-[80px] pointer-events-none z-0"
+        className="absolute top-[-10%] left-[25%] w-[450px] h-[450px] rounded-full bg-linear-to-br from-[#3CB4FF]/12 to-transparent blur-[80px] pointer-events-none z-0"
         animate={{
           scale: [1, 1.1, 1],
           opacity: [0.5, 0.7, 0.5],
@@ -58,7 +58,7 @@ const CorreoLogin = () => {
         transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute bottom-[-10%] right-[25%] w-[450px] h-[450px] rounded-full bg-gradient-to-br from-[#D21414]/9 to-transparent blur-[80px] pointer-events-none z-0"
+        className="absolute bottom-[-10%] right-[25%] w-[450px] h-[450px] rounded-full bg-linear-to-br from-[#D21414]/9 to-transparent blur-[80px] pointer-events-none z-0"
         animate={{
           scale: [1, 1.15, 1],
           opacity: [0.4, 0.6, 0.4],

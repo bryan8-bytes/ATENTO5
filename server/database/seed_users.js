@@ -1,39 +1,42 @@
 import pool from '../config/database.js';
 import bcrypt from 'bcryptjs';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const AUTHORIZED_USERS = [
   {
     email: 'Juan.ampuero@atento5.com',
-    password: '4B@}K?3DmgR!Nuq@',
-    imapPassword: '4B@}K?3DmgR!Nuq@',
+    password: process.env.USER_PASSWORD_JUAN,
+    imapPassword: process.env.USER_IMAP_PASSWORD_JUAN,
     name: 'Juan Ampuero',
     role: 'admin'
   },
   {
     email: 'Corina.anorga@atento5.com',
-    password: '5VWwcTyp3iB8PY7',
-    imapPassword: '5VWwcTyp3iB8PY7',
+    password: process.env.USER_PASSWORD_CORINA,
+    imapPassword: process.env.USER_IMAP_PASSWORD_CORINA,
     name: 'Corina Anorga',
     role: 'user'
   },
   {
     email: 'Proyectos@atento5.com',
-    password: '7ZjFHR#HtwbW53(C',
-    imapPassword: '7ZjFHR#HtwbW53(C',
+    password: process.env.USER_PASSWORD_PROYECTOS,
+    imapPassword: process.env.USER_IMAP_PASSWORD_PROYECTOS,
     name: 'Proyectos',
     role: 'user'
   },
   {
     email: 'Ventas@atento5.com',
-    password: 'MV}FgL4xmGkt4cav',
-    imapPassword: 'MV}FgL4xmGkt4cav',
+    password: process.env.USER_PASSWORD_VENTAS,
+    imapPassword: process.env.USER_IMAP_PASSWORD_VENTAS,
     name: 'Ventas',
     role: 'user'
   },
   {
     email: 'Operaciones@atento5.com',
-    password: 'rHxl.dgL&!tNgSeT',
-    imapPassword: 'rHxl.dgL&!tNgSeT',
+    password: process.env.USER_PASSWORD_OPERACIONES,
+    imapPassword: process.env.USER_IMAP_PASSWORD_OPERACIONES,
     name: 'Operaciones',
     role: 'user'
   }

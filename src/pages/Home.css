@@ -61,72 +61,6 @@
   background-size: 60px 60px;
 }
 
-.sidebar-scroll {
-  position: fixed;
-  right: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 999999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 18px;
-  background: rgba(5, 11, 20, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(60, 180, 255, 0.12);
-  border-radius: 28px;
-  padding: 18px 10px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 30px rgba(60, 180, 255, 0.05);
-  max-height: 72vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scroll-behavior: smooth;
-  width: 48px;
-}
-
-.sidebar-scroll-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sidebar-scroll-label {
-  position: absolute;
-  right: 58px;
-  background: rgba(5, 11, 20, 0.92);
-  color: #fff;
-  padding: 7px 12px;
-  border-radius: 14px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  white-space: nowrap;
-  border: 1px solid;
-  pointer-events: none;
-  text-transform: uppercase;
-  backdrop-filter: blur(10px);
-}
-
-.sidebar-scroll-dot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.sidebar-scroll-dot-active {
-  width: 30px;
-  height: 30px;
-  transform: scale(1.12);
-}
-
 .section-divider {
   width: 100%;
   height: 1px;
@@ -136,44 +70,34 @@
   transform-origin: center;
 }
 
-@media (min-width: 768px) {
-  .sidebar-scroll {
-    padding: 22px 12px;
-    gap: 22px;
-    width: 56px;
-  }
-
-  .sidebar-scroll-dot {
-    width: 18px;
-    height: 18px;
-  }
-
-  .sidebar-scroll-dot-active {
-    width: 34px;
-    height: 34px;
-  }
-}
-
-@media (max-width: 1023px) {
-  .sidebar-scroll {
-    display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sidebar-scroll-dot,
-  .sidebar-scroll-label {
-    transition: none;
-  }
-}
-
 .section-suspense {
   min-height: 40vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.02);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01) 0%, rgba(255,255,255,0.02) 100%);
   border: 1px dashed rgba(255, 255, 255, 0.06);
   border-radius: 1.25rem;
   margin: 1.5rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-suspense::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(60, 180, 255, 0.03), transparent);
+  animation: sectionShimmer 2s ease-in-out infinite;
+}
+
+@keyframes sectionShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section-suspense::after {
+    animation: none;
+  }
 }

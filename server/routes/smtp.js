@@ -85,7 +85,7 @@ router.post('/send', async (req, res) => {
       });
     }
 
-    await pool.query(
+    const insertResult = await pool.query(
       `INSERT INTO email_cache 
        (user_id, account_email, folder, message_id, subject, from_email, from_name, to_email, cc, bcc, body, date, is_read, has_attachments, size)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), true, $12, $13)
@@ -106,6 +106,27 @@ router.post('/send', async (req, res) => {
         result.attachmentsCount > 0 ? JSON.stringify(attachments || []).length : 0
       ]
     );
+
+    if (typeof global !== 'undefined' && global.notifyUser) {
+      global.notifyUser(userId, {
+        type: 'new_email',
+        email: {
+          id: insertResult.rows[0]?.id || null,
+          message_id: result.messageId,
+          subject,
+          from_email: activeFrom,
+          from_name: activeFrom,
+          to_email: to,
+          to_name: to,
+          folder: 'Sent',
+          date: new Date(),
+          account_email: activeFrom,
+          has_attachments: result.attachmentsCount > 0,
+          priority: 'Normal',
+          size: result.attachmentsCount > 0 ? JSON.stringify(attachments || []).length : 0
+        }
+      });
+    }
 
     if (attachments && Array.isArray(attachments) && attachments.length > 0) {
       const emailResult = await pool.query(

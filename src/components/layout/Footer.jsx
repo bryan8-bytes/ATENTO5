@@ -1,5 +1,5 @@
 import { motion as Motion } from 'framer-motion'
-import { Phone, Mail, MapPin, Facebook, Instagram, Linkedin, Youtube, ArrowUp } from 'lucide-react'
+import { Phone, Mail, MapPin, Facebook, Instagram, Youtube, ArrowUp, MessageCircle } from 'lucide-react'
 import logo from '../../assets/Logo Atento5.png'
 import './Footer.css'
 
@@ -13,7 +13,6 @@ export default function Footer() {
   const socialLinks = [
     { icon: <Facebook size={18} />, label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61592431140405' },
     { icon: <Instagram size={18} />, label: 'Instagram', href: 'https://www.instagram.com/atento5.solucionesgen/' },
-    { icon: <Linkedin size={18} />, label: 'LinkedIn', href: '#' },
     { icon: <Youtube size={18} />, label: 'YouTube', href: 'https://youtube.com/@atento5solucionesgenerales' },
     {
       icon: (
@@ -23,6 +22,11 @@ export default function Footer() {
       ),
       label: 'TikTok',
       href: 'https://www.tiktok.com/@atento5.solucione',
+    },
+    {
+      icon: <MessageCircle size={18} />,
+      label: 'WhatsApp',
+      href: 'https://wa.me/51955295390',
     },
   ]
 

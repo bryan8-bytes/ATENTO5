@@ -88,7 +88,7 @@ const MailWorkspace = ({
                       ${isSelected ? 'bg-sky-50 dark:bg-sky-950/20' : isUnread ? 'bg-white dark:bg-slate-950 hover:bg-slate-50 dark:hover:bg-slate-900/50' : 'bg-slate-50/40 dark:bg-slate-900/30 hover:bg-slate-50 dark:hover:bg-slate-900/50'}`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${avatarGradient} flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-sm`}>
+                      <div className={`w-10 h-10 rounded-full bg-linear-to-br ${avatarGradient} flex items-center justify-center font-bold text-sm text-white shrink-0 shadow-sm`}>
                         {firstLetter}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ const MailWorkspace = ({
                     {selectedEmail.subject || '(Sin Asunto)'}
                   </h1>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getAvatarColor(selectedEmail.from_email)} flex items-center justify-center font-bold text-sm text-white shrink-0`}>
+                    <div className={`w-10 h-10 rounded-full bg-linear-to-br ${getAvatarColor(selectedEmail.from_email)} flex items-center justify-center font-bold text-sm text-white shrink-0`}>
                       {(selectedEmail.from_name || selectedEmail.from_email).charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">

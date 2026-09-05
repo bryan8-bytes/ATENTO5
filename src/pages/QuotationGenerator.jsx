@@ -3,6 +3,8 @@ import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
 import { Download, Plus, Trash2, Building2, User, FileText, Palette, ChevronLeft, Check, Calculator } from 'lucide-react';
 import logo from '../assets/Logo Atento5.png';
+import firmaAtento5 from '../assets/Firma Atento5.png';
+import '../components/ui/BusinessSuite.css';
 
 const EditableField = ({ value, onChange, placeholder, style, prefix = '' }) => {
   const divRef = useRef(null);
@@ -103,13 +105,13 @@ const QuotationGenerator = () => {
     firmaEmpresa: 'ATENTO5 SERVICIOS GENERALES E.I.R.L.',
     firmaNombre: 'Juan Ampuero',
     firmaCargo: 'Gerente General',
-    mostrarSello: true,
-    firmaImagen: '', // base64 string for signature image
-    firmaZoom: 1,    // default zoom
-    firmaX: 0,       // default X translation
-    firmaY: 0,       // default Y translation
-    firmaAncho: 55,  // default width in mm
-    firmaAlto: 35    // default height in mm
+    mostrarSello: false,
+    firmaImagen: firmaAtento5,
+    firmaZoom: 1,
+    firmaX: 0,
+    firmaY: 0,
+    firmaAncho: 75,
+    firmaAlto: 50
   });
 
   const [emisor, setEmisor] = useState({
@@ -288,48 +290,72 @@ const QuotationGenerator = () => {
   };
 
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden', fontFamily: "'Outfit', sans-serif", backgroundColor: '#050B14' }}>
-      <div style={{
-        width: '95vw',
-        height: '90vh',
-        borderRadius: '24px',
-        border: '4px solid #3CB4FF',
-        boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 40px rgba(60, 180, 255, 0.25)',
-        overflow: 'hidden',
-        display: 'flex',
-        flexDirection: 'column',
-        background: '#1e293b',
-        backgroundImage: 'linear-gradient(rgba(60, 180, 255, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(60, 180, 255, 0.15) 1px, transparent 1px)',
-        backgroundSize: '24px 24px'
-      }}>
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 20px', borderBottom: '1px solid rgba(60, 180, 255, 0.35)', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)', flexShrink: 0 }}>
-          <Link to="/home" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', textDecoration: 'none', fontSize: '14px', fontWeight: '700', transition: 'color 0.2s' }}
-                onMouseEnter={(e) => e.target.style.color = '#fff'} onMouseLeave={(e) => e.target.style.color = '#3CB4FF'}>
+    <div style={{ fontFamily: "'Outfit', sans-serif" }} className="business-shell">
+      <div className="business-container">
+        <nav className="business-nav">
+          <Link to="/home" className="business-nav-back">
             <ChevronLeft size={20} />
             <span>Regresar al Inicio</span>
           </Link>
-          <div style={{ marginLeft: 'auto', fontSize: '18px', fontWeight: '900', color: 'white', letterSpacing: '1px' }}>GENERADOR DE COTIZACIÓN</div>
+          <div className="business-nav-title">GENERADOR DE COTIZACIÓN</div>
+          <button onClick={handleExportPDF} className="editor-btn editor-btn-primary" style={{ flexShrink: 0 }}>
+            <Download size={18} />
+            <span>Exportar PDF</span>
+          </button>
         </nav>
 
-        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-          <PreviewPanel 
-            previewRef={previewRef}
+        <div className="business-body-container">
+          <EditorPanel
             header={header}
+            setHeader={setHeader}
             cliente={cliente}
+            setCliente={setCliente}
             intro={intro}
+            setIntro={setIntro}
             items={items}
+            addItem={addItem}
+            removeItem={removeItem}
+            handleItemChange={handleItemChange}
             condiciones={condiciones}
+            addCondicion={addCondicion}
+            removeCondicion={removeCondicion}
+            handleCondicionChange={handleCondicionChange}
             cierre={cierre}
+            setCierre={setCierre}
             emisor={emisor}
+            setEmisor={setEmisor}
+            handleExportPDF={handleExportPDF}
+            showCalculations={showCalculations}
+            setShowCalculations={setShowCalculations}
+            descuento={descuento}
+            setDescuento={setDescuento}
+            handleSignatureUpload={handleSignatureUpload}
             subtotal={subtotal}
-            descuentoValue={descuentoValue}
             igv={igv}
             total={total}
             formatCurrency={formatCurrency}
-            showCalculations={showCalculations}
-            handleSignatureUpload={handleSignatureUpload}
-            isExporting={isExporting}
           />
+          <div className="preview-panel">
+            <PreviewPanel
+              previewRef={previewRef}
+              header={header}
+              cliente={cliente}
+              setCliente={setCliente}
+              intro={intro}
+              items={items}
+              condiciones={condiciones}
+              cierre={cierre}
+              emisor={emisor}
+              subtotal={subtotal}
+              descuentoValue={descuentoValue}
+              igv={igv}
+              total={total}
+              formatCurrency={formatCurrency}
+              showCalculations={showCalculations}
+              handleSignatureUpload={handleSignatureUpload}
+              isExporting={isExporting}
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -339,6 +365,185 @@ const QuotationGenerator = () => {
 // ==========================================
 // PANEL DE EDICIÓN (Izquierda)
 // ==========================================
+const EditorPanel = ({
+  header, setHeader,
+  cliente, setCliente,
+  intro, setIntro,
+  items, addItem, removeItem, handleItemChange,
+  condiciones, addCondicion, removeCondicion, handleCondicionChange,
+  cierre, setCierre,
+  emisor, setEmisor,
+  handleExportPDF,
+  showCalculations, setShowCalculations,
+  descuento, setDescuento,
+  handleSignatureUpload,
+  subtotal, igv, total, formatCurrency
+}) => {
+  return (
+    <div className="business-editor-panel">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+        {/* 1. CABECERA DOCUMENTAL */}
+        <SectionCard num="1" title="CABECERA DOCUMENTAL" icon={<FileText size={18} />} color="#3CB4FF">
+          <FieldBox label="Título Principal del Presupuesto" value={header.titulo} onChange={(v) => setHeader({ ...header, titulo: v })} placeholder="PRESUPUESTO DE SERVICIO..." />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '12px' }}>
+            <FieldBox label="Código de Doc." value={header.codigo} onChange={(v) => setHeader({ ...header, codigo: v })} placeholder="TYLROV-014-01" />
+            <FieldBox label="N° Cotización (Editable)" value={header.numero} onChange={(v) => setHeader({ ...header, numero: v })} placeholder="26-05-21-001" />
+          </div>
+          <FieldBox label="Revisión" value={header.revision} onChange={(v) => setHeader({ ...header, revision: v })} placeholder="02" />
+        </SectionCard>
+
+        {/* 2. CLIENTE (SEÑORES) */}
+        <SectionCard num="2" title="DATOS DEL CLIENTE" icon={<User size={18} />} color="#eab308">
+          <FieldBox label="Texto Señores" value={cliente.senores} onChange={(v) => setCliente({ ...cliente, senores: v })} placeholder="Señores:" />
+          <FieldBox label="Razón Social/Nombre" value={cliente.nombre} onChange={(v) => setCliente({ ...cliente, nombre: v })} placeholder="ATENTO5 SERVICIOS GENERALES E.I.R.L." />
+          <FieldBox label="Atención (Contacto/Representante)" value={cliente.atencion} onChange={(v) => setCliente({ ...cliente, atencion: v })} placeholder="Corina Añorga" />
+        </SectionCard>
+
+        {/* 3. TEXTOS DE INTRODUCCIÓN */}
+        <SectionCard num="3" title="TEXTOS DE INTRODUCCIÓN" icon={<Building2 size={18} />} color="#a855f7">
+          <FieldBox label="Saludo" value={intro.saludo} onChange={(v) => setIntro({ ...intro, saludo: v })} placeholder="Estimados Señores:" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Texto descriptivo</label>
+            <textarea value={intro.descripcion} onChange={(e) => setIntro({ ...intro, descripcion: e.target.value })} style={{ width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '60px', resize: 'vertical', fontFamily: 'inherit' }} placeholder="De acuerdo con su solicitud..." />
+          </div>
+        </SectionCard>
+
+        {/* 4. DETALLE DE RUTA / SERVICIOS */}
+        <SectionCard num="4" title="SERVICIOS (DETALLE DE RUTA)" icon={<Palette size={18} />} color="#ec4899">
+          {items.map((item, index) => (
+            <div key={item.id} style={{ background: 'linear-gradient(135deg, #0d1525 0%, #091020 100%)', borderRadius: '14px', padding: '16px', border: '1px solid rgba(60, 180, 255, 0.15)', marginBottom: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', color: 'white', fontSize: '11px', fontWeight: '700', padding: '4px 10px', borderRadius: '6px' }}>Item {index + 1}</span>
+                {items.length > 1 && (
+                  <button onClick={() => removeItem(item.id)} style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', border: 'none', padding: '6px', borderRadius: '8px', cursor: 'pointer', transition: 'background 0.2s' }}
+                    onMouseEnter={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.3)'} onMouseLeave={(e) => e.target.style.background = 'rgba(239, 68, 68, 0.15)'}>
+                    <Trash2 size={14} />
+                  </button>
+                )}
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <FieldBox label="Tipo de Unidad" value={item.tipoUnidad} onChange={(v) => handleItemChange(item.id, 'tipoUnidad', v)} placeholder="Remolcador / Plataforma hasta 32 TM" />
+                <FieldBox label="Ruta" value={item.ruta} onChange={(v) => handleItemChange(item.id, 'ruta', v)} placeholder="Lurin a Trujillo" />
+                <FieldBox label="Descripción Contenido" value={item.descripcion} onChange={(v) => handleItemChange(item.id, 'descripcion', v)} placeholder="Estructuras" />
+                <FieldBox label="Total por Unidad (Soles)" value={item.total} onChange={(v) => handleItemChange(item.id, 'total', v)} placeholder="3,600.00" />
+              </div>
+            </div>
+          ))}
+          <button onClick={addItem} style={{ width: '100%', padding: '14px', border: '2px dashed rgba(60, 180, 255, 0.3)', borderRadius: '12px', background: 'transparent', color: '#3CB4FF', fontSize: '13px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', transition: 'all 0.2s' }}
+            onMouseEnter={(e) => { e.target.style.borderColor = '#3CB4FF'; e.target.style.background = 'rgba(60, 180, 255, 0.05)'; }} onMouseLeave={(e) => { e.target.style.borderColor = 'rgba(60, 180, 255, 0.3)'; e.target.style.background = 'transparent'; }}>
+            <Plus size={18} />
+            <span>Agregar Item / Servicio</span>
+          </button>
+        </SectionCard>
+
+        {/* 5. CÁLCULOS Y TOTALES AUTOMÁTICOS */}
+        <SectionCard num="5" title="CÁLCULOS Y TOTALES AUTOMÁTICOS" icon={<Calculator size={18} />} color="#3CB4FF">
+          <FieldBox label="Descuento (Soles)" value={descuento} onChange={setDescuento} placeholder="0.00" />
+          <div style={{ background: '#0a0e17', borderRadius: '12px', padding: '14px', border: '1px solid rgba(60, 180, 255, 0.15)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#94a3b8' }}>Subtotal:</span>
+              <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatCurrency(subtotal)}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+              <span style={{ color: '#94a3b8' }}>I.G.V. (18%):</span>
+              <span style={{ color: '#fff', fontWeight: 'bold' }}>{formatCurrency(igv)}</span>
+            </div>
+            <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.08)', margin: '4px 0' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+              <span style={{ color: '#3CB4FF', fontWeight: 'bold' }}>Total General:</span>
+              <span style={{ color: '#3CB4FF', fontWeight: 'bold' }}>{formatCurrency(total)}</span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+            <input
+              type="checkbox"
+              id="showCalculations"
+              checked={showCalculations}
+              onChange={(e) => setShowCalculations(e.target.checked)}
+              style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#3CB4FF' }}
+            />
+            <label htmlFor="showCalculations" style={{ fontSize: '12px', color: '#fff', fontWeight: '500', cursor: 'pointer' }}>
+              Mostrar cuadro de cálculos en el PDF/Vista Previa
+            </label>
+          </div>
+        </SectionCard>
+
+        {/* 6. TÉRMINOS Y CONDICIONES (VIÑETAS) */}
+        <SectionCard num="6" title="TÉRMINOS Y CONDICIONES" icon={<FileText size={18} />} color="#22c55e">
+          <p style={{ fontSize: '11px', color: '#64748b', margin: '0 0 10px 0' }}>Agrega o edita las viñetas que aparecen abajo de la tabla</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {condiciones.map((cond, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <span style={{ fontSize: '12px', color: '#3CB4FF', fontWeight: 'bold' }}>•</span>
+                <input type="text" value={cond} onChange={(e) => handleCondicionChange(idx, e.target.value)} style={{ flex: 1, background: 'linear-gradient(135deg, #0a0f18 0%, #0d1422 100%)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: '#fff', outline: 'none' }} />
+                <button onClick={() => removeCondicion(idx)} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '4px' }}
+                  onMouseEnter={(e) => e.target.style.color = '#ef4444'} onMouseLeave={(e) => e.target.style.color = '#64748b'}>
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+            <button onClick={addCondicion} style={{ padding: '10px', border: '1px dashed rgba(34, 197, 94, 0.4)', borderRadius: '8px', background: 'transparent', color: '#22c55e', fontSize: '12px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '4px' }}>
+              <Plus size={14} />
+              <span>Agregar viñeta de condición</span>
+            </button>
+          </div>
+        </SectionCard>
+
+        {/* 7. CIERRE, FIRMA Y PIE DE PÁGINA */}
+        <SectionCard num="7" title="CIERRE Y FIRMA" icon={<Check size={18} />} color="#f43f5e">
+          <FieldBox label="Forma de Pago" value={cierre.formaPago} onChange={(v) => setCierre({ ...cierre, formaPago: v })} placeholder="contado" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Texto de Despedida</label>
+            <textarea value={cierre.despedidaTexto} onChange={(e) => setCierre({ ...cierre, despedidaTexto: e.target.value })} style={{ width: '100%', background: '#0a0e17', border: '1px solid rgba(60, 180, 255, 0.15)', borderRadius: '10px', padding: '12px', fontSize: '13px', color: '#fff', outline: 'none', minHeight: '50px', resize: 'vertical', fontFamily: 'inherit' }} placeholder="Sin más por el momento..." />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <FieldBox label="Firma: Nombre" value={cierre.firmaNombre} onChange={(v) => setCierre({ ...cierre, firmaNombre: v })} placeholder="Juan Ampuero" />
+            <FieldBox label="Firma: Cargo" value={cierre.firmaCargo} onChange={(v) => setCierre({ ...cierre, firmaCargo: v })} placeholder="Gerente General" />
+          </div>
+          <FieldBox label="Firma: Razón Social" value={cierre.firmaEmpresa} onChange={(v) => setCierre({ ...cierre, firmaEmpresa: v })} placeholder="ATENTO5 SERVICIOS GENERALES E.I.R.L." />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '6px' }}>
+            <input type="checkbox" id="showStamp" checked={cierre.mostrarSello} onChange={(e) => setCierre({ ...cierre, mostrarSello: e.target.checked })} style={{ cursor: 'pointer', width: '16px', height: '16px', accentColor: '#3CB4FF' }} />
+            <label htmlFor="showStamp" style={{ fontSize: '12px', color: '#fff', fontWeight: '500', cursor: 'pointer' }}>Mostrar sello de firma digital</label>
+          </div>
+          <div style={{ marginTop: '12px' }}>
+            <label style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
+              Subir imagen de firma (PNG, JPG)
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleSignatureUpload}
+              style={{
+                width: '100%',
+                padding: '10px',
+                background: 'linear-gradient(135deg, #0a0e17 0%, #0c121e 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '10px',
+                color: '#fff',
+                fontSize: '13px'
+              }}
+            />
+          </div>
+
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '10px 0' }} />
+          <h3 style={{ fontSize: '11px', fontWeight: 'bold', color: '#f43f5e', textTransform: 'uppercase', margin: '0 0 6px 0' }}>DATOS EMISOR (PIE DE PÁGINA)</h3>
+          <FieldBox label="Dirección Fiscal Emisor" value={emisor.direccion} onChange={(v) => setEmisor({ ...emisor, direccion: v })} placeholder="Dirección..." />
+          <FieldBox label="Bases / Contacto Secundario" value={emisor.base} onChange={(v) => setEmisor({ ...emisor, base: v })} placeholder="Bases..." />
+        </SectionCard>
+
+      </div>
+
+      <button onClick={handleExportPDF} className="editor-btn editor-btn-primary" style={{ width: '100%', marginTop: '4px' }}>
+        <Download size={20} />
+        <span>DESCARGAR PDF</span>
+      </button>
+    </div>
+  );
+};
+
 // ==========================================
 // VISTA PREVIA (Derecha)
 // ==========================================
@@ -346,6 +551,7 @@ const PreviewPanel = ({
   previewRef,
   header,
   cliente,
+  setCliente,
   intro,
   items,
   condiciones,
@@ -360,51 +566,55 @@ const PreviewPanel = ({
   handleSignatureUpload,
   isExporting
 }) => {
-  const [scale, setScale] = useState(0.65);
+  const [scale, setScale] = useState(1);
   const [hoverSignature, setHoverSignature] = useState(false);
 
   useEffect(() => {
     const updateScale = () => {
-      const availableHeight = window.innerHeight - 130;
+      const previewEl = document.querySelector('.preview-panel');
+      if (!previewEl) return;
+      const inner = previewEl.querySelector('.a4-scroll-area') || previewEl;
+      const rect = inner.getBoundingClientRect();
+      const availableWidth = Math.max(0, rect.width);
+      const availableHeight = Math.max(0, rect.height);
       const sheetHeight = 1122.5; // 297mm in pixels at 96dpi
-      let newScale = availableHeight / sheetHeight;
-      
-      const availableWidth = window.innerWidth * 0.6 - 48; // 60% width minus padding
-      const sheetWidth = 793.7; // 210mm in pixels at 96dpi
+      const sheetWidth = 793.7;   // 210mm in pixels at 96dpi
+      const heightScale = availableHeight / sheetHeight;
       const widthScale = availableWidth / sheetWidth;
-      
-      newScale = Math.min(newScale, widthScale, 1.0);
-      setScale(newScale);
+      const newScale = Math.min(heightScale, widthScale, 1.0);
+      setScale(newScale > 0.1 ? newScale : 1);
     };
-    
+
     updateScale();
     window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
+    const ro = new ResizeObserver(updateScale);
+    const panel = document.querySelector('.preview-panel');
+    if (panel) ro.observe(panel);
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      ro.disconnect();
+    };
   }, []);
 
   return (
-    <div style={{ width: '100%', height: '100%', overflow: 'hidden', backgroundColor: '#0a0e17', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box' }}>
-      <div style={{ textAlign: 'center', marginBottom: '12px', flexShrink: 0 }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '800', color: 'white', margin: 0, letterSpacing: '1px' }}>VISTA PREVIA DEL PRESUPUESTO</h2>
-        <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>Se ajusta automáticamente a una sola página A4</p>
-      </div>
-
-      <div style={{
+    <div className="preview-panel" style={{ flex: '0 1 auto', alignSelf: 'stretch' }}>
+      <div className="a4-scroll-area" style={{
         width: '100%',
+        flex: 1,
+        minHeight: 0,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        height: 'calc(100% - 110px)',
         overflow: 'hidden',
-        flexShrink: 0
+        padding: '4px',
+        boxSizing: 'border-box'
       }}>
         <div style={{
           transform: `scale(${scale})`,
           transformOrigin: 'top center',
           width: '210mm',
           height: '297mm',
-          flexShrink: 0,
-          marginBottom: `-${1122.5 * (1 - scale)}px`
+          flexShrink: 0
         }}>
           {/* Hoja A4 de la Cotización */}
           <div style={{ background: 'white', overflow: 'hidden', width: '210mm', height: '297mm', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
@@ -674,13 +884,13 @@ const PreviewPanel = ({
 // TARJETA DE SECCIÓN DEL EDITOR
 // ==========================================
 const SectionCard = ({ num, title, icon, color, children }) => (
-  <div style={{ background: 'linear-gradient(145deg, #09101d 0%, #060b13 100%)', border: '1px solid rgba(60, 180, 255, 0.12)', borderRadius: '16px', overflow: 'hidden' }}>
-    <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', background: 'linear-gradient(90deg, rgba(60, 180, 255, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%)', borderBottom: '1px solid rgba(60, 180, 255, 0.15)' }}>
-      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '24px', height: '24px', background: 'linear-gradient(135deg, #3CB4FF, #D21414)', borderRadius: '6px', fontSize: '12px', fontWeight: '900', color: '#fff', marginRight: '10px' }}>{num}</span>
+  <div style={{ background: 'linear-gradient(145deg, #0c1628 0%, #08111f 100%)', border: '1px solid rgba(60, 180, 255, 0.18)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 6px 18px rgba(0, 0, 0, 0.35)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', padding: '14px 16px', background: 'linear-gradient(90deg, rgba(60, 180, 255, 0.14) 0%, rgba(210, 20, 20, 0.08) 50%, rgba(0, 0, 0, 0.25) 100%)', borderBottom: '1px solid rgba(60, 180, 255, 0.2)' }}>
+      <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '26px', height: '26px', background: 'linear-gradient(135deg, #3CB4FF 0%, #D21414 100%)', borderRadius: '7px', fontSize: '12px', fontWeight: '900', color: '#fff', marginRight: '10px', boxShadow: '0 2px 8px rgba(60, 180, 255, 0.35)' }}>{num}</span>
       <span style={{ color: color, marginRight: '8px', display: 'flex', alignItems: 'center' }}>{icon}</span>
       <h3 style={{ fontSize: '13px', fontWeight: '700', color: '#fff', letterSpacing: '0.8px', margin: 0 }}>{title}</h3>
     </div>
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(0, 0, 0, 0.15)' }}>
+    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(0, 0, 0, 0.2)' }}>
       {children}
     </div>
   </div>

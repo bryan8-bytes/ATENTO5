@@ -14,6 +14,7 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
+  allowExitOnIdle: false
 });
 
 // Test connection
@@ -22,8 +23,9 @@ pool.on('connect', () => {
 });
 
 pool.on('error', (err) => {
-  console.error('❌ Unexpected error on idle client', err);
-  process.exit(-1);
+  // An error on an idle client should not crash the whole server.
+  // The pool will create a fresh connection on the next query.
+  console.error('❌ Unexpected error on idle PostgreSQL client:', err.message);
 });
 
 export default pool;

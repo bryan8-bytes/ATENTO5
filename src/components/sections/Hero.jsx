@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion as Motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, ShieldCheck, Wrench, MessageCircle } from 'lucide-react'
+import { ShieldCheck, Wrench, MessageCircle, ArrowRight, Briefcase, Phone } from 'lucide-react'
 import logo from '../assets/Logo Atento5.png'
 import heroBg from '../assets/hero-bg.webp'
 import './Hero.css'
@@ -143,20 +143,33 @@ const childVariants = {
 }
 
 const HERO_BUTTON_BASE =
-  'group inline-flex items-center justify-center gap-3 md:gap-4 font-bold rounded-full text-lg md:text-xl min-h-[60px] md:min-h-[64px] lg:min-h-[68px] px-10 md:px-12 lg:px-14 transition-all duration-300'
+  'relative group inline-flex items-center justify-center gap-3 text-center font-extrabold rounded-full text-base sm:text-lg md:text-xl py-4 sm:py-4.5 md:py-5 px-8 sm:px-10 md:px-12 min-h-[58px] md:min-h-[64px] min-w-[220px] sm:min-w-[260px] transition-all duration-300 tracking-wide shadow-lg'
+
+const HERO_BUTTONS_CONTAINER_CLASSES =
+  'flex flex-col sm:flex-row gap-4 md:gap-5 w-full justify-start items-stretch sm:items-center'
 
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(1)
-  const [progress, setProgress] = useState(0)
   const [isHovering, setIsHovering] = useState(false)
+  const [parallaxY, setParallaxY] = useState(0)
   const timerRef = useRef(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY
+      if (scrollY < window.innerHeight) {
+        setParallaxY(scrollY * 0.08)
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const goTo = useCallback((nextIndex) => {
     if (nextIndex === current) return
     setDirection(nextIndex > current ? 1 : -1)
     setCurrent(nextIndex)
-    setProgress(0)
   }, [current])
 
   const goNext = useCallback(() => {
@@ -170,14 +183,8 @@ const HeroSlider = () => {
   useEffect(() => {
     if (isHovering) return
     timerRef.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          goNext()
-          return 0
-        }
-        return prev + (100 / (SLIDE_DURATION / 50))
-      })
-    }, 50)
+      goNext()
+    }, SLIDE_DURATION)
 
     return () => clearInterval(timerRef.current)
   }, [isHovering, goNext])
@@ -214,7 +221,7 @@ const HeroSlider = () => {
         />
       </div>
 
-      <div className="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-20">
+      <div className="hidden lg:flex absolute left-6 top-[42%] -translate-y-1/2 z-20">
         <Motion.button
           onClick={goPrev}
           className="flex items-center justify-center w-14 h-14 rounded-full border border-white/15 bg-white/5 text-white/80 hover:text-white hover:border-white/30 hover:bg-white/10 backdrop-blur-md"
@@ -228,7 +235,7 @@ const HeroSlider = () => {
         </Motion.button>
       </div>
 
-      <div className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-20">
+      <div className="hidden lg:flex absolute right-6 top-[42%] -translate-y-1/2 z-20">
         <Motion.button
           onClick={goNext}
           className="flex items-center justify-center w-14 h-14 rounded-full border border-white/15 bg-white/5 text-white/80 hover:text-white hover:border-white/30 hover:bg-white/10 backdrop-blur-md"
@@ -301,20 +308,18 @@ const HeroSlider = () => {
                   {slide.subtitle}
                 </Motion.h2>
 
-                <Motion.p
-                  custom={3}
-                  variants={childVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="exit"
-                  className="hero-description"
-                >
-                  {slide.description}
-                </Motion.p>
+                 <Motion.p
+                   custom={3}
+                   variants={childVariants}
+                   initial="hidden"
+                   animate="visible"
+                   exit="exit"
+                   className="hero-description"
+                 >
+                   {slide.description}
+                 </Motion.p>
 
-                <div className="hero-spacer" />
-
-                {slide.showSocials && (
+                 {slide.showSocials && (
                   <>
                     <Motion.div
                       custom={4}
@@ -357,7 +362,7 @@ const HeroSlider = () => {
                       ))}
                     </Motion.div>
                   </>
-                )}
+                 )}
 
                 <Motion.div
                   custom={6}
@@ -365,12 +370,12 @@ const HeroSlider = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className="hero-actions-stack"
+                  className={`${HERO_BUTTONS_CONTAINER_CLASSES} ${slide.showSocials ? 'mt-10 sm:mt-14 md:mt-20 lg:mt-28' : 'mt-20 sm:mt-28 md:mt-36 lg:mt-48 xl:mt-56'}`}
                 >
                   {slide.id === 'inicio' && (
                     <>
                       <Motion.a
-                        href="#contact"
+                        href="#contacto"
                         className={HERO_BUTTON_BASE}
                         style={{
                           background: `linear-gradient(135deg, ${slide.accent} 0%, ${slide.accentSecondary} 100%)`,
@@ -380,7 +385,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span className="leading-none">Contáctanos</span>
-                        <ArrowRight size={28} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
+                        <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#servicios"
@@ -393,7 +398,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Ver Servicios</span>
-                        <Wrench size={28} className="transition-transform group-hover:rotate-12" />
+                        <Wrench size={24} className="transition-transform group-hover:rotate-12" />
                       </Motion.a>
                     </>
                   )}
@@ -411,7 +416,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Ver Servicios</span>
-                        <ArrowRight size={28} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
+                        <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="https://wa.me/51955295390"
@@ -426,7 +431,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Solicitar Cotización</span>
-                        <MessageCircle size={28} className="transition-transform group-hover:rotate-45" />
+                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45" />
                       </Motion.a>
                     </>
                   )}
@@ -444,7 +449,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Conócenos</span>
-                        <ArrowRight size={28} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
+                        <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#contacto"
@@ -457,7 +462,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Contactar</span>
-                        <MessageCircle size={28} className="transition-transform group-hover:rotate-45" />
+                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45" />
                       </Motion.a>
                     </>
                   )}
@@ -475,7 +480,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Nuestra Misión</span>
-                        <ArrowRight size={28} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
+                        <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#contacto"
@@ -488,7 +493,7 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Contactar</span>
-                        <MessageCircle size={28} className="transition-transform group-hover:rotate-45" />
+                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45" />
                       </Motion.a>
                     </>
                   )}
@@ -507,7 +512,7 @@ const HeroSlider = () => {
                         whileHover={{ scale: 1.03, y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <MessageCircle size={28} className="transition-transform group-hover:scale-110" />
+                        <MessageCircle size={24} className="transition-transform group-hover:scale-110" />
                         <span>Escríbenos</span>
                       </Motion.a>
                       <Motion.a
@@ -521,19 +526,19 @@ const HeroSlider = () => {
                         whileTap={{ scale: 0.98 }}
                       >
                         <span>Ver Contacto</span>
-                        <ArrowRight size={28} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
+                        <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                     </>
                   )}
                 </Motion.div>
-              </Motion.div>
+               </Motion.div>
             </AnimatePresence>
           </div>
 
           <Motion.div
             key={`image-${slide.id}`}
             initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={{ opacity: 1, scale: 1, y: parallaxY }}
             exit={{ opacity: 0, scale: 0.92 }}
             transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             className="relative flex items-center justify-center"
@@ -584,28 +589,20 @@ const HeroSlider = () => {
           <Motion.button
             key={s.id}
             onClick={() => goTo(index)}
-            className={`hero-indicator ${current === index ? 'hero-indicator-active' : 'hero-indicator-inactive'}`}
             style={{
-              backgroundColor: current === index ? `${s.accent}20` : 'rgba(255, 255, 255, 0.15)',
-              borderColor: current === index ? `${s.accent}40` : 'rgba(255, 255, 255, 0.05)',
+              width: '10px',
+              height: '10px',
+              borderRadius: '9999px',
+              backgroundColor: current === index ? s.accent : 'rgba(255, 255, 255, 0.25)',
+              border: current === index ? `1px solid ${s.accent}` : '1px solid rgba(255, 255, 255, 0.1)',
+              transition: 'background-color 0.3s ease, border-color 0.3s ease',
+              cursor: 'pointer',
+              flexShrink: 0,
             }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
             aria-label={`Ir a slide ${index + 1}`}
-          >
-            {current === index && (
-              <Motion.div
-                className="hero-indicator-fill"
-                style={{
-                  background: `linear-gradient(90deg, ${s.accent}, ${s.accentSecondary})`,
-                  boxShadow: `0 0 16px ${s.accent}50`,
-                }}
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: progress / 100 }}
-                transition={{ duration: 0.05, ease: 'linear' }}
-              />
-            )}
-          </Motion.button>
+          />
         ))}
       </div>
     </section>

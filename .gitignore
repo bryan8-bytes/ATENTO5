@@ -1,3 +1,15 @@
+﻿# Dependencies
+node_modules
+dist
+dist-ssr
+*.local
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+
 # Logs
 logs
 *.log
@@ -5,12 +17,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
+lerna-debug.log
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +29,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Scratch & temporary docs
+English_Monologue_Script.md
+/ATENTO5_Hoja_Membretada.docx
+/ATENTO5_Hoja_Membretada.pdf
+/public/html-docx-js.js
+

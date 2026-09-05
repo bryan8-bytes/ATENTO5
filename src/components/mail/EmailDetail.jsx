@@ -45,6 +45,11 @@ const EmailHtmlRenderer = ({ html }) => {
     const doc = iframe.contentDocument || iframe.contentWindow.document;
     doc.open();
 
+    const isHtml = /<[a-z][\s\S]*>/i.test(html || '');
+    const content = isHtml
+      ? (html || '')
+      : (html || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+
     const styledHtml = `
       <!DOCTYPE html>
       <html>
@@ -58,7 +63,7 @@ const EmailHtmlRenderer = ({ html }) => {
               padding: 10px 0;
               word-break: break-word;
               white-space: pre-wrap;
-              font-size: 14.5px;
+              font-size: 19px;
               background-color: transparent;
             }
             img {
@@ -86,7 +91,7 @@ const EmailHtmlRenderer = ({ html }) => {
           </style>
         </head>
         <body>
-          ${html}
+          ${content}
         </body>
       </html>
     `;
@@ -185,7 +190,7 @@ const EmailDetail = ({ selectedEmail, onClose, attachments, setAttachments, onRe
 
             {/* ── CABECERA Y BOTONES DE ACCIÓN ── */}
             <div className="px-6 py-5 bg-white border-b border-slate-200 shrink-0 space-y-4 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-              
+               
               {/* Toolbar */}
               <div className="flex items-center justify-between gap-4">
                 <div className="flex items-center gap-2">
@@ -195,23 +200,23 @@ const EmailDetail = ({ selectedEmail, onClose, attachments, setAttachments, onRe
                   >
                     <ChevronLeft size={18} />
                   </button>
-                  <h1 className="text-base md:text-lg font-bold text-slate-850 tracking-tight leading-snug">
-                    {selectedEmail.subject || '(Sin Asunto)'}
-                  </h1>
-                </div>
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-850 tracking-tight leading-snug">
+                      {selectedEmail.subject || '(Sin Asunto)'}
+                    </h1>
+                  </div>
 
                 <div className="flex items-center gap-2 shrink-0">
                   {/* Responder Button */}
                   {onReply && (
                     <button
                       onClick={() => onReply(selectedEmail)}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-all shadow-md shadow-blue-100 active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-bold transition-all shadow-md shadow-blue-100 active:scale-95 flex items-center gap-2 cursor-pointer shrink-0"
                     >
-                      <Reply size={14} className="scale-x-[-1]" />
+                      <Reply size={16} className="scale-x-[-1]" />
                       <span>Responder</span>
                     </button>
                   )}
-                  
+                   
                   {/* Destacar */}
                   <button
                     onClick={handleStar}
@@ -254,16 +259,16 @@ const EmailDetail = ({ selectedEmail, onClose, attachments, setAttachments, onRe
               </div>
 
               {/* Tags Row */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {selectedEmail.tags && selectedEmail.tags.map((tag, idx) => (
-                  <span 
-                    key={idx} 
-                    className={`px-2.5 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider ${getTagClass(tag)}`}
-                  >
-                    {tag === 'Gobierno' ? 'Gobierno Nacional' : tag}
-                  </span>
-                ))}
-              </div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {selectedEmail.tags && selectedEmail.tags.map((tag, idx) => (
+                    <span 
+                      key={idx} 
+                      className={`px-2.5 py-0.5 rounded-md text-xs font-black uppercase tracking-wider ${getTagClass(tag)}`}
+                    >
+                      {tag === 'Gobierno' ? 'Gobierno Nacional' : tag}
+                    </span>
+                  ))}
+                </div>
             </div>
 
             {/* ── INFO REMITENTE ── */}
@@ -274,16 +279,16 @@ const EmailDetail = ({ selectedEmail, onClose, attachments, setAttachments, onRe
                   <Building2 size={18} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-bold text-slate-800">
+                  <div className="text-base font-bold text-slate-800">
                     {selectedEmail.from_name || selectedEmail.from_email.split('@')[0]}
                   </div>
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">
                     {getSenderRole(selectedEmail)}
                   </div>
                 </div>
               </div>
 
-              <div className="text-[11px] font-bold text-slate-400 text-right shrink-0">
+              <div className="text-xs font-bold text-slate-400 text-right shrink-0">
                 {formatDateString(selectedEmail.date)}
               </div>
             </div>

@@ -6,9 +6,12 @@ import Intro from './pages/Intro';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import ManagerProfile from './pages/ManagerProfile';
+import CorreoLogin from './pages/CorreoLogin';
 
 const QuotationGenerator = React.lazy(() => import('./pages/QuotationGenerator'));
 const PurchaseOrder = React.lazy(() => import('./pages/PurchaseOrder'));
+const Correo = React.lazy(() => import('./pages/Correo'));
+const LetterheadGenerator = React.lazy(() => import('./pages/LetterheadGenerator'));
 
 function App() {
   return (
@@ -36,6 +39,27 @@ function App() {
               <ProtectedRoute>
                 <React.Suspense fallback={<div className="page-suspense" />}>
                   <PurchaseOrder />
+                </React.Suspense>
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/correo-login" element={<CorreoLogin />} />
+          <Route
+            path="/hoja-membretada"
+            element={
+              <ProtectedRoute>
+                <React.Suspense fallback={<div className="page-suspense" />}>
+                  <LetterheadGenerator />
+                </React.Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/correo" 
+            element={
+              <ProtectedRoute>
+                <React.Suspense fallback={<div className="page-suspense" />}>
+                  <Correo />
                 </React.Suspense>
               </ProtectedRoute>
             } 

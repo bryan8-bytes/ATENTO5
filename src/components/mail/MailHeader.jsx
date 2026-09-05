@@ -130,7 +130,7 @@ const MailHeader = ({ onCompose, onRefresh, loading, onMenuToggle, onShowSetting
         <div className="h-6 w-[1px] bg-slate-800 hidden sm:block"></div>
 
         <div className="relative flex items-center gap-2">
-          <div className="absolute inset-[-10px] bg-gradient-to-br from-[#3CB4FF]/15 to-transparent blur-md opacity-60 pointer-events-none" />
+          <div className="absolute inset-[-10px] bg-linear-to-br from-[#3CB4FF]/15 to-transparent blur-md opacity-60 pointer-events-none" />
           <img 
             src={logoAtento5} 
             alt="Atento5" 
@@ -319,7 +319,7 @@ const MailHeader = ({ onCompose, onRefresh, loading, onMenuToggle, onShowSetting
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="group flex items-center gap-3 p-1.5 bg-slate-900/40 hover:bg-[#3CB4FF]/10 border border-slate-800/50 hover:border-[#3CB4FF]/35 rounded-2xl transition-all duration-300 cursor-pointer shadow-lg shadow-black/20 hover:scale-[1.03]"
           >
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-650 flex items-center justify-center text-white font-bold text-xs shadow-md group-hover:scale-105 transition-transform ring-1 ring-white/10">
+            <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-indigo-650 flex items-center justify-center text-white font-bold text-xs shadow-md group-hover:scale-105 transition-transform ring-1 ring-white/10">
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
             <ChevronDown size={15} className="text-slate-450 group-hover:text-white transition-colors mr-1" />

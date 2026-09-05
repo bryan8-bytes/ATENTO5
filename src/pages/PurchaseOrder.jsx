@@ -2,7 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import html2pdf from 'html2pdf.js';
 import { Link } from 'react-router-dom';
 import { Download, Plus, Trash2, Building2, FileText, User, Package, ChevronLeft } from 'lucide-react';
+import Button from '../components/ui/Button';
 import logo from '../assets/Logo Atento5.png';
+import firmaAtento5 from '../assets/Firma Atento5.png';
+import '../components/ui/BusinessSuite.css';
 
 const ATENTO5 = {
   nombre: 'ATENTO5 SERVICIOS GENERALES E.I.R.L.',
@@ -40,7 +43,7 @@ const getFutureDate = (days) => {
 };
 
 const PurchaseOrder = () => {
-  const [scale, setScale] = useState(0.65);
+  const [scale, setScale] = useState(1);
   const [documento, setDocumento] = useState({
     numero: '',
     fecha: getTodayDate(),
@@ -75,6 +78,33 @@ const PurchaseOrder = () => {
   });
 
   const previewRef = useRef();
+
+  useEffect(() => {
+    const updateScale = () => {
+      const previewEl = document.querySelector('.preview-panel');
+      if (!previewEl) return;
+      const inner = previewEl.querySelector('.a4-scroll-area') || previewEl;
+      const rect = inner.getBoundingClientRect();
+      const availableWidth = Math.max(0, rect.width);
+      const availableHeight = Math.max(0, rect.height);
+      const sheetHeight = 1122.5; // 297mm in pixels at 96dpi
+      const sheetWidth = 793.7;   // 210mm in pixels at 96dpi
+      const heightScale = availableHeight / sheetHeight;
+      const widthScale = availableWidth / sheetWidth;
+      const newScale = Math.min(heightScale, widthScale, 1.0);
+      setScale(newScale > 0.1 ? newScale : 1);
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    const ro = new ResizeObserver(updateScale);
+    const panel = document.querySelector('.preview-panel');
+    if (panel) ro.observe(panel);
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      ro.disconnect();
+    };
+  }, []);
 
   const agregarItem = () => {
     setItems([...items, { id: Date.now(), descripcion: '', cantidad: 1, unidad: 'UND', precioUnitario: 0 }]);
@@ -133,203 +163,178 @@ const PurchaseOrder = () => {
     });
   };
 
-  const inputStyle = {
-    width: '100%',
-    background: '#1e293b',
-    border: '1px solid #334155',
-    borderRadius: '8px',
-    padding: '14px 16px',
-    fontSize: '14px',
-    color: '#fff',
-    outline: 'none',
-    transition: 'all 0.2s ease'
-  };
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '11px',
-    fontWeight: '600',
-    color: '#94a3b8',
-    marginBottom: '8px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px'
-  };
 
   return (
-    <div style={{ height: '100vh', background: '#0f172a', color: 'white', padding: '24px', overflow: 'hidden', boxSizing: 'border-box', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ maxWidth: '1400px', width: '100%', margin: '0 auto', flexShrink: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <Link to="/home" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3CB4FF', textDecoration: 'none', fontSize: '14px', fontWeight: '600' }}>
-            <ChevronLeft size={20} />
-            <span>Volver</span>
-          </Link>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', background: 'linear-gradient(135deg, #3CB4FF, #D21414)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Orden de Compra</h1>
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <button onClick={exportarPDF} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 24px', background: 'linear-gradient(135deg, #3CB4FF, #8764B2)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: '700', cursor: 'pointer' }}>
-              <Download size={18} />
-              <span>Exportar PDF</span>
-            </button>
-          </div>
-        </div>
+    <div className="business-shell" style={{ background: '#0f172a', padding: '24px' }}>
+      <div className="business-header">
+        <Link to="/home" className="business-nav-back">
+          <ChevronLeft size={20} />
+          <span>Volver</span>
+        </Link>
+        <h1 className="business-header-title">Orden de Compra</h1>
+        <Button variant="primary" size="md" icon={<Download size={18} />} onClick={exportarPDF}>
+          Exportar PDF
+        </Button>
       </div>
 
-      <div style={{ display: 'flex', gap: '24px', flex: 1, minHeight: 0, maxWidth: '1400px', width: '100%', margin: '0 auto' }}>
-        <div style={{ width: '40%', flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: '30px', height: '100%', overflowY: 'auto', paddingRight: '4px' }}>
-            <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(60, 180, 255, 0.2)' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#3CB4FF', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="business-body-container">
+        <div className="business-editor-panel">
+            <div className="editor-card" style={{ border: '1px solid rgba(60, 180, 255, 0.2)' }}>
+              <h3 className="editor-card-header" style={{ color: '#3CB4FF' }}>
                 <FileText size={20} /> Datos del Documento
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                 <div>
-                  <label style={labelStyle}>N° Orden de Compra</label>
-                  <input type="text" placeholder="OC-001" value={documento.numero} onChange={(e) => setDocumento({...documento, numero: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">N° Orden de Compra</label>
+                  <input type="text" placeholder="OC-001" value={documento.numero} onChange={(e) => setDocumento({...documento, numero: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Fecha de Emisión</label>
-                  <input type="date" value={documento.fecha} onChange={(e) => setDocumento({...documento, fecha: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Fecha de Emisión</label>
+                  <input type="date" value={documento.fecha} onChange={(e) => setDocumento({...documento, fecha: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Validad Hasta</label>
-                  <input type="date" value={documento.validezHasta} onChange={(e) => setDocumento({...documento, validezHasta: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Validad Hasta</label>
+                  <input type="date" value={documento.validezHasta} onChange={(e) => setDocumento({...documento, validezHasta: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Moneda</label>
-                  <select value={documento.moneda} onChange={(e) => setDocumento({...documento, moneda: e.target.value})} style={inputStyle}>
+                  <label className="editor-label">Moneda</label>
+                  <select value={documento.moneda} onChange={(e) => setDocumento({...documento, moneda: e.target.value})} className="editor-input">
                     <option value="SOLES">SOLES (S/.)</option>
                     <option value="DOLARES">DÓLARES (US$)</option>
                   </select>
                 </div>
                 <div>
-                  <label style={labelStyle}>Forma de Pago</label>
-                  <input type="text" placeholder="50% anticipo" value={documento.formaPago} onChange={(e) => setDocumento({...documento, formaPago: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Forma de Pago</label>
+                  <input type="text" placeholder="50% anticipo" value={documento.formaPago} onChange={(e) => setDocumento({...documento, formaPago: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Tipo de Cambio</label>
-                  <input type="text" placeholder="3.75" value={documento.tipoCambio} onChange={(e) => setDocumento({...documento, tipoCambio: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Tipo de Cambio</label>
+                  <input type="text" placeholder="3.75" value={documento.tipoCambio} onChange={(e) => setDocumento({...documento, tipoCambio: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Elaborado por</label>
-                  <input type="text" placeholder="Juan José Ampuero Torres" value={documento.elaboradoPor} onChange={(e) => setDocumento({...documento, elaboradoPor: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Elaborado por</label>
+                  <input type="text" placeholder="Juan José Ampuero Torres" value={documento.elaboradoPor} onChange={(e) => setDocumento({...documento, elaboradoPor: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Cargo</label>
-                  <input type="text" placeholder="Gerente General" value={documento.cargo} onChange={(e) => setDocumento({...documento, cargo: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Cargo</label>
+                  <input type="text" placeholder="Gerente General" value={documento.cargo} onChange={(e) => setDocumento({...documento, cargo: e.target.value})} className="editor-input" />
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(168, 85, 247, 0.2)' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#a855f7', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="editor-card" style={{ border: '1px solid rgba(168, 85, 247, 0.2)' }}>
+              <h3 className="editor-card-header" style={{ color: '#a855f7' }}>
                 <Building2 size={20} /> Datos del Proveedor
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="editor-grid-2">
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={labelStyle}>Nombre / Razón Social</label>
-                  <input type="text" placeholder="Empresa proveedora" value={proveedor.nombre} onChange={(e) => setProveedor({...proveedor, nombre: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Nombre / Razón Social</label>
+                  <input type="text" placeholder="Empresa proveedora" value={proveedor.nombre} onChange={(e) => setProveedor({...proveedor, nombre: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>RUC / DNI</label>
-                  <input type="text" placeholder="20123456789" value={proveedor.ruc} onChange={(e) => setProveedor({...proveedor, ruc: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">RUC / DNI</label>
+                  <input type="text" placeholder="20123456789" value={proveedor.ruc} onChange={(e) => setProveedor({...proveedor, ruc: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Teléfono</label>
-                  <input type="text" placeholder="+51 999 999 999" value={proveedor.telefono} onChange={(e) => setProveedor({...proveedor, telefono: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Teléfono</label>
+                  <input type="text" placeholder="+51 999 999 999" value={proveedor.telefono} onChange={(e) => setProveedor({...proveedor, telefono: e.target.value})} className="editor-input" />
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={labelStyle}>Dirección</label>
-                  <input type="text" placeholder="Dirección del proveedor" value={proveedor.direccion} onChange={(e) => setProveedor({...proveedor, direccion: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Dirección</label>
+                  <input type="text" placeholder="Dirección del proveedor" value={proveedor.direccion} onChange={(e) => setProveedor({...proveedor, direccion: e.target.value})} className="editor-input" />
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={labelStyle}>Correo Electrónico</label>
-                  <input type="email" placeholder="proveedor@email.com" value={proveedor.email} onChange={(e) => setProveedor({...proveedor, email: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Correo Electrónico</label>
+                  <input type="email" placeholder="proveedor@email.com" value={proveedor.email} onChange={(e) => setProveedor({...proveedor, email: e.target.value})} className="editor-input" />
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(236, 72, 153, 0.2)' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#ec4899', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="editor-card" style={{ border: '1px solid rgba(236, 72, 153, 0.2)' }}>
+              <h3 className="editor-card-header" style={{ color: '#ec4899' }}>
                 <Package size={20} /> Productos / Servicios
               </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="editor-items-list">
                 {items.map((item, index) => (
-                  <div key={item.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-                    <span style={{ background: '#3CB4FF', width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', fontSize: '12px', fontWeight: 'bold', color: '#000' }}>{index + 1}</span>
-                    <input type="text" placeholder="Descripción del producto" value={item.descripcion} onChange={(e) => actualizarItem(item.id, 'descripcion', e.target.value)} style={{ flex: 1, ...inputStyle }} />
-                    <input type="number" placeholder="Cant" value={item.cantidad} onChange={(e) => actualizarItem(item.id, 'cantidad', e.target.value)} style={{ width: '60px', textAlign: 'center', ...inputStyle }} />
-                    <input type="text" placeholder="Und" value={item.unidad} onChange={(e) => actualizarItem(item.id, 'unidad', e.target.value)} style={{ width: '60px', textAlign: 'center', ...inputStyle }} />
-                    <input type="number" placeholder="P.U." value={item.precioUnitario} onChange={(e) => actualizarItem(item.id, 'precioUnitario', e.target.value)} style={{ width: '80px', textAlign: 'right', ...inputStyle }} />
-                    <span style={{ width: '80px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#334155', borderRadius: '8px', fontSize: '14px', fontWeight: '600' }}>{(item.cantidad * item.precioUnitario).toFixed(2)}</span>
-                    <button onClick={() => eliminarItem(item.id)} disabled={items.length === 1} style={{ padding: '10px', background: items.length === 1 ? '#4b5563' : '#dc2626', border: 'none', borderRadius: '8px', cursor: items.length === 1 ? 'not-allowed' : 'pointer', color: '#fff' }}>
+                  <div key={item.id} className="editor-item-row">
+                    <span className="editor-item-num">{index + 1}</span>
+                    <input type="text" placeholder="Descripción del producto" value={item.descripcion} onChange={(e) => actualizarItem(item.id, 'descripcion', e.target.value)} className="editor-input editor-item-flex" />
+                    <input type="number" placeholder="Cant" value={item.cantidad} onChange={(e) => actualizarItem(item.id, 'cantidad', e.target.value)} className="editor-input editor-item-center" />
+                    <input type="text" placeholder="Und" value={item.unidad} onChange={(e) => actualizarItem(item.id, 'unidad', e.target.value)} className="editor-input editor-item-center" />
+                    <input type="number" placeholder="P.U." value={item.precioUnitario} onChange={(e) => actualizarItem(item.id, 'precioUnitario', e.target.value)} className="editor-input editor-item-right" />
+                    <span className="editor-item-total">{(item.cantidad * item.precioUnitario).toFixed(2)}</span>
+                    <button onClick={() => eliminarItem(item.id)} disabled={items.length === 1} className="editor-btn-danger editor-btn-icon">
                       <Trash2 size={16} />
                     </button>
                   </div>
                 ))}
-                <button onClick={agregarItem} style={{ width: '100%', padding: '14px', border: '2px dashed #3CB4FF', borderRadius: '12px', background: 'transparent', color: '#3CB4FF', fontSize: '14px', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <button onClick={agregarItem} className="editor-btn-ghost">
                   <Plus size={18} />
                   <span>Agregar Item</span>
                 </button>
               </div>
             </div>
 
-            <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(249, 115, 22, 0.2)' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#f97316', marginBottom: '16px' }}>Condiciones / Observaciones</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div className="editor-card" style={{ border: '1px solid rgba(249, 115, 22, 0.2)' }}>
+              <h3 className="editor-card-header" style={{ color: '#f97316' }}>Condiciones / Observaciones</h3>
+              <div className="editor-grid-2">
                 <div>
-                  <label style={labelStyle}>Forma de Pago</label>
-                  <input type="text" placeholder="50% anticipo" value={condiciones.formaPago} onChange={(e) => setCondiciones({...condiciones, formaPago: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Forma de Pago</label>
+                  <input type="text" placeholder="50% anticipo" value={condiciones.formaPago} onChange={(e) => setCondiciones({...condiciones, formaPago: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Tiempo de Entrega</label>
-                  <input type="text" placeholder="7 días útiles" value={condiciones.tiempoEntrega} onChange={(e) => setCondiciones({...condiciones, tiempoEntrega: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Tiempo de Entrega</label>
+                  <input type="text" placeholder="7 días útiles" value={condiciones.tiempoEntrega} onChange={(e) => setCondiciones({...condiciones, tiempoEntrega: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Garantía</label>
-                  <input type="text" placeholder="12 meses" value={condiciones.garantia} onChange={(e) => setCondiciones({...condiciones, garantia: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Garantía</label>
+                  <input type="text" placeholder="12 meses" value={condiciones.garantia} onChange={(e) => setCondiciones({...condiciones, garantia: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Validez</label>
-                  <input type="text" placeholder="30 días" value={condiciones.validez} onChange={(e) => setCondiciones({...condiciones, validez: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Validez</label>
+                  <input type="text" placeholder="30 días" value={condiciones.validez} onChange={(e) => setCondiciones({...condiciones, validez: e.target.value})} className="editor-input" />
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={labelStyle}>Observaciones</label>
-                  <textarea placeholder="Observaciones adicionales" value={condiciones.observaciones} onChange={(e) => setCondiciones({...condiciones, observaciones: e.target.value})} style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} />
+                  <label className="editor-label">Observaciones</label>
+                  <textarea placeholder="Observaciones adicionales" value={condiciones.observaciones} onChange={(e) => setCondiciones({...condiciones, observaciones: e.target.value})} className="editor-input" style={{ minHeight: '80px', resize: 'vertical' }} />
                 </div>
               </div>
             </div>
 
-            <div style={{ background: 'linear-gradient(145deg, #1e293b, #0f172a)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#3b82f6', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div className="editor-card" style={{ border: '1px solid rgba(59, 130, 246, 0.2)' }}>
+              <h3 className="editor-card-header" style={{ color: '#3b82f6' }}>
                 <User size={20} /> Firmas
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <div className="editor-grid-2">
                 <div>
-                  <label style={labelStyle}>Responsable ATENTO5</label>
-                  <input type="text" placeholder="Nombre del responsable" value={firmas.responsable} onChange={(e) => setFirmas({...firmas, responsable: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Responsable ATENTO5</label>
+                  <input type="text" placeholder="Nombre del responsable" value={firmas.responsable} onChange={(e) => setFirmas({...firmas, responsable: e.target.value})} className="editor-input" />
                 </div>
                 <div>
-                  <label style={labelStyle}>Proveedor</label>
-                  <input type="text" placeholder="Nombre del proveedor" value={firmas.proveedor} onChange={(e) => setFirmas({...firmas, proveedor: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Proveedor</label>
+                  <input type="text" placeholder="Nombre del proveedor" value={firmas.proveedor} onChange={(e) => setFirmas({...firmas, proveedor: e.target.value})} className="editor-input" />
                 </div>
                 <div style={{ gridColumn: 'span 2' }}>
-                  <label style={labelStyle}>Fecha de Firma</label>
-                  <input type="date" value={firmas.fechaFirma} onChange={(e) => setFirmas({...firmas, fechaFirma: e.target.value})} style={inputStyle} />
+                  <label className="editor-label">Fecha de Firma</label>
+                  <input type="date" value={firmas.fechaFirma} onChange={(e) => setFirmas({...firmas, fechaFirma: e.target.value})} className="editor-input" />
                 </div>
+              </div>
             </div>
-          </div>
         </div>
-          <div style={{ width: '60%', flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', overflow: 'hidden' }}>
-            <div style={{ textAlign: 'center', marginBottom: '12px', flexShrink: 0 }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: 'white', margin: 0 }}>VISTA PREVIA</h2>
-              <p style={{ fontSize: '12px', color: '#9ca3af', margin: '4px 0 0 0' }}>Así se verá tu orden de compra PDF</p>
+          <div className="preview-panel" style={{ flex: '0 1 auto', alignSelf: 'stretch' }}>
+            <div className="preview-header">
+              <h2 className="preview-header-title">VISTA PREVIA</h2>
+              <p className="preview-header-sub">Así se verá tu orden de compra PDF</p>
             </div>
-            <div className="custom-scrollbar" style={{
+            <div className="a4-scroll-area" style={{
               width: '100%',
+              flex: 1,
+              minHeight: 0,
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'flex-start',
-              height: 'calc(100vh - 200px)',
-              overflowY: 'auto',
-              paddingBottom: '20px',
+              overflow: 'hidden',
+              padding: '4px',
               boxSizing: 'border-box'
             }}>
               <div style={{
@@ -337,8 +342,7 @@ const PurchaseOrder = () => {
                 transformOrigin: 'top center',
                 width: '210mm',
                 height: '297mm',
-                flexShrink: 0,
-                marginBottom: `-${1122.5 * (1 - scale)}px`
+                flexShrink: 0
               }}>
                 <div style={{ background: 'white', borderRadius: '8px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', width: '210mm', height: '297mm' }}>
                   <div style={{ background: 'white', color: '#000', width: '210mm', height: '295mm', padding: '8mm 12mm 6mm 12mm', boxSizing: 'border-box', position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }} ref={previewRef}>
@@ -465,7 +469,9 @@ const PurchaseOrder = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px', marginTop: 'auto', paddingTop: '6mm', borderTop: '2.5px solid #1e293b' }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ height: '32px', borderBottom: '1.5px solid #64748b', marginBottom: '7px' }}></div>
+                    <div style={{ height: '90px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '6px' }}>
+                      <img src={firmaAtento5} alt="Firma ATENTO5" style={{ width: '180px', height: '80px', objectFit: 'contain' }} />
+                    </div>
                     <p style={{ fontSize: '14px', fontWeight: 'bold', color: '#1e293b', margin: '0 0 2px 0' }}>{firmas.responsable}</p>
                     <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Responsable ATENTO5</p>
                   </div>
@@ -479,14 +485,15 @@ const PurchaseOrder = () => {
                 <div style={{ marginTop: '4mm', paddingTop: '4mm', borderTop: '1px solid #e2e8f0', textAlign: 'center', fontSize: '10px', color: '#64748b' }}>
                   <p style={{ margin: 0 }}>{ATENTO5.direccion} | Tel: {ATENTO5.telefono} | Email: {ATENTO5.correo}</p>
                 </div>
-              </div>
-            </div>
-          </div>
+               </div>
+             </div>
+           </div>
         </div>
       </div>
     </div>
-  </div>
+    </div>
   );
 };
+
 
 export default PurchaseOrder;

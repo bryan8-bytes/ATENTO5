@@ -1,0 +1,384 @@
+.mail-chrome {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  background-color: #050B14;
+  color: #E5E7EB;
+  overflow: hidden;
+}
+
+.mail-chrome-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 40;
+}
+
+.mail-chrome-sidebar {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(8, 14, 26, 0.98) 0%, rgba(5, 11, 20, 0.98) 100%);
+  border-right: 1px solid rgba(60, 180, 255, 0.18);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(60, 180, 255, 0.1);
+  width: 18rem;
+  flex-shrink: 0;
+}
+
+.mail-chrome-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mail-chrome-sidebar-logo {
+  height: 1.75rem;
+  width: auto;
+  object-fit: contain;
+}
+
+.mail-chrome-sidebar-brand {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.025em;
+}
+
+.mail-chrome-compose {
+  padding: 0.75rem;
+}
+
+.mail-chrome-compose-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 0.9375rem 1.125rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(60, 180, 255, 0.35), 0 0 28px rgba(60, 180, 255, 0.2);
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+}
+
+.mail-chrome-compose-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.mail-chrome-compose-button:hover::before {
+  opacity: 1;
+}
+
+.mail-chrome-compose-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(60, 180, 255, 0.5), 0 0 45px rgba(60, 180, 255, 0.3);
+}
+
+.mail-chrome-compose-button:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(60, 180, 255, 0.3), 0 0 20px rgba(60, 180, 255, 0.15);
+}
+
+.mail-chrome-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.75rem;
+}
+
+.mail-chrome-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mail-chrome-nav-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: rgba(229, 231, 235, 0.7);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: left;
+}
+
+.mail-chrome-nav-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  transform: translateX(6px);
+  box-shadow: 0 0 20px rgba(60, 180, 255, 0.15);
+}
+
+.mail-chrome-nav-button-active {
+  background: rgba(60, 180, 255, 0.15);
+  color: white;
+  font-weight: 600;
+  box-shadow: inset 4px 0 0 #3CB4FF, 0 0 20px rgba(60, 180, 255, 0.15);
+}
+
+.mail-chrome-nav-badge {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.mail-chrome-accounts {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.75rem;
+}
+
+.mail-chrome-accounts-title {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: rgba(229, 231, 235, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.mail-chrome-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mail-chrome-account-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  border: none;
+  border-radius: 0.625rem;
+  background: transparent;
+  color: rgba(229, 231, 235, 0.6);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  text-align: left;
+}
+
+.mail-chrome-account-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  transform: translateX(6px);
+  box-shadow: 0 0 20px rgba(60, 180, 255, 0.15);
+}
+
+.mail-chrome-account-button-active {
+  background: rgba(60, 180, 255, 0.15);
+  color: white;
+  font-weight: 600;
+  box-shadow: inset 4px 0 0 #3CB4FF, 0 0 20px rgba(60, 180, 255, 0.15);
+}
+
+.mail-chrome-account-avatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.mail-chrome-account-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail-chrome-logout {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.75rem;
+}
+
+.mail-chrome-logout-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: rgba(229, 231, 235, 0.6);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.mail-chrome-logout-button:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.mail-chrome-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.mail-chrome-header {
+  height: 4rem;
+  background: rgba(5, 11, 20, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.mail-chrome-header-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: rgba(229, 231, 235, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.mail-chrome-header-menu:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+}
+
+.mail-chrome-search {
+  position: relative;
+  flex: 1;
+  max-width: 42rem;
+}
+
+.mail-chrome-search-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  color: white;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.mail-chrome-search-input::placeholder {
+  color: rgba(229, 231, 235, 0.4);
+}
+
+.mail-chrome-search-input:focus {
+  border-color: rgba(60, 180, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 15px rgba(60, 180, 255, 0.08);
+}
+
+.mail-chrome-search-icon {
+  position: absolute;
+  left: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(229, 231, 235, 0.4);
+  pointer-events: none;
+}
+
+.mail-chrome-header-actions {
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .mail-chrome-header-actions {
+    display: flex;
+  }
+}
+
+.mail-chrome-header-compose {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(60, 180, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.mail-chrome-header-compose:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.mail-chrome-header-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3CB4FF 0%, #D21414 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.mail-chrome-content {
+  flex: 1;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 1024px) {
+  .mail-chrome-sidebar {
+    position: relative;
+  }
+}

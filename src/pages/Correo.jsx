@@ -578,6 +578,8 @@ const Correo = () => {
           }}
           onRefresh={handleRefresh}
           loading={loading}
+          error={error}
+          searchQuery={searchQuery}
         />
       </div>
 
@@ -585,15 +587,25 @@ const Correo = () => {
       <div className={`flex-1 flex flex-col h-full transition-all duration-300 bg-[#050B14]
         ${selectedEmail ? 'flex' : 'hidden lg:flex'}`}
       >
-        <EmailDetail
-          selectedEmail={selectedEmail}
-          onClose={() => setSelectedEmail(null)}
-          attachments={attachments}
-          setAttachments={setAttachments}
-          onReply={handleReply}
-          onReplyAll={handleReplyAll}
-          onForward={handleForward}
-        />
+        {selectedEmail ? (
+          <EmailDetail
+            selectedEmail={selectedEmail}
+            onClose={() => setSelectedEmail(null)}
+            attachments={attachments}
+            setAttachments={setAttachments}
+            onReply={handleReply}
+            onReplyAll={handleReplyAll}
+            onForward={handleForward}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <Mail size={44} className="mx-auto text-slate-400 mb-3" />
+              <p className="text-slate-300 font-semibold text-sm">Selecciona un correo</p>
+              <p className="text-slate-500 text-xs mt-1">Elige un mensaje de la bandeja para leerlo aquí.</p>
+            </div>
+          </div>
+        )}
       </div>
       </div>
 

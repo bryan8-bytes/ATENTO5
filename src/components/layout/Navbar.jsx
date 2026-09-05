@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Menu, X, Mail, User, LogOut, FileText, ShoppingCart } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { Menu, X, User, LogOut, FileText, ShoppingCart } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../../context/AuthContext'
 import Button from '../ui/Button'
-import logo from '../../assets/Logo Atento5.png'
 import './Navbar.css'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
+  const location = useLocation()
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeLink, setActiveLink] = useState('hero')
+
+  const isCotizadorActive = location.pathname === '/cotizador'
+  const isPurchaseOrderActive = location.pathname === '/purchase-order'
 
   const navLinks = [
     { name: 'INICIO', id: 'hero' },
@@ -72,48 +75,20 @@ export default function Navbar() {
     >
       <div className="navbar-inner">
         <Link href="#hero" className="navbar-logo" aria-label="ATENTO5 Inicio">
-          <motion.div
-            animate={{ y: [-5, 5, -5] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-          >
-            <motion.div
-              style={{ position: 'absolute', inset: '-20px', borderRadius: '50%', filter: 'blur(20px)' }}
-              animate={{
-                background: [
-                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)',
-                  'radial-gradient(circle, rgba(210, 20, 20,0.25) 0%, transparent 70%)',
-                  'radial-gradient(circle, rgba(60, 180, 255,0.3) 0%, transparent 70%)'
-                ],
-                scale: [1, 1.2, 1],
-                opacity: [0.5, 0.8, 0.5]
-              }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            />
-            <img src={logo} alt="ATENTO5" className="navbar-logo-img" />
-          </motion.div>
+          <span className="navbar-logo-text">ATENTO5</span>
         </Link>
 
         <div className="navbar-actions">
-          {user && (
-            <>
-              <Link to="/cotizador">
-                <Button variant="primary" size="sm" icon={<FileText size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}>
-                  COTIZACIÓN
-                </Button>
-              </Link>
-              <Link to="/purchase-order">
-                <Button variant="danger" size="sm" icon={<ShoppingCart size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}>
-                  ORDEN DE COMPRA
-                </Button>
-              </Link>
-              <Link to="/correo">
-                <Button variant="secondary" size="sm" icon={<Mail size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }} style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)', border: 'none', boxShadow: '0 4px 15px rgba(124,58,237,0.35)' }}>
-                  CORREO
-                </Button>
-              </Link>
-            </>
-          )}
+          <Link to="/cotizador" className={`navbar-link ${isCotizadorActive ? 'navbar-link-active' : ''}`}>
+            <Button variant="primary" size="sm" icon={<FileText size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}>
+              COTIZAR
+            </Button>
+          </Link>
+          <Link to="/purchase-order" className={`navbar-link ${isPurchaseOrderActive ? 'navbar-link-active' : ''}`}>
+            <Button variant="danger" size="sm" icon={<ShoppingCart size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }}>
+              ORDEN DE COMPRA
+            </Button>
+          </Link>
 
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -130,7 +105,7 @@ export default function Navbar() {
             </div>
           ) : (
             <Link to="/login">
-              <Button variant="ghost" size="sm" icon={<User size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }} style={{ border: '1.5px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.02)' }}>
+              <Button variant="ghost" size="sm" icon={<User size={14} />} motionProps={{ whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } }} className="navbar-btn-login">
                 ACCESO ADMIN
               </Button>
             </Link>
@@ -174,27 +149,16 @@ export default function Navbar() {
 
               <div className="navbar-drawer-divider">
                 <span className="navbar-drawer-admin-label">Área Administrativa</span>
-                {user && (
-                  <Link to="/cotizador" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
-                    <Button variant="primary" size="md" block style={{ marginBottom: '0.75rem' }}>
-                      COTIZAR
-                    </Button>
-                  </Link>
-                )}
-                {user && (
-                  <Link to="/purchase-order" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
-                    <Button variant="secondary" size="md" block style={{ marginBottom: '0.75rem', border: '1px solid rgba(255,255,255,0.12)' }}>
-                      ORDEN DE COMPRA
-                    </Button>
-                  </Link>
-                )}
-                {user && (
-                  <Link to="/correo" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
-                    <Button variant="secondary" size="md" block style={{ marginBottom: '0.75rem', background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)', border: 'none' }}>
-                      <Mail size={14} /> MI CORREO
-                    </Button>
-                  </Link>
-                )}
+                <Link to="/cotizador" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                  <Button variant="primary" size="md" block className="navbar-drawer-btn">
+                    COTIZAR
+                  </Button>
+                </Link>
+                <Link to="/purchase-order" onClick={() => setIsOpen(false)} style={{ textDecoration: 'none' }}>
+                  <Button variant="secondary" size="md" block className="navbar-drawer-btn navbar-drawer-btn-outline">
+                    ORDEN DE COMPRA
+                  </Button>
+                </Link>
 
                 {user ? (
                   <div className="navbar-drawer-user">

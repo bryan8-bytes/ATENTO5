@@ -12,8 +12,8 @@ import StarterKit from '@tiptap/starter-kit';
 import UnderlineExt from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Placeholder from '@tiptap/extension-placeholder';
+import './EmailComposer.css';
 
-// Map file types to Lucide Icons
 const getFileIcon = (filename = '') => {
   const ext = filename.split('.').pop().toLowerCase();
   if (['xls', 'xlsx', 'csv'].includes(ext)) return FileSpreadsheet;
@@ -23,50 +23,28 @@ const getFileIcon = (filename = '') => {
   return FileText;
 };
 
-// Map file types to professional light Tailwind badge styles
 const getFileStyle = (filename = '') => {
   const ext = filename.split('.').pop().toLowerCase();
   if (['xls', 'xlsx', 'csv'].includes(ext)) {
-    return 'text-emerald-600 bg-emerald-50 border border-emerald-200';
+    return 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20';
   }
   if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
-    return 'text-purple-600 bg-purple-50 border border-purple-200';
+    return 'text-purple-400 bg-purple-500/10 border border-purple-500/20';
   }
   if (['zip', 'rar', 'tar', 'gz', '7z'].includes(ext)) {
-    return 'text-amber-600 bg-amber-50 border border-amber-200';
+    return 'text-amber-400 bg-amber-500/10 border border-amber-500/20';
   }
   if (ext === 'pdf') {
-    return 'text-rose-600 bg-rose-50 border border-rose-200';
+    return 'text-rose-400 bg-rose-500/10 border border-rose-500/20';
   }
   if (['doc', 'docx'].includes(ext)) {
-    return 'text-blue-600 bg-blue-50 border border-blue-200';
+    return 'text-blue-400 bg-blue-500/10 border border-blue-500/20';
   }
-  return 'text-slate-500 bg-slate-50 border border-slate-200';
+  return 'text-slate-400 bg-slate-500/10 border border-slate-500/20';
 };
 
 const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEmail = null }) => {
   const { accounts } = useMail();
-  
-  React.useEffect(() => {
-    if (mode === 'reply' && originalEmail) {
-      setTo(originalEmail.from_email);
-      setSubject(`Re: ${originalEmail.subject || ''}`);
-      setEditorContent(originalEmail.body || '');
-    } else if (mode === 'replyAll' && originalEmail) {
-      setTo(originalEmail.from_email);
-      setCc(originalEmail.cc?.join(', ') || '');
-      setSubject(`Re: ${originalEmail.subject || ''}`);
-      setEditorContent(originalEmail.body || '');
-    } else if (mode === 'forward' && originalEmail) {
-      setSubject(`Fwd: ${originalEmail.subject || ''}`);
-      setEditorContent(`<br/>------ Mensaje reenviado ------
-        <br/><br/>De: ${originalEmail.from_name} &lt;${originalEmail.from_email}&gt;
-        <br/>Para: ${originalEmail.to?.join(', ') || ''}
-        <br/>Asunto: ${originalEmail.subject}
-        <br/>Fecha: ${new Date(originalEmail.date).toLocaleString()}
-        <br/><br/>${originalEmail.body || ''}`);
-    }
-  }, [mode, originalEmail]);
   
   const [from, setFrom] = useState(accounts[0]?.email || '');
   const [to, setTo] = useState('');
@@ -92,7 +70,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
     content: '',
     editorProps: {
       attributes: {
-        class: 'prose max-w-none focus:outline-none min-h-[180px] px-4 py-3 text-sm text-slate-800 bg-white',
+        class: 'prose max-w-none focus:outline-none min-h-[180px] px-4 py-3 text-sm text-slate-200 bg-transparent',
       },
     },
   });
@@ -102,6 +80,27 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
       editor.commands.setContent(content);
     }
   };
+
+  React.useEffect(() => {
+    if (mode === 'reply' && originalEmail) {
+      setTo(originalEmail.from_email);
+      setSubject(`Re: ${originalEmail.subject || ''}`);
+      setEditorContent(originalEmail.body || '');
+    } else if (mode === 'replyAll' && originalEmail) {
+      setTo(originalEmail.from_email);
+      setCc(originalEmail.cc?.join(', ') || '');
+      setSubject(`Re: ${originalEmail.subject || ''}`);
+      setEditorContent(originalEmail.body || '');
+    } else if (mode === 'forward' && originalEmail) {
+      setSubject(`Fwd: ${originalEmail.subject || ''}`);
+      setEditorContent(`<br/>------ Mensaje reenviado ------
+        <br/><br/>De: ${originalEmail.from_name} &lt;${originalEmail.from_email}&gt;
+        <br/>Para: ${originalEmail.to?.join(', ') || ''}
+        <br/>Asunto: ${originalEmail.subject}
+        <br/>Fecha: ${new Date(originalEmail.date).toLocaleString()}
+        <br/><br/>${originalEmail.body || ''}`);
+    }
+  }, [mode, originalEmail]);
 
   const processFiles = (files) => {
     const validFiles = Array.from(files).filter(file => {
@@ -316,31 +315,25 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-white text-slate-800">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
-        <h3 className="text-base font-bold flex items-center gap-2.5 text-slate-800">
-          <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-sm" />
+    <div className="email-composer">
+      <div className="email-composer-header">
+        <h3 className="email-composer-title">
+          <span className="email-composer-title-dot" />
           Redactar Mensaje
         </h3>
         <button
           onClick={onClose}
-          className="p-2 rounded-xl text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-all cursor-pointer"
+          className="email-composer-close"
         >
           <X size={18} />
         </button>
       </div>
 
-      {/* Inputs Form */}
       <div 
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className="flex-1 overflow-y-auto p-6 space-y-5 relative transition-all duration-300 bg-white"
-        style={{
-          scrollbarWidth: 'thin',
-          scrollbarColor: '#cbd5e1 #ffffff',
-        }}
+        className={`email-composer-body ${isDragging ? 'email-composer-body-drag' : ''}`}
       >
         <AnimatePresence>
           {isDragging && (
@@ -348,20 +341,20 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-white/90 backdrop-blur-md z-30 flex flex-col items-center justify-center p-8 pointer-events-none"
+              className="email-composer-drag-overlay"
             >
               <motion.div
                 initial={{ scale: 0.9, y: 10 }}
                 animate={{ scale: 1, y: 0 }}
                 exit={{ scale: 0.9, y: 10 }}
                 transition={{ type: 'spring', damping: 20 }}
-                className="p-10 rounded-[2rem] bg-slate-50 border border-slate-200 shadow-xl flex flex-col items-center gap-4 text-center max-w-sm"
+                className="email-composer-drag-card"
               >
-                <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center border border-blue-200 text-blue-600 animate-pulse">
+                <div className="email-composer-drag-icon">
                   <UploadCloud size={32} />
                 </div>
-                <span className="text-base font-bold text-slate-800">¡Suelta tus archivos aquí!</span>
-                <p className="text-xs text-slate-500 leading-relaxed">
+                <span className="email-composer-drag-title">¡Suelta tus archivos aquí!</span>
+                <p className="email-composer-drag-desc">
                   Soporta múltiples archivos y formatos. Límite de 5MB por archivo.
                 </p>
               </motion.div>
@@ -370,32 +363,30 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
         </AnimatePresence>
 
         <div className="space-y-4">
-          {/* De / From */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">De:</label>
+          <div className="email-composer-field">
+            <label className="email-composer-label">De:</label>
             <select
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="w-full text-sm text-slate-800 bg-white border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 rounded-xl px-3.5 py-2.5 focus:outline-none transition-all duration-300"
+              className="email-composer-select"
             >
               {accounts.map(acc => (
-                <option key={acc.email} value={acc.email} className="bg-white text-slate-850">
+                <option key={acc.email} value={acc.email} style={{ background: '#0A0F1A', color: '#E5E7EB' }}>
                   {acc.email}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Para / To */}
-          <div className="space-y-2">
+          <div className="email-composer-field">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Para:</label>
+              <label className="email-composer-label">Para:</label>
               <div className="flex items-center gap-2 text-xs">
                 {!showCc && (
-                  <button onClick={() => setShowCc(true)} className="text-blue-600 hover:underline cursor-pointer">Cc</button>
+                  <button onClick={() => setShowCc(true)} className="text-[#3CB4FF] hover:underline cursor-pointer">Cc</button>
                 )}
                 {!showBcc && (
-                  <button onClick={() => setShowBcc(true)} className="text-blue-600 hover:underline cursor-pointer">Cco</button>
+                  <button onClick={() => setShowBcc(true)} className="text-[#3CB4FF] hover:underline cursor-pointer">Cco</button>
                 )}
               </div>
             </div>
@@ -403,23 +394,22 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               type="text"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="w-full text-sm text-slate-800 bg-white border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 rounded-xl px-3.5 py-2.5 focus:outline-none transition-all duration-300"
+              className="email-composer-input"
               placeholder="correo@atento5.com"
             />
           </div>
 
-          {/* CC */}
           <AnimatePresence>
             {showCc && (
               <motion.div 
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="space-y-2 overflow-hidden"
+                className="email-composer-field"
               >
                 <div className="flex justify-between items-center">
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">CC:</label>
-                  <button onClick={() => { setShowCc(false); setCc(''); }} className="text-slate-400 hover:text-slate-800 transition-colors duration-200">
+                  <label className="email-composer-label">CC:</label>
+                  <button onClick={() => { setShowCc(false); setCc(''); }} className="text-slate-400 hover:text-white transition-colors duration-200">
                     <X size={14} />
                   </button>
                 </div>
@@ -427,25 +417,24 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
                   type="text"
                   value={cc}
                   onChange={(e) => setCc(e.target.value)}
-                  className="w-full text-sm text-slate-800 bg-white border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 rounded-xl px-3.5 py-2.5 focus:outline-none transition-all duration-300"
+                  className="email-composer-input"
                   placeholder="copia@ejemplo.com"
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* BCO / BCC */}
           <AnimatePresence>
             {showBcc && (
               <motion.div 
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="space-y-2 overflow-hidden"
+                className="email-composer-field"
               >
                 <div className="flex justify-between items-center">
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">CCO:</label>
-                  <button onClick={() => { setShowBcc(false); setBcc(''); }} className="text-slate-400 hover:text-slate-800 transition-colors duration-200">
+                  <label className="email-composer-label">CCO:</label>
+                  <button onClick={() => { setShowBcc(false); setBcc(''); }} className="text-slate-400 hover:text-white transition-colors duration-200">
                     <X size={14} />
                   </button>
                 </div>
@@ -453,36 +442,34 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
                   type="text"
                   value={bcc}
                   onChange={(e) => setBcc(e.target.value)}
-                  className="w-full text-sm text-slate-800 bg-white border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 rounded-xl px-3.5 py-2.5 focus:outline-none transition-all duration-300"
+                  className="email-composer-input"
                   placeholder="copiaoculta@ejemplo.com"
                 />
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Asunto / Subject */}
-          <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Asunto:</label>
+          <div className="email-composer-field">
+            <label className="email-composer-label">Asunto:</label>
             <input
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              className="w-full text-sm font-semibold text-slate-800 bg-white border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/25 rounded-xl px-3.5 py-2.5 focus:outline-none transition-all duration-300"
+              className="email-composer-input"
               placeholder="Asunto del mensaje"
+              style={{ fontWeight: 600 }}
             />
           </div>
         </div>
 
-        {/* Mensaje / Body */}
-        <div className="space-y-2">
-          <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Mensaje:</label>
-          <div className="rounded-xl border border-slate-200 bg-white overflow-hidden transition-all duration-300 focus-within:border-blue-400 focus-within:shadow-[0_0_12px_rgba(37,99,235,0.08)]">
-            {/* TipTap Toolbar */}
-            <div className="flex flex-wrap items-center gap-1 px-3 py-2 border-b border-slate-200 bg-slate-50/50">
+        <div className="space-y-2 mt-6">
+          <label className="email-composer-label">Mensaje:</label>
+          <div className="email-composer-editor-wrapper">
+            <div className="email-composer-toolbar">
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleBold().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('bold') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('bold') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Negrita"
               >
                 <Bold size={14} />
@@ -490,7 +477,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleItalic().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('italic') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('italic') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Cursiva"
               >
                 <Italic size={14} />
@@ -498,7 +485,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('underline') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('underline') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Subrayado"
               >
                 <Underline size={14} />
@@ -506,18 +493,18 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleStrike().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('strike') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('strike') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Tachado"
               >
                 <Strikethrough size={14} />
               </button>
 
-              <span className="w-px h-4 bg-slate-200 mx-1" />
+              <span className="email-composer-toolbar-divider" />
 
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().setParagraph().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('paragraph') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('paragraph') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Párrafo"
               >
                 <AlignLeft size={14} />
@@ -525,7 +512,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('bulletList') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('bulletList') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Lista"
               >
                 <List size={14} />
@@ -533,13 +520,13 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
               <button
                 type="button"
                 onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                className={`p-1.5 rounded-lg text-xs transition-colors ${editor?.isActive('orderedList') ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}
+                className={`email-composer-toolbar-button ${editor?.isActive('orderedList') ? 'email-composer-toolbar-button-active' : ''}`}
                 title="Lista numerada"
               >
                 <ListOrdered size={14} />
               </button>
 
-              <span className="w-px h-4 bg-slate-200 mx-1" />
+              <span className="email-composer-toolbar-divider" />
 
               <button
                 type="button"
@@ -548,37 +535,35 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
                   if (url) editor?.chain().focus().setLink({ href: url }).run();
                 }}
                 disabled={!editor?.can().setLink({ href: 'https://' })}
-                className={`p-1.5 rounded-lg text-xs transition-colors text-slate-500 hover:text-slate-800 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed`}
+                className="email-composer-toolbar-button disabled:opacity-30 disabled:cursor-not-allowed"
                 title="Insertar enlace"
               >
                 <LinkIcon size={14} />
               </button>
             </div>
 
-            {/* TipTap Editor */}
             {editor && (
               <EditorContent
                 editor={editor}
-                className="max-w-none focus-within:outline-none bg-white text-slate-800"
+                className="max-w-none focus-within:outline-none bg-transparent text-slate-200"
               />
             )}
             {!editor && (
-              <div className="px-4 py-3 text-xs text-slate-400 bg-white">Cargando editor...</div>
+              <div className="px-4 py-3 text-xs text-slate-400 bg-transparent">Cargando editor...</div>
             )}
           </div>
         </div>
 
-        {/* Adjuntos / Attachments area */}
-        <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              <Paperclip size={14} className="text-slate-400" />
+        <div className="email-composer-attachments">
+          <div className="email-composer-attachments-header">
+            <div className="email-composer-attachments-title">
+              <Paperclip size={14} />
               Adjuntos ({attachments.length})
             </div>
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-150 transition-all text-xs rounded-xl flex items-center gap-1.5 cursor-pointer font-bold"
+              className="email-composer-add-files"
             >
               <Plus size={14} />
               <span>Añadir archivos</span>
@@ -593,7 +578,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
           </div>
 
           {attachments.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="email-composer-attachments-grid">
               {attachments.map((att) => {
                 const Icon = getFileIcon(att.filename);
                 const isUploading = att.status === 'uploading';
@@ -603,38 +588,38 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
                     key={att.id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    whileHover={{ scale: 1.01, borderColor: 'rgba(37, 99, 235, 0.2)' }}
-                    className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex flex-col gap-2 relative"
+                    whileHover={{ scale: 1.01, borderColor: 'rgba(60, 180, 255, 0.2)' }}
+                    className="email-composer-attachment"
                   >
-                    <div className="flex items-start gap-3 w-full">
-                      <div className="flex-shrink-0">
+                    <div className="email-composer-attachment-info">
+                      <div className="email-composer-attachment-icon">
                         <div className={`p-2 rounded-lg ${getFileStyle(att.filename)}`}>
                           <Icon size={16} />
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
+                      <div className="email-composer-attachment-details">
                         <div className="flex justify-between items-start mb-0.5">
-                          <h4 className="text-xs font-semibold text-slate-800 truncate max-w-[130px]" title={att.filename}>
+                          <h4 className="email-composer-attachment-name" title={att.filename}>
                             {att.filename}
                           </h4>
                           <button
                             type="button"
                             onClick={() => removeAttachment(att.id)}
-                            className="p-1 hover:bg-slate-200 rounded-full transition-colors duration-200 cursor-pointer"
+                            className="email-composer-attachment-remove"
                           >
-                            <X size={12} className="text-slate-400 hover:text-slate-800"/>
+                            <X size={12} />
                           </button>
                         </div>
-                        <p className="text-[10px] text-slate-500">
+                        <p className="email-composer-attachment-meta">
                           {(att.size / 1024).toFixed(1)} KB • {att.contentType || 'Archivo'}
                         </p>
                       </div>
                     </div>
 
                     {isUploading && (
-                      <div className="w-full bg-slate-200 rounded-full h-1 overflow-hidden">
+                      <div className="email-composer-progress">
                         <motion.div 
-                          className="bg-blue-600 h-full rounded-full"
+                          className="email-composer-progress-bar"
                           initial={{ width: 0 }}
                           animate={{ width: `${att.progress}%` }}
                           transition={{ duration: 0.1 }}
@@ -648,27 +633,26 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
           ) : (
             <motion.div 
               onClick={() => fileInputRef.current?.click()}
-              whileHover={{ scale: 0.99, borderColor: 'rgba(37, 99, 235, 0.3)', backgroundColor: '#F8FAFC' }}
+              whileHover={{ scale: 0.99, borderColor: 'rgba(60, 180, 255, 0.2)', backgroundColor: 'rgba(60, 180, 255, 0.02)' }}
               whileTap={{ scale: 0.985 }}
-              className="border border-dashed border-slate-250 rounded-2xl p-7 flex flex-col items-center gap-2.5 cursor-pointer bg-slate-50/50 transition-all duration-300"
+              className="email-composer-dropzone"
             >
-              <UploadCloud size={28} className="text-blue-650" />
-              <p className="text-xs font-semibold text-slate-655">Arrastra archivos aquí o haz clic para buscarlos</p>
-              <p className="text-[10px] text-slate-400">Límite por archivo: 5MB</p>
+              <UploadCloud size={28} className="email-composer-dropzone-icon" />
+              <p className="email-composer-dropzone-text">Arrastra archivos aquí o haz clic para buscarlos</p>
+              <p className="email-composer-dropzone-hint">Límite por archivo: 5MB</p>
             </motion.div>
           )}
         </div>
       </div>
 
-      {/* Footer Actions */}
-      <div className="flex items-center justify-between gap-3 px-6 py-4 border-t border-slate-200 shrink-0 bg-slate-50/50">
+      <div className="email-composer-footer">
         <div className="flex items-center gap-2">
           {!loading && onSaveDraft && (
             <motion.button
               onClick={handleSaveDraft}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="px-4 py-2 bg-white border border-slate-200 text-slate-600 hover:text-slate-800 hover:bg-slate-50 transition-all text-xs rounded-xl flex items-center gap-1.5 font-bold cursor-pointer"
+              className="email-composer-footer-draft"
               title="Guardar borrador"
             >
               <Paperclip size={14} />
@@ -680,7 +664,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
           <button
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2.5 text-xs bg-white border border-slate-200 text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-xl transition-all cursor-pointer"
+            className="email-composer-footer-cancel"
           >
             Cancelar
           </button>
@@ -689,7 +673,7 @@ const EmailComposer = ({ onClose, onSend, onSaveDraft, mode = 'new', originalEma
             disabled={loading}
             whileHover={{ scale: 1.02, y: -0.5 }}
             whileTap={{ scale: 0.98 }}
-            className="px-5 py-2.5 text-xs bg-blue-600 hover:bg-blue-750 text-white rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="email-composer-footer-send"
           >
             {loading ? (
               <>
