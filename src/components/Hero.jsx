@@ -145,7 +145,7 @@ const HERO_BUTTON_BASE =
   'group inline-flex items-center justify-center gap-3 font-bold rounded-full text-lg md:text-xl min-h-[56px] px-8 md:px-10 transition-all duration-300'
 
 const HERO_BUTTONS_CONTAINER_CLASSES =
-  'flex flex-col sm:flex-row gap-4 md:gap-5 mt-24 md:mt-28 w-full justify-start items-stretch sm:items-center'
+  'flex flex-col sm:flex-row gap-4 md:gap-5 w-full justify-start items-stretch sm:items-center'
 
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0)
@@ -366,7 +366,12 @@ const HeroSlider = () => {
                   initial="hidden"
                   animate="visible"
                   exit="exit"
-                  className={HERO_BUTTONS_CONTAINER_CLASSES}
+                  className={`${HERO_BUTTONS_CONTAINER_CLASSES} ${slide.showSocials ? 'hero-cta-container-socials' : 'hero-cta-container'}`}
+                  style={{
+                    marginTop: slide.showSocials
+                      ? 'clamp(28px, 4vh, 36px)'
+                      : 'clamp(80px, 11vh, 115px)',
+                  }}
                 >
                   {slide.id === 'inicio' && (
                     <>

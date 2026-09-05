@@ -379,3 +379,12 @@ img {
   }
 }
 
+/* Hero CTA spacing - bajado 5 dedos (~95px-115px) */
+.hero-cta-container {
+  margin-top: clamp(80px, 11vh, 115px) !important;
+}
+
+.hero-cta-container-socials {
+  margin-top: clamp(28px, 4vh, 36px) !important;
+}
+
