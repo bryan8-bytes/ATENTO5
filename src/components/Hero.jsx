@@ -142,10 +142,22 @@ const childVariants = {
 }
 
 const HERO_BUTTON_BASE =
-  'group inline-flex items-center justify-center gap-3 font-bold rounded-full text-lg md:text-xl min-h-[56px] px-8 md:px-10 transition-all duration-300'
+  'hero-btn group inline-flex items-center justify-center text-center font-bold rounded-full transition-all duration-300'
 
 const HERO_BUTTONS_CONTAINER_CLASSES =
-  'flex flex-col sm:flex-row gap-4 md:gap-5 w-full justify-start items-stretch sm:items-center'
+  'flex flex-col sm:flex-row gap-4 sm:gap-5 md:gap-6 w-full justify-start items-stretch sm:items-center'
+
+const HERO_BTN_STYLE_BASE = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  textAlign: 'center',
+  gap: '14px',
+  padding: '16px 36px',
+  minHeight: '58px',
+  minWidth: '220px',
+  borderRadius: '9999px',
+}
 
 const HeroSlider = () => {
   const [current, setCurrent] = useState(0)
@@ -379,27 +391,29 @@ const HeroSlider = () => {
                         href="#contacto"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           background: `linear-gradient(135deg, ${slide.accent} 0%, ${slide.accentSecondary} 100%)`,
                           boxShadow: `0 12px 24px ${slide.accent}25, inset 0 1px 0 rgba(255,255,255,0.2)`,
                         }}
                         whileHover={{ scale: 1.03, y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span className="leading-none">Contáctanos</span>
+                        <span className="leading-none text-center">Contáctanos</span>
                         <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#servicios"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           border: '1px solid rgba(255,255,255,0.2)',
                           backgroundColor: 'rgba(255,255,255,0.05)',
                         }}
                         whileHover={{ scale: 1.03, y: -1.5, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.35)' }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Ver Servicios</span>
-                        <Wrench size={24} className="transition-transform group-hover:rotate-12" />
+                        <span className="leading-none text-center">Ver Servicios</span>
+                        <Wrench size={24} className="transition-transform group-hover:rotate-12 flex-shrink-0" />
                       </Motion.a>
                     </>
                   )}
@@ -410,13 +424,14 @@ const HeroSlider = () => {
                         href="#servicios"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           background: `linear-gradient(135deg, ${slide.accent} 0%, ${slide.accentSecondary} 100%)`,
                           boxShadow: `0 12px 24px ${slide.accent}25, inset 0 1px 0 rgba(255,255,255,0.2)`,
                         }}
                         whileHover={{ scale: 1.03, y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Ver Servicios</span>
+                        <span className="leading-none text-center">Ver Servicios</span>
                         <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
@@ -425,14 +440,15 @@ const HeroSlider = () => {
                         rel="noopener noreferrer"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           border: '1px solid rgba(255,255,255,0.2)',
                           backgroundColor: 'rgba(255,255,255,0.05)',
                         }}
                         whileHover={{ scale: 1.03, y: -1.5, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.35)' }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Solicitar Cotización</span>
-                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45" />
+                        <span className="leading-none text-center">Solicitar Cotización</span>
+                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45 flex-shrink-0" />
                       </Motion.a>
                     </>
                   )}
@@ -443,27 +459,29 @@ const HeroSlider = () => {
                         href="#nosotros"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           background: `linear-gradient(135deg, ${slide.accent} 0%, ${slide.accentSecondary} 100%)`,
                           boxShadow: `0 12px 24px ${slide.accent}25, inset 0 1px 0 rgba(255,255,255,0.2)`,
                         }}
                         whileHover={{ scale: 1.03, y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Conócenos</span>
+                        <span className="leading-none text-center">Conócenos</span>
                         <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#contacto"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           border: '1px solid rgba(255,255,255,0.2)',
                           backgroundColor: 'rgba(255,255,255,0.05)',
                         }}
                         whileHover={{ scale: 1.03, y: -1.5, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.35)' }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Contactar</span>
-                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45" />
+                        <span className="leading-none text-center">Contactar</span>
+                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45 flex-shrink-0" />
                       </Motion.a>
                     </>
                   )}
@@ -474,27 +492,29 @@ const HeroSlider = () => {
                         href="#mision-vision"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           background: `linear-gradient(135deg, ${slide.accent} 0%, ${slide.accentSecondary} 100%)`,
                           boxShadow: `0 12px 24px ${slide.accent}25, inset 0 1px 0 rgba(255,255,255,0.2)`,
                         }}
                         whileHover={{ scale: 1.03, y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Nuestra Misión</span>
+                        <span className="leading-none text-center">Nuestra Misión</span>
                         <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#contacto"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           border: '1px solid rgba(255,255,255,0.2)',
                           backgroundColor: 'rgba(255,255,255,0.05)',
                         }}
                         whileHover={{ scale: 1.03, y: -1.5, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.35)' }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Contactar</span>
-                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45" />
+                        <span className="leading-none text-center">Contactar</span>
+                        <MessageCircle size={24} className="transition-transform group-hover:rotate-45 flex-shrink-0" />
                       </Motion.a>
                     </>
                   )}
@@ -507,30 +527,33 @@ const HeroSlider = () => {
                         rel="noopener noreferrer"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)',
                           boxShadow: '0 12px 24px rgba(37, 211, 102, 0.2)',
                         }}
                         whileHover={{ scale: 1.03, y: -1.5 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <MessageCircle size={24} className="transition-transform group-hover:scale-110" />
-                        <span>Escríbenos</span>
+                        <span className="leading-none text-center">Escríbenos</span>
+                        <MessageCircle size={24} className="transition-transform group-hover:scale-110 flex-shrink-0" />
                       </Motion.a>
                       <Motion.a
                         href="#contacto"
                         className={HERO_BUTTON_BASE}
                         style={{
+                          ...HERO_BTN_STYLE_BASE,
                           border: '1px solid rgba(255,255,255,0.2)',
                           backgroundColor: 'rgba(255,255,255,0.05)',
                         }}
                         whileHover={{ scale: 1.03, y: -1.5, backgroundColor: 'rgba(255,255,255,0.12)', borderColor: 'rgba(255,255,255,0.35)' }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        <span>Ver Contacto</span>
+                        <span className="leading-none text-center">Ver Contacto</span>
                         <ArrowRight size={24} className="transition-transform group-hover:translate-x-0.5 flex-shrink-0" />
                       </Motion.a>
                     </>
                   )}
+
                 </Motion.div>
               </Motion.div>
             </AnimatePresence>

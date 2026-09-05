@@ -388,3 +388,43 @@ img {
   margin-top: clamp(28px, 4vh, 36px) !important;
 }
 
+/* Hero CTA buttons - amplios, con espacios internos (padding) y texto centrado */
+.hero-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 14px !important;
+  padding: 16px 36px !important;
+  min-height: 58px !important;
+  min-width: 220px !important;
+  border-radius: 9999px !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.02em !important;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+
+@media (min-width: 640px) {
+  .hero-btn {
+    min-width: 240px !important;
+    padding: 18px 44px !important;
+    font-size: 1.125rem !important;
+    min-height: 64px !important;
+    gap: 14px !important;
+  }
+}
+
+@media (max-width: 639px) {
+  .hero-btn {
+    width: 100% !important;
+    min-width: 100% !important;
+    padding: 15px 24px !important;
+    font-size: 1rem !important;
+    min-height: 54px !important;
+  }
+}
+
